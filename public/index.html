@@ -311,6 +311,55 @@ canvas{display:block}
   font-weight:700;color:#fff;background:linear-gradient(180deg,#ff8c00,#c94000);
   border:2px solid #ffd24a;border-radius:6px}
 .bw-tap{margin-top:10px;font-size:10px;color:#a090d0}
+
+/* ===== تحسين التوافق مع الجوال ===== */
+@media (max-width:640px){
+  #mainArea{padding:44px 3px 3px 3px;gap:3px}
+  #sideCol{width:64px;gap:3px}
+  #paytable,#historyPanel{padding:3px}
+  #paytable h3,#historyPanel h3{font-size:7px;padding-bottom:1px;margin-bottom:2px}
+  .ptRow{font-size:7px;padding:0}
+  .ptRow .ico{width:12px;height:12px}
+  #historyList{font-size:7px}
+  .histRow{grid-template-columns:16px 1fr 1fr;font-size:7px;padding:1px}
+  #hud{gap:2px}
+  .hudBox{padding:2px 6px;font-size:8px}
+  .hudBox b{font-size:10px}
+  #ctrl{gap:3px;padding:1px 0}
+  .cbtn{padding:4px 6px;font-size:9px}
+  #betBox{padding:2px 6px;min-width:60px}
+  #betBox small{font-size:7px}
+  #betBox b{font-size:10px}
+  #spinWrap,#spinWheel{width:52px;height:52px}
+  #spinLabel{font-size:10px}
+  .bonusBtn{padding:4px 5px;font-size:8px;min-width:50px}
+  .bonusBtn small{font-size:6px}
+  .bonusBtn .price{font-size:8px}
+  #log{height:22px;font-size:8px}
+  #topBtns button{width:32px;height:32px;font-size:13px}
+  #walletBtn{left:42px}
+  #agentBadge{top:38px;left:6px}
+  #logoutTopBtn{top:38px;left:42px}
+  #frame{padding:3px}
+}
+@media (max-width:430px){
+  #sideCol{width:56px}
+  #hud{gap:2px}
+  .hudBox{padding:2px 5px;font-size:7px}
+  .hudBox b{font-size:9px}
+  .cbtn{padding:3px 5px;font-size:8px}
+  #betBox{min-width:50px}
+  #spinWrap,#spinWheel{width:46px;height:46px}
+  #spinLabel{font-size:9px}
+  .bonusBtn{padding:3px 4px;font-size:7px}
+  #log{height:18px;font-size:7px}
+  #mainArea{padding:40px 2px 2px 2px}
+}
+@media (max-height:500px) and (orientation:landscape){
+  #mainArea{padding:38px 4px 2px 4px;flex-direction:row;gap:6px}
+  #sideCol{display:none}
+  #ctrl{position:absolute;bottom:2px;left:6px;right:6px;width:auto}
+}
 </style>
 </head>
 <body>
@@ -491,7 +540,6 @@ const Aud=(()=>{
     if(c)return;
     try{
       c=new (window.AudioContext||window.webkitAudioContext)();
-      window.__audCtxRef=c;
       const comp=c.createDynamicsCompressor();
       comp.threshold.value=-10;comp.knee.value=6;comp.ratio.value=14;
       mg=c.createGain();mg.gain.value=.4;
@@ -503,7 +551,7 @@ const Aud=(()=>{
       const rg=c.createGain();rg.gain.value=.4;
       rev.connect(rg);rg.connect(mg);
       ready=true;
-    }catch(e){console.error('Audio init error',e)}
+    }catch(e){}
   }
   function resume(){ if(!c)return; if(c.state==='suspended'){c.resume().catch(()=>{});} }
   function send(node,dry,wet){
@@ -806,10 +854,18 @@ const COLS=6,ROWS=5,CELL=115,PADX=12,PADY=12;
 const rcv=$('reels');
 const rcx=rcv.getContext('2d');
 
+/* ✅ الأرباح الجديدة — مضروبة في معامل الرهان */
 const SYM={
-  zeusFist:{pay:200},crown:{pay:150},chalice:{pay:100},hourglass:{pay:80},
-  ring:{pay:65},flaming:{pay:55},gem_red:{pay:45},gem_blue:{pay:40},
-  gem_green:{pay:35},gem_purple:{pay:30}
+  zeusFist:{pay:200},
+  crown:{pay:100},
+  chalice:{pay:60},
+  hourglass:{pay:40},
+  ring:{pay:25},
+  flaming:{pay:15},
+  gem_red:{pay:10},
+  gem_blue:{pay:7},
+  gem_green:{pay:5},
+  gem_purple:{pay:3}
 };
 const ZEUS_NORMAL=[1,2,3,4,5,6,8,10];
 const ZEUS_PREMIUM=[20,25,30,40,50,75,100,150,250,500];
@@ -823,8 +879,7 @@ const S={bal:0,bi:2,bet:100,grid:[],spin:false,fs:0,mc:0,lw:0,
 
 let activeBonus=null;
 
-/* ============ نظام نسبة الربح الجديد ============ */
-/* يبدأ من 75% وينخفض 3% كل جولتين، بحد أدنى 10% */
+/* ============ نظام House ============ */
 const House = {
   spins: 0,
   totalBet: 0,
@@ -851,7 +906,7 @@ const House = {
   }
 };
 
-/* ============ ExplosionFX — نظام الانفجارات ============ */
+/* ============ ExplosionFX — انفجار لطيف ============ */
 const ExplosionFX = (() => {
   const cvs = document.createElement('canvas');
   cvs.id = 'boomFX';
@@ -867,47 +922,33 @@ const ExplosionFX = (() => {
   }
   window.addEventListener('resize', resize); resize();
   const particles = [];
-  const colors = ['#ffd24a', '#ff8c00', '#ff2a00', '#fff8d0', '#c89bff'];
+  // ألوان هادئة فقط
+  const colors = ['#ffd24a', '#ffaa40', '#ffe89a'];
 
-  function boom(x, y, n = 20){
-    for(let i = 0; i < n; i++){
+  // انفجار لطيف: 6 جزيئات صغيرة فقط
+  function boom(x, y){
+    for(let i = 0; i < 6; i++){
       const a = Math.random() * Math.PI * 2;
-      const s = 4 + Math.random() * 12;
+      const s = 2 + Math.random() * 3.5;
       particles.push({
         x, y,
         vx: Math.cos(a) * s,
-        vy: Math.sin(a) * s - 2,
+        vy: Math.sin(a) * s - 1,
         life: 1,
-        decay: 0.02 + Math.random() * 0.02,
-        size: 3 + Math.random() * 6,
+        decay: 0.028 + Math.random() * 0.015,
+        size: 1.8 + Math.random() * 2,
         col: colors[Math.floor(Math.random() * colors.length)]
       });
     }
-    // نجمة مركزية بيضاء
-    particles.push({
-      x, y,
-      vx: 0, vy: 0,
-      life: 1, decay: 0.06,
-      size: 30, col: '#ffffff', isStar: true
-    });
-    // حلقة صدمة
-    particles.push({
-      x, y,
-      vx: 0, vy: 0,
-      life: 1, decay: 0.04,
-      size: 5, col: '#ffd24a', isRing: true
-    });
   }
 
   function update(){
     for(let i = particles.length - 1; i >= 0; i--){
       const p = particles[i];
       p.x += p.vx; p.y += p.vy;
-      p.vy += 0.35;
-      p.vx *= 0.96;
+      p.vy += 0.15;
+      p.vx *= 0.95;
       p.life -= p.decay;
-      if(p.isStar) p.size *= 0.92;
-      if(p.isRing) p.size += 6;
       if(p.life <= 0) particles.splice(i, 1);
     }
   }
@@ -915,24 +956,13 @@ const ExplosionFX = (() => {
   function draw(){
     ctx.clearRect(0, 0, W, H);
     for(const p of particles){
-      ctx.globalAlpha = p.life;
-      ctx.shadowColor = p.col;
-      ctx.shadowBlur = p.isStar ? 50 : (p.isRing ? 30 : 15);
-      if(p.isRing){
-        ctx.strokeStyle = p.col;
-        ctx.lineWidth = 3 * p.life;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = p.col;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      ctx.globalAlpha = p.life * 0.7;
+      ctx.fillStyle = p.col;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
     }
     ctx.globalAlpha = 1;
-    ctx.shadowBlur = 0;
   }
 
   function loop(){ update(); draw(); requestAnimationFrame(loop); }
@@ -1340,6 +1370,7 @@ function rSym(){
 function strip(){const a=[];for(let i=0;i<ROWS+3;i++)a.push(rSym());return a}
 
 /* ============ WIN LOGIC ============ */
+/* ✅ معامل الرهان: كل 20 ل.س = وحدة واحدة */
 function chkWins(g){
   const c={};
   for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
@@ -1348,11 +1379,15 @@ function chkWins(g){
     c[s.type]=(c[s.type]||0)+1;
   }
   const w=[];
+  const betScale = S.bet / 20;
   for(const[sym,n]of Object.entries(c)){
     if(n>=6){
-      const base=SYM[sym].pay;
+      const base=SYM[sym].pay * betScale;
       let m;
-      if(n===6)m=1;else if(n===7)m=1.5;else if(n===8)m=2.2;else m=2.2+(n-8)*.7;
+      if(n===6)m=1;
+      else if(n===7)m=1.5;
+      else if(n===8)m=2.2;
+      else m=2.2+(n-8)*.7;
       w.push({symbol:sym,count:n,amount:base*m});
     }
   }
@@ -1383,7 +1418,7 @@ async function animSpin(final){
   await sl(150);
 }
 
-/* ✅ animTumble مع الانفجارات */
+/* ✅ animTumble مع انفجار لطيف */
 async function animTumble(wt){
   const boomPoints = [];
   for(let x = 0; x < COLS; x++) for(let y = 0; y < ROWS; y++){
@@ -1401,15 +1436,15 @@ async function animTumble(wt){
       setTimeout(() => {
         const px = rect.left + (PADX + pt.x * CELL + CELL/2) * scaleX;
         const py = rect.top + (PADY + pt.y * CELL + CELL/2) * scaleY;
-        ExplosionFX.boom(px, py, 20);
-      }, idx * 30);
+        ExplosionFX.boom(px, py);
+      }, idx * 40);
     });
   }
 
-  shake(1.2, 250);
-  Aud.thunder(0.9);
-  flash(120, 0.25);
-  await sl(280);
+  // ✅ اهتزاز خفيف + صوت هادئ + بلا وميض
+  shake(0.5, 150);
+  Aud.thunder(0.6);
+  await sl(260);
 
   for(let x = 0; x < COLS; x++){
     const k = [];
@@ -1535,6 +1570,14 @@ async function spin(){
     setTimeout(()=>showBigWinOverlay(cw,15,'fs'),500);
     await sl(2500);
   }
+
+  /* ✅ الحد الأقصى للربح = 50× الرهان */
+  const maxWinPerSpin = currentBet * 50;
+  if(cw > maxWinPerSpin){
+    log('⚡ تم تحديد الربح بحد أقصى ' + maxWinPerSpin.toFixed(0) + ' ل.س');
+    cw = maxWinPerSpin;
+  }
+
   S.bal+=cw;S.lw=cw;S.won+=cw;
   if(cw>S.best)S.best=cw;
   const token = localStorage.getItem('sc_token');
