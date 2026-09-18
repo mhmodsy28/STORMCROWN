@@ -15,10 +15,11 @@ const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'ADMIN_' + crypto.randomBytes(16)
 const USDT_TO_SYP = 15000;
 const USD_TO_SYP = 15000;
 
+// ============ محافظ الشركة (معدّلة) ============
 const COMPANY_WALLETS = {
-  sham_syp: 'SYR-SHAMCASH-001',
-  sham_usd: 'SYR-SHAMCASH-USD-001',
-  usdt_bep20: '0x1234567890abcdef1234567890abcdef12345678',
+  sham_syp: '066f10afcd1b2d1a8f66dbe1a1eb3f17',
+  sham_usd: '066f10afcd1b2d1a8f66dbe1a1eb3f17',
+  usdt_bep20: '0x3932890a5d1acb3ab036bd39ade26c47929b37e5',
   usdt_trc20: 'TXYZ1234567890abcdef1234567890abcdef'
 };
 
@@ -54,11 +55,12 @@ function saveDB(){
 loadDB();
 setInterval(saveDB, 3000);
 
+// ============ وسائل الدفع (معدّلة — حد أدنى 200 ل.س) ============
 const PAYMENT_METHODS = [
-  { code: 'sham_syp',   name: 'شام كاش - ليرة سورية', currency: 'SYP',  min: 5000, max: 5000000, rate: 1 },
-  { code: 'sham_usd',   name: 'شام كاش - دولار',       currency: 'USD',  min: 5,    max: 5000,    rate: USD_TO_SYP },
-  { code: 'usdt_bep20', name: 'USDT (BEP20)',          currency: 'USDT', min: 5,    max: 5000,    rate: USDT_TO_SYP },
-  { code: 'usdt_trc20', name: 'USDT (TRC20)',          currency: 'USDT', min: 5,    max: 5000,    rate: USDT_TO_SYP }
+  { code: 'sham_syp',   name: 'شام كاش - ليرة سورية', currency: 'SYP',  min: 200, max: 5000000, rate: 1 },
+  { code: 'sham_usd',   name: 'شام كاش - دولار',       currency: 'USD',  min: 5,   max: 5000,    rate: USD_TO_SYP },
+  { code: 'usdt_bep20', name: 'USDT (BEP20)',          currency: 'USDT', min: 5,   max: 5000,    rate: USDT_TO_SYP },
+  { code: 'usdt_trc20', name: 'USDT (TRC20)',          currency: 'USDT', min: 5,   max: 5000,    rate: USDT_TO_SYP }
 ];
 
 function genUID(){
@@ -112,6 +114,7 @@ function authAdmin(req, res, next){
   next();
 }
 
+// ============ تسجيل حساب (رصيد يبدأ من 0) ============
 app.post('/api/register', rateLimit(10, 60000), (req, res) => {
   try {
     const { first, last, phone, email, password, inviteCode } = req.body;
@@ -141,17 +144,13 @@ app.post('/api/register', rateLimit(10, 60000), (req, res) => {
       id: ++DB._seq.users,
       uid, first_name: first, last_name: last, phone, email,
       password_hash: hash,
-      balance: 500000, laps: 0, best_win: 0, wagered: 0, won: 0,
+      balance: 0,
+      laps: 0, best_win: 0, wagered: 0, won: 0,
       banned: 0, referred_by: referrerUid, agent_level: 0,
       invite_code: code, total_commission: 0,
       created_at: Date.now(), last_login: Date.now(), last_ip: ip, notes: ''
     };
     DB.users.push(user);
-    DB.transactions.push({
-      id: ++DB._seq.transactions, uid, type: 'initial',
-      amount: 500000, balance_after: 500000,
-      note: 'رصيد ترحيبي', admin: null, created_at: Date.now()
-    });
     DB.login_log.push({
       id: ++DB._seq.login_log, uid, phone, success: 1, ip,
       user_agent: req.headers['user-agent'] || '', created_at: Date.now()
@@ -161,7 +160,7 @@ app.post('/api/register', rateLimit(10, 60000), (req, res) => {
     const token = jwt.sign({ uid }, JWT_SECRET, { expiresIn: '30d' });
     res.json({
       success: true, token,
-      user: { uid, first, last, phone, email, balance: 500000, laps: 0, best: 0,
+      user: { uid, first, last, phone, email, balance: 0, laps: 0, best: 0,
               wagered: 0, won: 0, invite_code: code, agent_level: 0, total_commission: 0 }
     });
   } catch(e){ console.error(e); res.status(500).json({ error: 'خطأ في السيرفر' }); }
@@ -277,6 +276,7 @@ app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), (req, res) => {
   } catch(e){ res.status(500).json({ error: 'خطأ' }); }
 });
 
+// ============ المحفظة ============
 app.get('/api/wallet/methods', (req, res) => {
   res.json({ methods: PAYMENT_METHODS.map(m => ({ ...m, company_wallet: COMPANY_WALLETS[m.code] || '' })) });
 });
@@ -344,6 +344,7 @@ app.get('/api/wallet/history', authUser, (req, res) => {
   res.json({ deposits, withdraws });
 });
 
+// ============ الوكالة ============
 app.get('/api/agent/info', authUser, (req, res) => {
   const u = req.user;
   const referrals = DB.users.filter(x => x.referred_by === u.uid)
@@ -369,6 +370,7 @@ app.post('/api/agent/become', authUser, (req, res) => {
   res.json({ success: true, message: 'تم ترقيتك إلى وكيل المستوى 1' });
 });
 
+// ============ الأدمن ============
 app.post('/api/admin/login', rateLimit(5, 60000), (req, res) => {
   const { password } = req.body;
   if(password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'كلمة مرور خاطئة' });
