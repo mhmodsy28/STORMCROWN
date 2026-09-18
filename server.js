@@ -55,7 +55,7 @@ function saveDB(){
 loadDB();
 setInterval(saveDB, 3000);
 
-// ============ وسائل الدفع (معدّلة — حد أدنى 200 ل.س) ============
+// ============ وسائل الدفع (شام كاش ل.س: min 200) ============
 const PAYMENT_METHODS = [
   { code: 'sham_syp',   name: 'شام كاش - ليرة سورية', currency: 'SYP',  min: 200, max: 5000000, rate: 1 },
   { code: 'sham_usd',   name: 'شام كاش - دولار',       currency: 'USD',  min: 5,   max: 5000,    rate: USD_TO_SYP },
@@ -114,7 +114,7 @@ function authAdmin(req, res, next){
   next();
 }
 
-// ============ تسجيل حساب (رصيد يبدأ من 0) ============
+// ============ تسجيل حساب (رصيد 0) ============
 app.post('/api/register', rateLimit(10, 60000), (req, res) => {
   try {
     const { first, last, phone, email, password, inviteCode } = req.body;
