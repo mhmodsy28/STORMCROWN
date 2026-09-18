@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STORMCROWN — لوحة التحكم</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Tahoma,Arial,sans-serif;background:#0a0a14;color:#eee;min-height:100vh}
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+#loginBox{background:linear-gradient(180deg,#1a0a30,#0a0515);border:2px solid #ffd24a;
+  border-radius:16px;padding:40px;max-width:400px;width:100%;text-align:center;
+  box-shadow:0 0 80px rgba(255,210,74,.4)}
+#loginBox h1{color:#ffd24a;font-size:32px;margin-bottom:8px}
+#loginBox p{color:#888;font-size:14px;margin-bottom:24px}
+#loginBox input{width:100%;padding:14px;background:#0a0515;border:2px solid #4a1a7a;
+  border-radius:8px;color:#fff;font-size:16px;margin-bottom:16px;text-align:center}
+#loginBox input:focus{outline:none;border-color:#ffd24a}
+#loginBox button{width:100%;padding:14px;background:linear-gradient(180deg,#6a0dad,#2a0a4a);
+  border:2px solid #ffd24a;border-radius:8px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer}
+.err{color:#ff4a4a;font-size:14px;margin-top:12px;display:none}
+.err.on{display:block}
+#app{display:none;padding:16px;max-width:1600px;margin:0 auto}
+#app.on{display:block}
+header{display:flex;justify-content:space-between;align-items:center;
+  padding:12px 18px;background:linear-gradient(180deg,#1a0a30,#0a0515);
+  border:2px solid #4a1a7a;border-radius:12px;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+header h1{color:#ffd24a;font-size:22px}
+header .stats{display:flex;gap:12px;font-size:12px;flex-wrap:wrap}
+header .stats div{text-align:center}
+header .stats .lbl{color:#888;font-size:10px}
+header .stats .val{color:#ffd24a;font-weight:bold;font-family:monospace;font-size:13px}
+#tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:9px 14px;background:linear-gradient(180deg,#1a0a30,#0a0515);
+  border:1px solid #4a1a7a;border-radius:8px;color:#ccc;cursor:pointer;
+  font-size:13px;font-weight:bold;position:relative}
+.tab.active{background:linear-gradient(180deg,#6a0dad,#2a0a4a);border-color:#ffd24a;color:#fff}
+.tab .badge{background:#ff4a4a;color:#fff;border-radius:10px;padding:1px 6px;
+  font-size:10px;margin-right:3px;display:none}
+.tab .badge.on{display:inline-block}
+.panel{display:none}
+.panel.active{display:block}
+.searchBar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.searchBar input,.searchBar select{padding:10px;background:#0a0515;
+  border:1px solid #4a1a7a;border-radius:8px;color:#fff;font-size:13px;min-width:150px}
+.searchBar button{padding:10px 18px;background:linear-gradient(180deg,#6a0dad,#2a0a4a);
+  border:1px solid #ffd24a;border-radius:8px;color:#fff;font-weight:bold;cursor:pointer}
+table{width:100%;border-collapse:collapse;background:#0a0515;border-radius:12px;overflow:hidden}
+th{background:linear-gradient(180deg,#2a1050,#1a0530);color:#ffd24a;
+  padding:9px 6px;text-align:right;font-size:11px;border-bottom:2px solid #4a1a7a}
+td{padding:8px 6px;border-bottom:1px solid #1a0a30;font-size:11px}
+td.mono{font-family:monospace;color:#c89bff;direction:ltr;text-align:left}
+td.bal{font-family:monospace;color:#2ecc71;font-weight:bold}
+td.uid{font-family:monospace;color:#ffd24a;direction:ltr;text-align:left;font-weight:bold}
+.banned{color:#ff4a4a;font-weight:bold}
+.active{color:#2ecc71}
+.btn{padding:5px 9px;border-radius:5px;border:none;cursor:pointer;font-size:10px;font-weight:bold;margin:1px}
+.btn-view{background:#4a9eff;color:#fff}
+.btn-ban{background:#8b0000;color:#fff}
+.btn-unban{background:#2ecc71;color:#fff}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1000;
+  display:none;align-items:center;justify-content:center;padding:12px;overflow-y:auto}
+.modal.on{display:flex}
+.modalBox{background:linear-gradient(180deg,#1a0a30,#0a0515);
+  border:2px solid #ffd24a;border-radius:16px;padding:20px;
+  max-width:900px;width:100%;max-height:92vh;overflow-y:auto;position:relative}
+.modalBox h2{color:#ffd24a;margin-bottom:14px;font-size:20px;text-align:center}
+.infoGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:16px}
+.infoCard{background:rgba(106,74,154,.15);border:1px solid #4a1a7a;border-radius:8px;padding:8px}
+.infoCard .lbl{color:#888;font-size:10px;margin-bottom:3px}
+.infoCard .val{color:#ffd24a;font-family:monospace;font-size:12px;font-weight:bold}
+.infoCard .val.big{font-size:14px;color:#2ecc71}
+.section{margin-bottom:16px}
+.section h3{color:#c89bff;margin-bottom:8px;font-size:14px;
+  padding-bottom:5px;border-bottom:1px solid #4a1a7a}
+.actionBar{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0;padding:10px;
+  background:rgba(106,74,154,.1);border-radius:8px;border:1px solid #4a1a7a}
+.actionBar input{padding:8px;background:#0a0515;border:1px solid #4a1a7a;
+  border-radius:6px;color:#fff;font-size:12px;flex:1;min-width:100px}
+.actionBar button{padding:8px 14px;border-radius:6px;border:none;font-weight:bold;cursor:pointer;font-size:12px}
+.btn-save{background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff}
+.btn-add{background:linear-gradient(180deg,#ffd24a,#ff8c00);color:#1a0033}
+.btn-sub{background:linear-gradient(180deg,#ff4a4a,#8b0000);color:#fff}
+.closeBtn{position:absolute;top:8px;left:8px;background:none;border:none;
+  color:#ff4a4a;font-size:22px;cursor:pointer;padding:4px 8px}
+.loading{text-align:center;padding:30px;color:#888}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);
+  background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;padding:12px 22px;
+  border-radius:10px;font-weight:bold;z-index:9999;transition:transform .3s;font-size:13px}
+#toast.on{transform:translateX(-50%) translateY(0)}
+#toast.err{background:linear-gradient(180deg,#ff4a4a,#8b0000)}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div id="loginBox">
+    <h1>🎛️ لوحة التحكم</h1>
+    <p>STORMCROWN ADMIN</p>
+    <input type="password" id="adminPass" placeholder="كلمة مرور الأدمن">
+    <button id="loginBtn">دخول</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <h1>⚡ STORMCROWN</h1>
+    <div class="stats" id="statsHeader"></div>
+  </header>
+  <div id="tabs">
+    <div class="tab active" data-tab="users">👥 المستخدمون</div>
+    <div class="tab" data-tab="spins">🎰 اللفات</div>
+    <div class="tab" data-tab="logins">🔑 الدخول</div>
+    <div class="tab" data-tab="deposits">💰 الإيداعات <span class="badge" id="depBadge"></span></div>
+    <div class="tab" data-tab="withdraws">💸 السحوبات <span class="badge" id="wdBadge"></span></div>
+    <div class="tab" data-tab="agents">👑 الوكلاء</div>
+  </div>
+
+  <div class="panel active" id="panel-users">
+    <div class="searchBar">
+      <input type="text" id="searchInput" placeholder="ابحث...">
+      <select id="sortSelect">
+        <option value="recent">الأحدث دخولاً</option>
+        <option value="created">الأحدث تسجيلاً</option>
+        <option value="balance">الأعلى رصيداً</option>
+        <option value="balance_asc">الأدنى رصيداً</option>
+        <option value="laps">الأكثر لفاً</option>
+        <option value="best">الأعلى فوزاً</option>
+        <option value="commission">الأعلى عمولة</option>
+      </select>
+      <button id="searchBtn">🔍 بحث</button>
+      <button id="refreshBtn">🔄 تحديث</button>
+    </div>
+    <div id="usersTable"></div>
+  </div>
+  <div class="panel" id="panel-spins"><div id="spinsTable"><div class="loading">جاري التحميل...</div></div></div>
+  <div class="panel" id="panel-logins"><div id="loginsTable"><div class="loading">جاري التحميل...</div></div></div>
+  <div class="panel" id="panel-deposits">
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn btn-view" onclick="loadDeposits('pending')">⏳ معلقة</button>
+      <button class="btn btn-unban" onclick="loadDeposits('approved')">✅ موافق</button>
+      <button class="btn btn-ban" onclick="loadDeposits('rejected')">❌ مرفوضة</button>
+    </div>
+    <div id="depositsTable"></div>
+  </div>
+  <div class="panel" id="panel-withdraws">
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn btn-view" onclick="loadWithdraws('pending')">⏳ معلقة</button>
+      <button class="btn btn-unban" onclick="loadWithdraws('approved')">✅ مدفوعة</button>
+      <button class="btn btn-ban" onclick="loadWithdraws('rejected')">↩️ مرفوضة</button>
+    </div>
+    <div id="withdrawsTable"></div>
+  </div>
+  <div class="panel" id="panel-agents"><div id="agentsTable"><div class="loading">جاري التحميل...</div></div></div>
+</div>
+
+<div class="modal" id="userModal"><div class="modalBox" id="userModalBox"></div></div>
+<div id="toast"></div>
+
+<script>
+const API = window.location.origin;
+let adminToken = localStorage.getItem('sc_admin_token') || '';
+function toast(msg, isErr){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = isErr ? 'err on' : 'on';
+  setTimeout(() => t.classList.remove('on'), 2500);
+}
+async function api(path, opts = {}){
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if(adminToken) headers['X-Admin-Token'] = adminToken;
+  const res = await fetch(API + path, { ...opts, headers });
+  const data = await res.json();
+  if(!res.ok) throw new Error(data.error || 'خطأ');
+  return data;
+}
+function fmt(n){ return Number(n || 0).toLocaleString('en-US'); }
+function timeAgo(ts){
+  if(!ts) return '—';
+  const d = Date.now() - ts;
+  if(d < 60000) return 'الآن';
+  if(d < 3600000) return Math.floor(d/60000) + 'د';
+  if(d < 86400000) return Math.floor(d/3600000) + 'س';
+  if(d < 2592000000) return Math.floor(d/86400000) + 'ي';
+  return new Date(ts).toLocaleDateString('ar-EG');
+}
+document.getElementById('loginBtn').onclick = async () => {
+  const pass = document.getElementById('adminPass').value;
+  try {
+    const res = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ password: pass }) });
+    adminToken = res.token;
+    localStorage.setItem('sc_admin_token', adminToken);
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').classList.add('on');
+    initApp();
+  } catch(e){
+    const err = document.getElementById('loginErr');
+    err.textContent = '⚠ ' + e.message;
+    err.classList.add('on');
+  }
+};
+function initApp(){
+  loadStats(); loadUsers(); updateBadges();
+  setInterval(loadStats, 30000);
+  setInterval(updateBadges, 15000);
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      const t = tab.dataset.tab;
+      if(t === 'spins') loadSpins();
+      if(t === 'logins') loadLogins();
+      if(t === 'deposits') loadDeposits('pending');
+      if(t === 'withdraws') loadWithdraws('pending');
+      if(t === 'agents') loadAgents();
+    };
+  });
+  document.getElementById('searchBtn').onclick = loadUsers;
+  document.getElementById('refreshBtn').onclick = loadUsers;
+  document.getElementById('sortSelect').onchange = loadUsers;
+}
+async function updateBadges(){
+  try {
+    const s = await api('/api/admin/stats');
+    const d = document.getElementById('depBadge');
+    const w = document.getElementById('wdBadge');
+    if(s.pendingDeposits > 0){ d.textContent = s.pendingDeposits; d.classList.add('on'); } else d.classList.remove('on');
+    if(s.pendingWithdraws > 0){ w.textContent = s.pendingWithdraws; w.classList.add('on'); } else w.classList.remove('on');
+  } catch(e){}
+}
+async function loadStats(){
+  try {
+    const s = await api('/api/admin/stats');
+    document.getElementById('statsHeader').innerHTML = `
+      <div><div class="lbl">المستخدمون</div><div class="val">${fmt(s.totalUsers)}</div></div>
+      <div><div class="lbl">نشط اليوم</div><div class="val">${fmt(s.activeToday)}</div></div>
+      <div><div class="lbl">الرصيد الكلي</div><div class="val">${fmt(s.totalBalance)}</div></div>
+      <div><div class="lbl">إجمالي الرهانات</div><div class="val">${fmt(s.totalWagered)}</div></div>
+      <div><div class="lbl">إجمالي الأرباح</div><div class="val">${fmt(s.totalWon)}</div></div>
+      <div><div class="lbl">أرباح المنزل</div><div class="val" style="color:#2ecc71">${fmt(s.houseProfit)}</div></div>
+      <div><div class="lbl">RTP</div><div class="val">${s.rtp}</div></div>
+      <div><div class="lbl">وكلاء</div><div class="val">${s.agents}</div></div>
+      <div><div class="lbl">محظورون</div><div class="val" style="color:#ff4a4a">${s.banned}</div></div>
+    `;
+  } catch(e){}
+}
+async function loadUsers(){
+  document.getElementById('usersTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
+  try {
+    const search = document.getElementById('searchInput').value.trim();
+    const sort = document.getElementById('sortSelect').value;
+    const q = new URLSearchParams({ search, sort, limit: 200 });
+    const { users, total } = await api('/api/admin/users?' + q);
+    if(users.length === 0){
+      document.getElementById('usersTable').innerHTML = '<div class="loading">لا يوجد</div>';
+      return;
+    }
+    const rows = users.map(u => `
+      <tr>
+        <td class="uid">${u.uid}</td>
+        <td>${u.first_name} ${u.last_name}</td>
+        <td class="mono">${u.phone}</td>
+        <td class="bal">${fmt(u.balance)}</td>
+        <td>${fmt(u.laps)}</td>
+        <td>${u.agent_level > 0 ? '<span style="color:#ffd24a">L'+u.agent_level+'</span>' : '—'}</td>
+        <td>${timeAgo(u.last_login)}</td>
+        <td>${u.banned ? '<span class="banned">محظور</span>' : '<span class="active">نشط</span>'}</td>
+        <td>
+          <button class="btn btn-view" onclick="openUser('${u.uid}')">👁</button>
+          ${u.banned
+            ? `<button class="btn btn-unban" onclick="toggleBan('${u.uid}')">فك</button>`
+            : `<button class="btn btn-ban" onclick="toggleBan('${u.uid}')">حظر</button>`}
+        </td>
+      </tr>`).join('');
+    document.getElementById('usersTable').innerHTML = `
+      <div style="color:#888;font-size:11px;margin-bottom:6px">إجمالي: ${fmt(total)}</div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>UID</th><th>الاسم</th><th>الهاتف</th><th>الرصيد</th>
+        <th>لفات</th><th>وكيل</th><th>آخر دخول</th><th>الحالة</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  } catch(e){
+    document.getElementById('usersTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
+  }
+}
+async function openUser(uid){
+  const modal = document.getElementById('userModal');
+  const box = document.getElementById('userModalBox');
+  box.innerHTML = '<div class="loading">جاري التحميل...</div>';
+  modal.classList.add('on');
+  try {
+    const d = await api('/api/admin/user/' + uid);
+    const u = d.user;
+    const created = new Date(u.created_at).toLocaleDateString('ar-EG');
+    const spinsRows = d.spins.slice(0, 15).map(s => `<tr>
+      <td>${new Date(s.created_at).toLocaleTimeString('ar-EG')}</td>
+      <td>${fmt(s.bet)}</td>
+      <td style="color:${s.won > s.bet ? '#2ecc71' : '#888'}">${fmt(s.won)}</td>
+      <td style="color:${s.net >= 0 ? '#2ecc71' : '#ff4a4a'}">${s.net >= 0 ? '+' : ''}${fmt(s.net)}</td>
+    </tr>`).join('');
+    const depRows = d.deposits.slice(0, 10).map(x => `<tr>
+      <td>${new Date(x.created_at).toLocaleString('ar-EG')}</td>
+      <td>${x.method_code}</td>
+      <td>${x.amount}</td>
+      <td>${fmt(x.amount_syp)}</td>
+      <td style="color:${x.status==='approved'?'#2ecc71':x.status==='rejected'?'#ff4a4a':'#ffd24a'}">${x.status}</td>
+    </tr>`).join('');
+    const wdRows = d.withdraws.slice(0, 10).map(x => `<tr>
+      <td>${new Date(x.created_at).toLocaleString('ar-EG')}</td>
+      <td>${x.method_code}</td>
+      <td>${x.amount}</td>
+      <td>${fmt(x.amount_syp)}</td>
+      <td class="mono">${x.wallet_to}</td>
+      <td style="color:${x.status==='approved'?'#2ecc71':x.status==='rejected'?'#ff4a4a':'#ffd24a'}">${x.status}</td>
+    </tr>`).join('');
+    const refRows = d.referrals.map(r => `<tr>
+      <td class="uid">${r.uid}</td>
+      <td>${r.first_name} ${r.last_name}</td>
+      <td>${new Date(r.created_at).toLocaleDateString('ar-EG')}</td>
+    </tr>`).join('');
+    box.innerHTML = `
+      <button class="closeBtn" onclick="closeUser()">✕</button>
+      <h2>👤 ${u.first_name} ${u.last_name}</h2>
+      <div class="infoGrid">
+        <div class="infoCard"><div class="lbl">UID</div><div class="val">${u.uid}</div></div>
+        <div class="infoCard"><div class="lbl">الهاتف</div><div class="val">${u.phone}</div></div>
+        <div class="infoCard"><div class="lbl">البريد</div><div class="val">${u.email}</div></div>
+        <div class="infoCard"><div class="lbl">كود الدعوة</div><div class="val">${u.invite_code || '—'}</div></div>
+        <div class="infoCard"><div class="lbl">الرصيد</div><div class="val big">${fmt(u.balance)}</div></div>
+        <div class="infoCard"><div class="lbl">لفات</div><div class="val">${fmt(u.laps)}</div></div>
+        <div class="infoCard"><div class="lbl">أفضل فوز</div><div class="val">${fmt(u.best_win)}</div></div>
+        <div class="infoCard"><div class="lbl">إجمالي مراهنات</div><div class="val">${fmt(u.wagered)}</div></div>
+        <div class="infoCard"><div class="lbl">إجمالي أرباح</div><div class="val">${fmt(u.won)}</div></div>
+        <div class="infoCard"><div class="lbl">مستوى الوكيل</div><div class="val">${u.agent_level || 0}</div></div>
+        <div class="infoCard"><div class="lbl">عمولة</div><div class="val">${fmt(u.total_commission)}</div></div>
+        <div class="infoCard"><div class="lbl">آخر IP</div><div class="val">${u.last_ip || '—'}</div></div>
+      </div>
+      <div class="actionBar">
+        <input type="number" id="newBalance" placeholder="الرصيد الجديد" value="${u.balance}">
+        <button class="btn-save" onclick="setBalance('${u.uid}')">💾 تعيين</button>
+      </div>
+      <div class="actionBar">
+        <input type="number" id="addAmount" placeholder="مبلغ">
+        <input type="text" id="addNote" placeholder="ملاحظة">
+        <button class="btn-add" onclick="adjustBalance('${u.uid}', 1)">➕ إضافة</button>
+        <button class="btn-sub" onclick="adjustBalance('${u.uid}', -1)">➖ خصم</button>
+      </div>
+      <div class="actionBar">
+        <select id="agentLvl" style="padding:8px;background:#0a0515;border:1px solid #4a1a7a;border-radius:6px;color:#fff;flex:1">
+          <option value="0" ${u.agent_level===0?'selected':''}>لاعب</option>
+          <option value="1" ${u.agent_level===1?'selected':''}>وكيل 1 (3%)</option>
+          <option value="2" ${u.agent_level===2?'selected':''}>وكيل 2 (5%)</option>
+          <option value="3" ${u.agent_level===3?'selected':''}>وكيل 3 (8%)</option>
+        </select>
+        <button class="btn-save" onclick="setAgentLevel('${u.uid}')">👑 تعيين</button>
+      </div>
+      <div class="actionBar">
+        <input type="text" id="userNote" placeholder="ملاحظات" value="${u.notes || ''}">
+        <button class="btn-save" onclick="setNote('${u.uid}')">💾</button>
+      </div>
+      <div class="section"><h3>🎰 آخر 15 لفة</h3>
+        <table><thead><tr><th>الوقت</th><th>رهان</th><th>فوز</th><th>صافي</th></tr></thead>
+        <tbody>${spinsRows || '<tr><td colspan="4" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody></table>
+      </div>
+      <div class="section"><h3>📥 آخر الإيداعات</h3>
+        <table><thead><tr><th>الوقت</th><th>الوسيلة</th><th>المبلغ</th><th>ل.س</th><th>الحالة</th></tr></thead>
+        <tbody>${depRows || '<tr><td colspan="5" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody></table>
+      </div>
+      <div class="section"><h3>📤 آخر السحوبات</h3>
+        <table><thead><tr><th>الوقت</th><th>الوسيلة</th><th>المبلغ</th><th>ل.س</th><th>العنوان</th><th>الحالة</th></tr></thead>
+        <tbody>${wdRows || '<tr><td colspan="6" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody></table>
+      </div>
+      ${d.referrals.length > 0 ? `<div class="section"><h3>👥 الإحالات (${d.referrals.length})</h3>
+        <table><thead><tr><th>UID</th><th>الاسم</th><th>التسجيل</th></tr></thead>
+        <tbody>${refRows}</tbody></table>
+      </div>` : ''}
+    `;
+  } catch(e){
+    box.innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
+  }
+}
+function closeUser(){ document.getElementById('userModal').classList.remove('on'); }
+document.getElementById('userModal').addEventListener('click', e => {
+  if(e.target.id === 'userModal') closeUser();
+});
+async function setBalance(uid){
+  const val = parseInt(document.getElementById('newBalance').value);
+  if(isNaN(val) || val < 0){ toast('قيمة غير صحيحة', true); return; }
+  try {
+    await api('/api/admin/update-balance', { method: 'POST', body: JSON.stringify({ uid, newBalance: val, note: 'تعيين' }) });
+    toast('✅ تم: ' + fmt(val));
+    loadUsers(); loadStats();
+  } catch(e){ toast('⚠ ' + e.message, true); }
+}
+async function adjustBalance(uid, sign){
+  const amt = parseInt(document.getElementById('addAmount').value);
+  if(isNaN(amt) || amt <= 0){ toast('مبلغ غير صحيح', true); return; }
+  const note = document.getElementById('addNote').value || '';
+  try {
+    await api('/api/admin/adjust-balance', { method: 'POST', body: JSON.stringify({ uid, amount: amt * sign, note }) });
+    toast(`✅ ${sign > 0 ? 'إضافة' : 'خصم'} ${fmt(amt)}`);
+    document.getElementById('addAmount').value = '';
+    document.getElementById('addNote').value = '';
+    loadUsers(); loadStats();
+  } catch(e){ toast('⚠ ' + e.message, true); }
+}
+async function setNote(uid){
+  const note = document.getElementById('userNote').value;
+  try {
+    await api('/api/admin/set-note', { method: 'POST', body: JSON.stringify({ uid, note }) });
+    toast('✅ تم');
+  } catch(e){ toast('⚠ ' + e.message, true); }
+}
+async function setAgentLevel(uid){
+  const level = document.getElementById('agentLvl').value;
+  try {
+    await api('/api/admin/set-agent-level', { method: 'POST', body: JSON.stringify({ uid, level: parseInt(level) }) });
+    toast('✅ المستوى: ' + level);
+  } catch(e){ toast('⚠ ' + e.message, true); }
+}
+async function toggleBan(uid){
+  try {
+    const res = await api('/api/admin/toggle-ban', { method: 'POST', body: JSON.stringify({ uid }) });
+    toast(res.banned ? '🚫 حظر' : '✅ فك');
+    loadUsers(); loadStats();
+  } catch(e){ toast('⚠ ' + e.message, true); }
+}
+async function loadSpins(){
+  document.getElementById('spinsTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
+  try {
+    const { spins } = await api('/api/admin/recent-spins');
+    const rows = spins.map(s => `<tr>
+      <td>${new Date(s.created_at).toLocaleString('ar-EG')}</td>
+      <td>${s.first_name || '—'} ${s.last_name || ''}</td>
+      <td class="uid">${s.uid}</td>
+      <td>${fmt(s.bet)}</td>
+      <td style="color:${s.won > 0 ? '#2ecc71' : '#888'}">${fmt(s.won)}</td>
+      <td style="color:${s.net >= 0 ? '#2ecc71' : '#ff4a4a'}">${s.net >= 0 ? '+' : ''}${fmt(s.net)}</td>
+    </tr>`).join('');
+    document.getElementById('spinsTable').innerHTML = `
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>الوقت</th><th>اللاعب</th><th>UID</th><th>رهان</th><th>فوز</th><th>صافي</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody>
+      </table></div>`;
+  } catch(e){
+    document.getElementById('spinsTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
+  }
+}
+async function loadLogins(){
+  document.getElementById('loginsTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
+  try {
+    const { logins } = await api('/api/admin/recent-logins');
+    const rows = logins.map(l => `<tr>
+      <td>${new Date(l.created_at).toLocaleString('ar-EG')}</td>
+      <td>${l.first_name || '—'} ${l.last_name || ''}</td>
+      <td class="uid">${l.uid || '—'}</td>
+      <td class="mono">${l.ip || '—'}</td>
+      <td>${l.success ? '<span style="color:#2ecc71">نجح</span>' : '<span style="color:#ff4a4a">فشل</span>'}</td>
+    </tr>`).join('');
+    document.getElementById('loginsTable').innerHTML = `
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>الوقت</th><th>المستخدم</th><th>UID</th><th>IP</th><th>النتيجة</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody>
+      </table></div>`;
+  } catch(e){
+    document.getElementById('loginsTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
+  }
+}
+async function loadDeposits(status){
+  document.getElementById('depositsTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
+  try {
+    const { deposits } = await api('/api/admin/deposits?status=' + status);
+    const rows = deposits.map(d => `<tr>
+      <td>#${d.id}</td>
+      <td>${d.first_name || '—'} ${d.last_name || ''}<br><small style="color:#888">${d.phone || ''}</small></td>
+      <td class="uid">${d.uid}</td>
+      <td>${d.method_code}</td>
+      <td><b>${d.amount}</b></td>
+      <td style="color:#2ecc71">${fmt(d.amount_syp)}</td>
+      <td class="mono">${d.tx_hash || '—'}</td>
+      <td>${new Date(d.created_at).toLocaleString('ar-EG')}</td>
+      <td>${d.status === 'pending'
+        ? `<button class="btn btn-unban" onclick="processDeposit(${d.id}, 'approve')">✅</button>
+           <button class="btn btn-ban" onclick="processDeposit(${d.id}, 'reject')">❌</button>`
+        : `<span style="color:${d.status==='approved'?'#2ecc71':'#ff4a4a'}">${d.status}</span>`}
+      </td>
+    </tr>`).join('');
+    document.getElementById('depositsTable').innerHTML = `
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>#</th><th>المستخدم</th><th>UID</th><th>الوسيلة</th><th>المبلغ</th>
+        <th>ل.س</th><th>TX</th><th>الوقت</th><th>إجراء</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody>
+      </table></div>`;
+  } catch(e){
+    document.getElementById('depositsTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
+  }
+}
+async function processDeposit(id, action){
+  const note = prompt('ملاحظة (اختياري):') || '';
+  try {
+    await api('/api/admin/deposits/process', { method: 'POST', body: JSON.stringify({ id, action, admin_note: note }) });
+    toast(action === 'approve' ? '✅ تمت الموافقة' : '❌ تم الرفض');
+    loadDeposits('pending'); loadStats(); updateBadges();
+  } catch(e){ toast('⚠ ' + e.message, true); }
+}
+async function loadWithdraws(status){
+  document.getElementById('withdrawsTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
+  try {
+    const { withdraws } = await api('/api/admin/withdraws?status=' + status);
+    const rows = withdraws.map(w => `<tr>
+      <td>#${w.id}</td>
+      <td>${w.first_name || '—'} ${w.last_name || ''}<br><small style="color:#888">${w.phone || ''}</small></td>
+      <td class="uid">${w.uid}</td>
+      <td>${w.method_code}</td>
+      <td><b>${w.amount}</b></td>
+      <td style="color:#2ecc71">${fmt(w.amount_syp)}</td>
+      <td class="mono">${w.wallet_to}</td>
+      <td>${new Date(w.created_at).toLocaleString('ar-EG')}</td>
+      <td>${w.status === 'pending'
+        ? `<button class="btn btn-unban" onclick="processWithdraw(${w.id}, 'approve')">✅</button>
+           <button class="btn btn-ban" onclick="processWithdraw(${w.id}, 'reject')">↩️</button>`
+        : `<span style="color:${w.status==='approved'?'#2ecc71':'#ff4a4a'}">${w.status}</span>`}
+      </td>
+    </tr>`).join('');
+    document.getElementById('withdrawsTable').innerHTML = `
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>#</th><th>المستخدم</th><th>UID</th><th>الوسيلة</th><th>المبلغ</th>
+        <th>ل.س</th><th>العنوان</th><th>الوقت</th><th>إجراء</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody>
+      </table></div>`;
+  } catch(e){
+    document.getElementById('withdrawsTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
+  }
+}
+async function processWithdraw(id, action){
+  const note = prompt('ملاحظة (اختياري):') || '';
+  try {
+    await api('/api/admin/withdraws/process', { method: 'POST', body: JSON.stringify({ id, action, admin_note: note }) });
+    toast(action === 'approve' ? '✅ تم الدفع' : '↩️ تم الرفض');
+    loadWithdraws('pending'); loadStats(); updateBadges();
+  } catch(e){ toast('⚠ ' + e.message, true); }
+}
+async function loadAgents(){
+  document.getElementById('agentsTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
+  try {
+    const { agents } = await api('/api/admin/agents');
+    const rows = agents.map(a => `<tr>
+      <td class="uid">${a.uid}</td>
+      <td>${a.first_name} ${a.last_name}</td>
+      <td class="mono">${a.phone}</td>
+      <td><span style="background:#ffd24a;color:#1a0033;padding:2px 6px;border-radius:5px;font-weight:bold">L${a.agent_level}</span></td>
+      <td><b>${a.referrals}</b></td>
+      <td style="color:#2ecc71;font-family:monospace">${fmt(a.total_commission)}</td>
+      <td>${fmt(a.balance)}</td>
+    </tr>`).join('');
+    document.getElementById('agentsTable').innerHTML = `
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>UID</th><th>الاسم</th><th>الهاتف</th><th>المستوى</th>
+        <th>الإحالات</th><th>العمولات</th><th>الرصيد</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:#888">لا يوجد وكلاء</td></tr>'}</tbody>
+      </table></div>`;
+  } catch(e){
+    document.getElementById('agentsTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
+  }
+}
+(async () => {
+  if(adminToken){
+    try {
+      await api('/api/admin/stats');
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('app').classList.add('on');
+      initApp();
+    } catch(e){ adminToken = ''; localStorage.removeItem('sc_admin_token'); }
+  }
+})();
+</script>
+</body>
+</html>
