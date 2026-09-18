@@ -125,6 +125,7 @@ td.uid{font-family:monospace;color:#ffd24a;direction:ltr;text-align:left;font-we
     <div class="tab" data-tab="deposits">💰 الإيداعات <span class="badge" id="depBadge"></span></div>
     <div class="tab" data-tab="withdraws">💸 السحوبات <span class="badge" id="wdBadge"></span></div>
     <div class="tab" data-tab="agents">👑 الوكلاء</div>
+    <div class="tab" data-tab="rtp">⚙️ إعدادات RTP</div>
   </div>
 
   <div class="panel active" id="panel-users">
@@ -144,8 +145,10 @@ td.uid{font-family:monospace;color:#ffd24a;direction:ltr;text-align:left;font-we
     </div>
     <div id="usersTable"></div>
   </div>
+
   <div class="panel" id="panel-spins"><div id="spinsTable"><div class="loading">جاري التحميل...</div></div></div>
   <div class="panel" id="panel-logins"><div id="loginsTable"><div class="loading">جاري التحميل...</div></div></div>
+
   <div class="panel" id="panel-deposits">
     <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
       <button class="btn btn-view" onclick="loadDeposits('pending')">⏳ معلقة</button>
@@ -154,6 +157,7 @@ td.uid{font-family:monospace;color:#ffd24a;direction:ltr;text-align:left;font-we
     </div>
     <div id="depositsTable"></div>
   </div>
+
   <div class="panel" id="panel-withdraws">
     <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
       <button class="btn btn-view" onclick="loadWithdraws('pending')">⏳ معلقة</button>
@@ -162,7 +166,63 @@ td.uid{font-family:monospace;color:#ffd24a;direction:ltr;text-align:left;font-we
     </div>
     <div id="withdrawsTable"></div>
   </div>
+
   <div class="panel" id="panel-agents"><div id="agentsTable"><div class="loading">جاري التحميل...</div></div></div>
+
+  <div class="panel" id="panel-rtp">
+    <div style="background:linear-gradient(180deg,#1a0a30,#0a0515);border:2px solid #4a1a7a;border-radius:12px;padding:20px;max-width:600px;margin:0 auto">
+      <h2 style="color:#ffd24a;text-align:center;margin-bottom:20px;font-size:22px">⚙️ التحكم بنسبة الربح (RTP)</h2>
+
+      <div style="background:rgba(255,210,74,.1);border:1px solid #ffd24a;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:#ffd24a;text-align:center">
+        <div style="margin-bottom:6px">RTP الحالي:</div>
+        <div id="rtpCurrentDisplay" style="font-size:32px;font-weight:bold;font-family:monospace;color:#2ecc71">—</div>
+        <div style="font-size:11px;color:#888;margin-top:6px" id="rtpProgressDisplay"></div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="display:block;color:#c89bff;margin-bottom:6px;font-size:13px">الحالة</label>
+        <select id="rtpEnabled" style="width:100%;padding:10px;background:#0a0515;border:1px solid #4a1a7a;border-radius:6px;color:#fff;font-size:14px">
+          <option value="false">🔴 معطّل (يستخدم النظام الافتراضي)</option>
+          <option value="true">🟢 مفعّل (يستخدم النظام الجديد)</option>
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div>
+          <label style="display:block;color:#c89bff;margin-bottom:6px;font-size:13px">RTP أقصى (%) — بداية الجلسة</label>
+          <input type="number" id="rtpMax" min="0" max="100" step="1" value="60" style="width:100%;padding:10px;background:#0a0515;border:1px solid #4a1a7a;border-radius:6px;color:#2ecc71;font-size:16px;font-family:monospace;text-align:center">
+        </div>
+        <div>
+          <label style="display:block;color:#c89bff;margin-bottom:6px;font-size:13px">RTP أدنى (%) — نهاية المدة</label>
+          <input type="number" id="rtpMin" min="0" max="100" step="1" value="20" style="width:100%;padding:10px;background:#0a0515;border:1px solid #4a1a7a;border-radius:6px;color:#e74c3c;font-size:16px;font-family:monospace;text-align:center">
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="display:block;color:#c89bff;margin-bottom:6px;font-size:13px">المدة (بالدقائق) — كم يستغرق النزول من الأقصى إلى الأدنى</label>
+        <input type="number" id="rtpDuration" min="1" max="1440" step="1" value="60" style="width:100%;padding:10px;background:#0a0515;border:1px solid #4a1a7a;border-radius:6px;color:#ffd24a;font-size:16px;font-family:monospace;text-align:center">
+        <div style="font-size:11px;color:#888;margin-top:4px;text-align:center">
+          مثال: 60 = ساعة، 120 = ساعتان، 1440 = يوم كامل
+        </div>
+      </div>
+
+      <div style="background:rgba(46,204,113,.08);border:1px solid #2ecc71;border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px;color:#c8ffd8;line-height:1.7">
+        <b style="color:#2ecc71">📊 كيف يعمل:</b><br>
+        • عند التفعيل + حفظ → يبدأ العداد من الآن<br>
+        • RTP يبدأ من الحد الأقصى<br>
+        • ينخفض تدريجياً خلال المدة المحددة<br>
+        • يصل للحد الأدنى عند نهاية المدة<br>
+        • اضغط "إعادة تعيين العداد" لبدء جلسة جديدة
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="rtpSaveBtn" style="flex:1;min-width:130px;padding:12px;background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px">💾 حفظ الإعدادات</button>
+        <button id="rtpResetBtn" style="flex:1;min-width:130px;padding:12px;background:linear-gradient(180deg,#ffd24a,#ff8c00);color:#1a0033;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px">🔄 إعادة تعيين العداد</button>
+      </div>
+
+      <button id="rtpRefreshBtn" style="width:100%;margin-top:8px;padding:10px;background:linear-gradient(180deg,#6a0dad,#2a0a4a);color:#fff;border:1px solid #ffd24a;border-radius:8px;font-weight:bold;cursor:pointer;font-size:13px">🔄 تحديث الحالة الحالية</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal" id="userModal"><div class="modalBox" id="userModalBox"></div></div>
@@ -232,6 +292,7 @@ function initApp(){
       if(t === 'deposits') loadDeposits('pending');
       if(t === 'withdraws') loadWithdraws('pending');
       if(t === 'agents') loadAgents();
+      if(t === 'rtp') loadRTPSettings();
     };
   });
   document.getElementById('searchBtn').onclick = loadUsers;
@@ -675,6 +736,56 @@ async function setAgentLevelQuick(uid, level){
   } catch(e){ toast('⚠ ' + e.message, true); }
 }
 window.setAgentLevelQuick = setAgentLevelQuick;
+
+/* ============ RTP SETTINGS ============ */
+async function loadRTPSettings(){
+  try {
+    const s = await api('/api/admin/rtp-settings');
+    document.getElementById('rtpEnabled').value = s.enabled ? 'true' : 'false';
+    document.getElementById('rtpMax').value = s.maxRTP;
+    document.getElementById('rtpMin').value = s.minRTP;
+    document.getElementById('rtpDuration').value = s.durationMinutes;
+    document.getElementById('rtpCurrentDisplay').textContent = s.currentRTP + '%';
+    document.getElementById('rtpCurrentDisplay').style.color =
+      s.currentRTP >= 40 ? '#2ecc71' : s.currentRTP >= 20 ? '#ffd24a' : '#e74c3c';
+    if(s.enabled){
+      const elapsed = Math.floor((Date.now() - s.startTime) / 60000);
+      const remain = Math.max(0, s.durationMinutes - elapsed);
+      document.getElementById('rtpProgressDisplay').textContent =
+        `⏱️ مضى: ${elapsed} دقيقة · متبقي: ${remain} دقيقة من ${s.durationMinutes}`;
+    } else {
+      document.getElementById('rtpProgressDisplay').textContent = 'النظام الجديد معطّل';
+    }
+  } catch(e){ toast('⚠ ' + e.message, true); }
+}
+
+async function saveRTPSettings(resetTimer){
+  try {
+    const enabled = document.getElementById('rtpEnabled').value === 'true';
+    const maxRTP = parseInt(document.getElementById('rtpMax').value);
+    const minRTP = parseInt(document.getElementById('rtpMin').value);
+    const durationMinutes = parseInt(document.getElementById('rtpDuration').value);
+
+    if(isNaN(maxRTP) || maxRTP < 0 || maxRTP > 100){ toast('RTP الأقصى: 0-100', true); return; }
+    if(isNaN(minRTP) || minRTP < 0 || minRTP > 100){ toast('RTP الأدنى: 0-100', true); return; }
+    if(maxRTP < minRTP){ toast('الأقصى يجب أن يكون أكبر من الأدنى', true); return; }
+    if(isNaN(durationMinutes) || durationMinutes < 1){ toast('المدة ≥ دقيقة', true); return; }
+
+    await api('/api/admin/rtp-settings', {
+      method: 'POST',
+      body: JSON.stringify({ enabled, maxRTP, minRTP, durationMinutes, resetTimer })
+    });
+    toast('✅ تم الحفظ');
+    loadRTPSettings();
+  } catch(e){ toast('⚠ ' + e.message, true); }
+}
+
+document.getElementById('rtpSaveBtn').onclick = () => saveRTPSettings(false);
+document.getElementById('rtpResetBtn').onclick = () => {
+  if(confirm('هل تريد إعادة تعيين العداد؟\nسيعود RTP للحد الأقصى ويبدأ من جديد.'))
+    saveRTPSettings(true);
+};
+document.getElementById('rtpRefreshBtn').onclick = loadRTPSettings;
 
 /* ============ AUTO LOGIN ============ */
 (async () => {
