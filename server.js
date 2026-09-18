@@ -33,6 +33,14 @@ let DB = {
   deposit_requests: [],
   withdraw_requests: [],
   commissions: [],
+  rtpSettings: {
+    enabled: false,
+    maxRTP: 60,
+    minRTP: 20,
+    durationMinutes: 60,
+    startTime: Date.now(),
+    updatedAt: Date.now()
+  },
   _seq: { users: 0, spins: 0, login_log: 0, transactions: 0,
           deposit_requests: 0, withdraw_requests: 0, commissions: 0 }
 };
@@ -44,6 +52,7 @@ function loadDB(){
       const parsed = JSON.parse(raw);
       DB = { ...DB, ...parsed };
       if(!DB._seq) DB._seq = { users: 0, spins: 0, login_log: 0, transactions: 0, deposit_requests: 0, withdraw_requests: 0, commissions: 0 };
+      if(!DB.rtpSettings) DB.rtpSettings = { enabled:false, maxRTP:60, minRTP:20, durationMinutes:60, startTime:Date.now(), updatedAt:Date.now() };
     }
   } catch(e){ console.error('loadDB error:', e); }
 }
@@ -363,6 +372,52 @@ app.post('/api/agent/become', authUser, (req, res) => {
   req.user.agent_level = 1;
   saveDB();
   res.json({ success: true, message: 'تم ترقيتك إلى وكيل المستوى 1' });
+});
+
+/* ============ RTP SETTINGS ============ */
+app.get('/api/admin/rtp-settings', authAdmin, (req, res) => {
+  if(!DB.rtpSettings){
+    DB.rtpSettings = { enabled:false, maxRTP:60, minRTP:20, durationMinutes:60, startTime:Date.now(), updatedAt:Date.now() };
+  }
+  const s = DB.rtpSettings;
+  let currentRTP = s.maxRTP;
+  if(s.enabled){
+    const elapsed = (Date.now() - s.startTime) / 60000;
+    const progress = Math.min(1, elapsed / s.durationMinutes);
+    currentRTP = s.maxRTP - progress * (s.maxRTP - s.minRTP);
+  }
+  res.json({ ...s, currentRTP: parseFloat(currentRTP.toFixed(2)) });
+});
+
+app.post('/api/admin/rtp-settings', authAdmin, (req, res) => {
+  try {
+    const { enabled, maxRTP, minRTP, durationMinutes, resetTimer } = req.body;
+    if(!DB.rtpSettings){
+      DB.rtpSettings = { enabled:false, maxRTP:60, minRTP:20, durationMinutes:60, startTime:Date.now(), updatedAt:Date.now() };
+    }
+    if(typeof enabled === 'boolean') DB.rtpSettings.enabled = enabled;
+    if(typeof maxRTP === 'number' && maxRTP >= 0 && maxRTP <= 100) DB.rtpSettings.maxRTP = maxRTP;
+    if(typeof minRTP === 'number' && minRTP >= 0 && minRTP <= 100) DB.rtpSettings.minRTP = minRTP;
+    if(typeof durationMinutes === 'number' && durationMinutes > 0) DB.rtpSettings.durationMinutes = durationMinutes;
+    if(resetTimer) DB.rtpSettings.startTime = Date.now();
+    DB.rtpSettings.updatedAt = Date.now();
+    saveDB();
+    res.json({ success:true, settings: DB.rtpSettings });
+  } catch(e){ res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/rtp-settings', (req, res) => {
+  if(!DB.rtpSettings){
+    DB.rtpSettings = { enabled:false, maxRTP:60, minRTP:20, durationMinutes:60, startTime:Date.now(), updatedAt:Date.now() };
+  }
+  const s = DB.rtpSettings;
+  let currentRTP = 75;
+  if(s.enabled){
+    const elapsed = (Date.now() - s.startTime) / 60000;
+    const progress = Math.min(1, elapsed / s.durationMinutes);
+    currentRTP = s.maxRTP - progress * (s.maxRTP - s.minRTP);
+  }
+  res.json({ enabled: s.enabled, currentRTP: parseFloat(currentRTP.toFixed(2)) });
 });
 
 app.post('/api/admin/login', rateLimit(5, 60000), (req, res) => {
