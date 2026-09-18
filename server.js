@@ -15,7 +15,6 @@ const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'ADMIN_' + crypto.randomBytes(16)
 const USDT_TO_SYP = 15000;
 const USD_TO_SYP = 15000;
 
-// ============ محافظ الشركة (معدّلة) ============
 const COMPANY_WALLETS = {
   sham_syp: '066f10afcd1b2d1a8f66dbe1a1eb3f17',
   sham_usd: '066f10afcd1b2d1a8f66dbe1a1eb3f17',
@@ -55,7 +54,6 @@ function saveDB(){
 loadDB();
 setInterval(saveDB, 3000);
 
-// ============ وسائل الدفع (شام كاش ل.س: min 200) ============
 const PAYMENT_METHODS = [
   { code: 'sham_syp',   name: 'شام كاش - ليرة سورية', currency: 'SYP',  min: 200, max: 5000000, rate: 1 },
   { code: 'sham_usd',   name: 'شام كاش - دولار',       currency: 'USD',  min: 5,   max: 5000,    rate: USD_TO_SYP },
@@ -114,7 +112,6 @@ function authAdmin(req, res, next){
   next();
 }
 
-// ============ تسجيل حساب (رصيد 0) ============
 app.post('/api/register', rateLimit(10, 60000), (req, res) => {
   try {
     const { first, last, phone, email, password, inviteCode } = req.body;
@@ -276,7 +273,6 @@ app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), (req, res) => {
   } catch(e){ res.status(500).json({ error: 'خطأ' }); }
 });
 
-// ============ المحفظة ============
 app.get('/api/wallet/methods', (req, res) => {
   res.json({ methods: PAYMENT_METHODS.map(m => ({ ...m, company_wallet: COMPANY_WALLETS[m.code] || '' })) });
 });
@@ -344,7 +340,6 @@ app.get('/api/wallet/history', authUser, (req, res) => {
   res.json({ deposits, withdraws });
 });
 
-// ============ الوكالة ============
 app.get('/api/agent/info', authUser, (req, res) => {
   const u = req.user;
   const referrals = DB.users.filter(x => x.referred_by === u.uid)
@@ -370,7 +365,6 @@ app.post('/api/agent/become', authUser, (req, res) => {
   res.json({ success: true, message: 'تم ترقيتك إلى وكيل المستوى 1' });
 });
 
-// ============ الأدمن ============
 app.post('/api/admin/login', rateLimit(5, 60000), (req, res) => {
   const { password } = req.body;
   if(password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'كلمة مرور خاطئة' });
