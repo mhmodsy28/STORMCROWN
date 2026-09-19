@@ -1,6 +1,6 @@
 /* ============================================================
    STORMCROWN — server.js
-   v5 — موزعة نادرة (2%) + دفعات v3 المتوازنة
+   v6 — فوز أقل تكرارًا وأعلى قيمة
    ============================================================ */
 
 const express = require('express');
@@ -127,19 +127,19 @@ async function initDB() {
 const COLS = 6, ROWS = 5;
 
 /* ============================================================
-   💰 جدول الدفع v3 — متوازن
+   💰 جدول الدفع v6 — دفعات أعلى
    ============================================================ */
 const SYM = {
-  zeusFist:  { pay: 3.5  },
-  crown:     { pay: 1.5  },
-  chalice:   { pay: 1.0  },
-  hourglass: { pay: 0.7  },
-  ring:      { pay: 0.4  },
-  flaming:   { pay: 0.22 },
-  gem_red:   { pay: 0.18 },
-  gem_blue:  { pay: 0.14 },
-  gem_green: { pay: 0.10 },
-  gem_purple:{ pay: 0.07 }
+  zeusFist:  { pay: 4.0  },
+  crown:     { pay: 2.0  },
+  chalice:   { pay: 1.4  },
+  hourglass: { pay: 1.0  },
+  ring:      { pay: 0.65 },
+  flaming:   { pay: 0.45 },
+  gem_red:   { pay: 0.35 },
+  gem_blue:  { pay: 0.28 },
+  gem_green: { pay: 0.22 },
+  gem_purple:{ pay: 0.15 }
 };
 
 const ZEUS_MAIN    = [2, 3, 5, 10, 15, 25];
@@ -148,7 +148,7 @@ const ZEUS_PREMIUM = [10, 15, 25, 50, 75, 100];
 function rint(max) { return crypto.randomInt(0, max); }
 
 /* ============================================================
-   🎯 توزيع زيوس — v3
+   🎯 توزيع زيوس — v3 (متوازن)
    ============================================================ */
 function pickZeusValue(pool) {
   const r = rint(1000);
@@ -171,23 +171,22 @@ function pickZeusValue(pool) {
 }
 
 /* ============================================================
-   🎯 rSym — الموزعة 2%، زيوس 4%
+   🎯 rSym v6 — gem_purple نادر (8%)، الرموز الأخرى موزعة
    ============================================================ */
 function rSym(zeusPool) {
   const r = rint(1000);
   if (r < 40)  return { type: 'zeus', v: pickZeusValue(zeusPool) };  // 4%
-  if (r < 60)  return { type: 'scatter' };                          // 2% ← نادرة
-  if (r < 160) return { type: 'gem_purple' };
-  if (r < 260) return { type: 'gem_green' };
-  if (r < 360) return { type: 'gem_blue' };
-  if (r < 460) return { type: 'gem_red' };
-  if (r < 545) return { type: 'flaming' };
-  if (r < 630) return { type: 'ring' };
-  if (r < 705) return { type: 'hourglass' };
-  if (r < 775) return { type: 'chalice' };
-  if (r < 840) return { type: 'crown' };
-  if (r < 870) return { type: 'zeusFist' };
-  return { type: 'gem_purple' };
+  if (r < 60)  return { type: 'scatter' };                          // 2%
+  if (r < 140) return { type: 'gem_purple' };                       // 8% ← قليل
+  if (r < 260) return { type: 'gem_green' };                        // 12%
+  if (r < 380) return { type: 'gem_blue' };                         // 12%
+  if (r < 500) return { type: 'gem_red' };                          // 12%
+  if (r < 620) return { type: 'flaming' };                          // 12%
+  if (r < 740) return { type: 'ring' };                             // 12%
+  if (r < 850) return { type: 'hourglass' };                        // 11%
+  if (r < 930) return { type: 'chalice' };                          // 8%
+  if (r < 980) return { type: 'crown' };                            // 5%
+  return { type: 'zeusFist' };                                       // 2%
 }
 
 function genGrid(zeusPool) {
@@ -200,7 +199,7 @@ function genGrid(zeusPool) {
 }
 
 /* ============================================================
-   🎯 chkWins — v3: 7 رموز حد أدنى، مضاعفات أقل
+   🎯 chkWins v6 — الحد الأدنى 8 رموز، مضاعفات مرتفعة
    ============================================================ */
 function chkWins(g, bet) {
   const c = {};
@@ -211,14 +210,14 @@ function chkWins(g, bet) {
   }
   const wins = [];
   for (const [sym, n] of Object.entries(c)) {
-    if (n < 7) continue;
+    if (n < 8) continue;
     const base = SYM[sym].pay * bet;
     let posMult = 1;
-    if (n === 8)       posMult = 1.8;
-    else if (n === 9)  posMult = 3.0;
-    else if (n === 10) posMult = 5.0;
-    else if (n === 11) posMult = 8.0;
-    else if (n >= 12)  posMult = 12.0;
+    if (n === 9)       posMult = 2.0;
+    else if (n === 10) posMult = 4.0;
+    else if (n === 11) posMult = 7.0;
+    else if (n === 12) posMult = 12.0;
+    else if (n >= 13)  posMult = 20.0;
     wins.push({ symbol: sym, count: n, amount: Math.floor(base * posMult) });
   }
   return wins;
