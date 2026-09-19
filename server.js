@@ -1,6 +1,6 @@
 /* ============================================================
    STORMCROWN — server.js
-   v7 — توازن حقيقي: فوز صغير متكرر + فوز كبير نادر
+   v8 — توازن حقيقي، سلاسل قليلة، دفعات معتدلة
    ============================================================ */
 
 const express = require('express');
@@ -122,20 +122,19 @@ async function initDB() {
 const COLS = 6, ROWS = 5;
 
 /* ============================================================
-   💰 جدول الدفع v7 — متوازن
-   الرموز الصغيرة تدفع معقول، الرموز النادرة تدفع جيد
+   💰 جدول الدفع v8 — متوازن ومضبوط
    ============================================================ */
 const SYM = {
-  zeusFist:  { pay: 3.0  },   // نادر — يدفع جيد
-  crown:     { pay: 1.5  },
-  chalice:   { pay: 1.0  },
-  hourglass: { pay: 0.7  },
-  ring:      { pay: 0.5  },
-  flaming:   { pay: 0.35 },
-  gem_red:   { pay: 0.28 },
-  gem_blue:  { pay: 0.22 },
-  gem_green: { pay: 0.16 },
-  gem_purple:{ pay: 0.10 }    // شائع — دفع صغير
+  zeusFist:  { pay: 2.0  },
+  crown:     { pay: 1.0  },
+  chalice:   { pay: 0.7  },
+  hourglass: { pay: 0.5  },
+  ring:      { pay: 0.35 },
+  flaming:   { pay: 0.24 },
+  gem_red:   { pay: 0.19 },
+  gem_blue:  { pay: 0.15 },
+  gem_green: { pay: 0.11 },
+  gem_purple:{ pay: 0.07 }
 };
 
 const ZEUS_MAIN    = [2, 3, 5, 10, 15, 25];
@@ -143,9 +142,6 @@ const ZEUS_PREMIUM = [10, 15, 25, 50, 75, 100];
 
 function rint(max) { return crypto.randomInt(0, max); }
 
-/* ============================================================
-   🎯 توزيع زيوس
-   ============================================================ */
 function pickZeusValue(pool) {
   const r = rint(1000);
   const isPremium = Array.isArray(pool) && pool[0] >= 10;
@@ -167,23 +163,22 @@ function pickZeusValue(pool) {
 }
 
 /* ============================================================
-   🎯 rSym v7 — توزيع متوازن
-   gem_purple شائع (يدفع صغير) + رموز نادرة تدفع جيد
+   🎯 rSym v8 — gem_purple 10%، رموز متوسطة موزعة
    ============================================================ */
 function rSym(zeusPool) {
   const r = rint(1000);
   if (r < 40)  return { type: 'zeus', v: pickZeusValue(zeusPool) };  // 4%
   if (r < 60)  return { type: 'scatter' };                          // 2%
-  if (r < 200) return { type: 'gem_purple' };                       // 14% شائع
-  if (r < 320) return { type: 'gem_green' };                        // 12%
-  if (r < 430) return { type: 'gem_blue' };                         // 11%
-  if (r < 530) return { type: 'gem_red' };                          // 10%
-  if (r < 620) return { type: 'flaming' };                          // 9%
-  if (r < 710) return { type: 'ring' };                             // 9%
+  if (r < 160) return { type: 'gem_purple' };                       // 10%
+  if (r < 280) return { type: 'gem_green' };                        // 12%
+  if (r < 400) return { type: 'gem_blue' };                         // 12%
+  if (r < 510) return { type: 'gem_red' };                          // 11%
+  if (r < 610) return { type: 'flaming' };                          // 10%
+  if (r < 710) return { type: 'ring' };                             // 10%
   if (r < 800) return { type: 'hourglass' };                        // 9%
-  if (r < 890) return { type: 'chalice' };                          // 9%
-  if (r < 970) return { type: 'crown' };                            // 8%
-  return { type: 'zeusFist' };                                       // 3%
+  if (r < 880) return { type: 'chalice' };                          // 8%
+  if (r < 950) return { type: 'crown' };                            // 7%
+  return { type: 'zeusFist' };                                       // 5%
 }
 
 function genGrid(zeusPool) {
@@ -196,8 +191,7 @@ function genGrid(zeusPool) {
 }
 
 /* ============================================================
-   🎯 chkWins v7 — حد 6 رموز (فوز أكثر تكرارًا)
-   مضاعفات معقولة
+   🎯 chkWins v8 — حد 7 رموز، مضاعفات متوازنة
    ============================================================ */
 function chkWins(g, bet) {
   const c = {};
@@ -208,15 +202,15 @@ function chkWins(g, bet) {
   }
   const wins = [];
   for (const [sym, n] of Object.entries(c)) {
-    if (n < 6) continue;
+    if (n < 7) continue;
     const base = SYM[sym].pay * bet;
     let posMult = 1;
-    if (n === 7)       posMult = 2.0;
-    else if (n === 8)  posMult = 4.0;
-    else if (n === 9)  posMult = 7.0;
-    else if (n === 10) posMult = 12.0;
-    else if (n === 11) posMult = 20.0;
-    else if (n >= 12)  posMult = 35.0;
+    if (n === 8)       posMult = 1.5;
+    else if (n === 9)  posMult = 2.5;
+    else if (n === 10) posMult = 4.0;
+    else if (n === 11) posMult = 6.0;
+    else if (n === 12) posMult = 9.0;
+    else if (n >= 13)  posMult = 12.0;
     wins.push({ symbol: sym, count: n, amount: Math.floor(base * posMult) });
   }
   return wins;
@@ -236,8 +230,12 @@ function cntSc(g) {
   return n;
 }
 
+/* ============================================================
+   🎯 runSpin v8 — سلاسل انفجار = 5 فقط
+   هذا يحدّ من تضاعف الأرباح بشكل جنوني
+   ============================================================ */
 function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
-  const MAX_CHAINS = 8;
+  const MAX_CHAINS = 5;
   const chains = [];
   let grid = genGrid(zeusPool);
   let totalWin = 0;
