@@ -1,6 +1,6 @@
 /* ============================================================
    STORMCROWN — server.js
-   v4 — موزعة نادرة (2%)، رموز عادية بأسعار أفضل
+   v5 — موزعة نادرة (2%) + دفعات v3 المتوازنة
    ============================================================ */
 
 const express = require('express');
@@ -127,19 +127,19 @@ async function initDB() {
 const COLS = 6, ROWS = 5;
 
 /* ============================================================
-   💰 جدول الدفع — مُحسَّن: أعلى من v3 بقليل
+   💰 جدول الدفع v3 — متوازن
    ============================================================ */
 const SYM = {
-  zeusFist:  { pay: 4.5  },
-  crown:     { pay: 2.0  },
-  chalice:   { pay: 1.3  },
-  hourglass: { pay: 0.9  },
-  ring:      { pay: 0.55 },
-  flaming:   { pay: 0.30 },
-  gem_red:   { pay: 0.24 },
-  gem_blue:  { pay: 0.18 },
-  gem_green: { pay: 0.13 },
-  gem_purple:{ pay: 0.09 }
+  zeusFist:  { pay: 3.5  },
+  crown:     { pay: 1.5  },
+  chalice:   { pay: 1.0  },
+  hourglass: { pay: 0.7  },
+  ring:      { pay: 0.4  },
+  flaming:   { pay: 0.22 },
+  gem_red:   { pay: 0.18 },
+  gem_blue:  { pay: 0.14 },
+  gem_green: { pay: 0.10 },
+  gem_purple:{ pay: 0.07 }
 };
 
 const ZEUS_MAIN    = [2, 3, 5, 10, 15, 25];
@@ -148,7 +148,7 @@ const ZEUS_PREMIUM = [10, 15, 25, 50, 75, 100];
 function rint(max) { return crypto.randomInt(0, max); }
 
 /* ============================================================
-   🎯 توزيع زيوس — نفس v3 (متوسط)
+   🎯 توزيع زيوس — v3
    ============================================================ */
 function pickZeusValue(pool) {
   const r = rint(1000);
@@ -171,7 +171,7 @@ function pickZeusValue(pool) {
 }
 
 /* ============================================================
-   🎯 rSym — الموزعة 2% (نادرة)، زيوس 4%
+   🎯 rSym — الموزعة 2%، زيوس 4%
    ============================================================ */
 function rSym(zeusPool) {
   const r = rint(1000);
@@ -200,7 +200,7 @@ function genGrid(zeusPool) {
 }
 
 /* ============================================================
-   🎯 chkWins — الحد الأدنى 6 رموز (أرباح صغيرة متكررة)
+   🎯 chkWins — v3: 7 رموز حد أدنى، مضاعفات أقل
    ============================================================ */
 function chkWins(g, bet) {
   const c = {};
@@ -211,15 +211,14 @@ function chkWins(g, bet) {
   }
   const wins = [];
   for (const [sym, n] of Object.entries(c)) {
-    if (n < 6) continue;
+    if (n < 7) continue;
     const base = SYM[sym].pay * bet;
     let posMult = 1;
-    if (n === 7)       posMult = 1.8;
-    else if (n === 8)  posMult = 3.0;
-    else if (n === 9)  posMult = 5.0;
-    else if (n === 10) posMult = 8.0;
-    else if (n === 11) posMult = 12.0;
-    else if (n >= 12)  posMult = 20.0;
+    if (n === 8)       posMult = 1.8;
+    else if (n === 9)  posMult = 3.0;
+    else if (n === 10) posMult = 5.0;
+    else if (n === 11) posMult = 8.0;
+    else if (n >= 12)  posMult = 12.0;
     wins.push({ symbol: sym, count: n, amount: Math.floor(base * posMult) });
   }
   return wins;
