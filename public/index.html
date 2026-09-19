@@ -12,8 +12,6 @@ html,body{height:100%;overflow:hidden;background:#05000f;color:#fff;
   font-family:'Amiri',serif;user-select:none;touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 canvas{display:block}
-
-/* ===== AUTH ===== */
 #auth{position:fixed;inset:0;z-index:2000;
   background:radial-gradient(ellipse at 50% 100%,#3a0505 0%,#0a0014 45%,#000 100%);
   overflow:hidden;display:flex;align-items:center;justify-content:center;padding:16px}
@@ -50,8 +48,6 @@ canvas{display:block}
   border:1px solid #6b0a0a;border-radius:6px;color:#ff8080;
   font-size:12px;text-align:center;display:none}
 .authErr.on{display:block}
-
-/* ===== GAME ===== */
 #game{position:fixed;inset:0;opacity:0;visibility:hidden;transition:opacity 1s;
   z-index:5;display:none;flex-direction:column;overflow:hidden;
   width:100vw;height:100vh;height:100dvh;
@@ -61,7 +57,6 @@ canvas{display:block}
     radial-gradient(ellipse at 50% 50%,#1a0533 0%,#0a0218 60%,#05000a 100%)}
 #game.on{opacity:1;visibility:visible;display:flex}
 #flash{position:fixed;inset:0;z-index:30;background:#fff;opacity:0;pointer-events:none}
-
 #topBtns{position:fixed;top:6px;left:0;right:0;z-index:60;height:80px;
   display:none;pointer-events:none}
 #topBtns.on{display:block}
@@ -75,10 +70,8 @@ canvas{display:block}
 #walletBtn{top:0;left:48px;background:rgba(30,90,60,.95);border-color:#2ecc71;color:#2ecc71}
 #agentBadge{top:42px;left:6px;background:rgba(60,30,110,.95);border-color:#9b59ff;color:#c89bff}
 #logoutTopBtn{top:42px;left:48px;background:rgba(139,0,0,.95);border-color:#ff2a00;color:#ff8080}
-
 #mainArea{display:flex;flex-direction:column;width:100%;height:100%;
   padding:46px 4px 4px 4px;gap:4px;overflow:hidden}
-
 #hud{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;
   width:100%;flex-shrink:0}
 .hudBox{background:linear-gradient(180deg,rgba(60,30,110,.85),rgba(15,5,40,.9));
@@ -86,10 +79,8 @@ canvas{display:block}
   font-size:9px;color:#c8b0e8;white-space:nowrap}
 .hudBox b{color:#ffd24a;font-family:monospace;font-size:11px;margin-right:2px}
 .hudBox.hot{border-color:#ff8c00;box-shadow:0 0 15px #ff8c00}
-
 #playRow{display:flex;gap:4px;flex:1;min-height:0;width:100%;
   align-items:center;justify-content:center;overflow:hidden}
-
 #sideCol{display:flex;flex-direction:column;gap:4px;width:78px;
   height:100%;max-height:100%;overflow:hidden;flex-shrink:0}
 #paytable,#historyPanel{background:linear-gradient(180deg,rgba(40,15,80,.9),rgba(10,3,25,.95));
@@ -113,7 +104,6 @@ canvas{display:block}
 .histRow.zero{opacity:.6;border-left-color:#666}
 .histRow .hs{color:#888}.histRow .hb{color:#ffd24a}.histRow .hn{font-weight:bold}
 .histRow.win .hn{color:#2ecc71}.histRow.loss .hn{color:#ff6a6a}
-
 #frameWrap{flex:1;display:flex;align-items:center;justify-content:center;
   min-width:0;min-height:0;padding:0;overflow:hidden}
 #frame{position:relative;padding:4px;border-radius:10px;
@@ -128,7 +118,6 @@ canvas{display:block}
 #zeusBackdrop{position:absolute;top:4px;left:4px;border-radius:5px;
   pointer-events:none;z-index:1;
   max-width:100%;max-height:100%;width:auto;height:auto}
-
 #ctrl{display:flex;gap:3px;align-items:center;justify-content:center;
   flex-shrink:0;flex-wrap:wrap;width:100%;padding:2px 0}
 .cbtn{padding:5px 8px;font-family:'Amiri',serif;font-size:10px;font-weight:700;
@@ -161,12 +150,10 @@ canvas{display:block}
   border:2px solid #2ecc71;color:#d0ffe0}
 #buyPremium{background:linear-gradient(180deg,#6a1a5a,#3a0540);
   border:2px solid #ffd24a;color:#ffe8a0}
-
 #log{height:26px;overflow-y:auto;width:100%;font-size:8px;
   background:rgba(5,0,20,.85);padding:2px 6px;border-radius:4px;
   border:1px solid rgba(106,74,154,.35);color:#a090c0;flex-shrink:0}
 #log b{color:#ffd24a}
-
 .big{position:fixed;top:50%;left:50%;z-index:40;pointer-events:none;
   transform:translate(-50%,-50%) scale(.3);opacity:0;text-align:center;
   font-family:'Cinzel Decorative',serif;font-size:clamp(40px,9vw,90px);font-weight:900;
@@ -189,8 +176,6 @@ canvas{display:block}
   20%{transform:translate(-50%,-50%) scale(1.3);opacity:1}
   40%{transform:translate(-50%,-50%) scale(1)}
   100%{transform:translate(-50%,-180%) scale(.9);opacity:0}}
-
-/* ===== MODALS ===== */
 .modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.9);
   display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);
   padding:12px;overflow-y:auto}
@@ -202,7 +187,6 @@ canvas{display:block}
   text-shadow:0 0 15px #ff8c00}
 .closeX{position:absolute;top:6px;left:6px;background:none;border:none;
   color:#ff4a4a;font-size:20px;cursor:pointer;padding:4px 8px}
-
 .walletTabs{display:flex;gap:5px;margin-bottom:12px;justify-content:center;flex-wrap:wrap}
 .walletTab{padding:6px 12px;background:linear-gradient(180deg,#1a3a2a,#0a1a10);
   border:1px solid #2ecc71;border-radius:6px;color:#c8ffd8;
@@ -226,7 +210,6 @@ canvas{display:block}
 .walletInfo{background:rgba(46,204,113,.1);border:1px solid #2ecc71;border-radius:6px;
   padding:7px;margin-bottom:10px;font-size:11px;color:#c8ffd8;line-height:1.5}
 .walletInfo b{color:#2ecc71;font-family:monospace;direction:ltr;display:inline-block}
-
 .companyWallet{background:linear-gradient(180deg,#1a3a2a,#0a1a10);
   border:2px dashed #2ecc71;border-radius:8px;padding:12px 10px;margin:8px 0;
   cursor:pointer;text-align:center;transition:all .2s;user-select:none}
@@ -237,14 +220,12 @@ canvas{display:block}
   direction:ltr;word-break:break-all;font-weight:bold;line-height:1.4}
 .companyWallet .cw-hint{font-size:10px;color:#7aab8a;margin-top:6px;
   direction:rtl;font-family:'Amiri',serif}
-
 .historyItem{display:flex;justify-content:space-between;padding:6px 8px;
   background:rgba(46,204,113,.08);border-radius:5px;margin-bottom:3px;
   font-size:10px;font-family:monospace;color:#c8ffd8;direction:ltr;
   border-left:3px solid #2ecc71}
 .historyItem.pending{border-left-color:#ffd24a}
 .historyItem.rejected{border-left-color:#ff4a4a;opacity:.6}
-
 .profileRow{display:flex;justify-content:space-between;padding:6px 9px;
   margin-bottom:5px;border-radius:5px;background:rgba(106,74,154,.15);
   border-right:3px solid #ffd24a;font-size:11px}
@@ -257,7 +238,6 @@ canvas{display:block}
   cursor:pointer;direction:ltr;word-break:break-all}
 .profileUID small{display:block;font-size:10px;color:#4a2000;margin-bottom:3px;
   font-weight:normal;direction:rtl}
-
 .agentBox{background:rgba(155,89,255,.1);border:1px solid #9b59ff;border-radius:6px;
   padding:9px;margin-bottom:10px;font-size:11px;color:#e0d0ff;line-height:1.6;text-align:right}
 .agentBox b{color:#c89bff}
@@ -269,14 +249,12 @@ canvas{display:block}
   padding:7px;text-align:center;font-size:10px}
 .agentStat .lbl{color:#888;margin-bottom:3px}
 .agentStat .val{color:#c89bff;font-weight:bold;font-size:12px}
-
 #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);
   background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;padding:10px 18px;
   border-radius:8px;font-weight:bold;z-index:9999;transition:transform .3s;
   font-size:12px;max-width:90vw;text-align:center}
 #toast.on{transform:translateX(-50%) translateY(0)}
 #toast.err{background:linear-gradient(180deg,#ff4a4a,#8b0000)}
-
 #zeusBubble{position:fixed;bottom:130px;left:50%;
   transform:translate(-50%,30px) scale(.8);opacity:0;
   background:linear-gradient(180deg,rgba(40,15,80,.95),rgba(15,3,35,.98));
@@ -284,7 +262,6 @@ canvas{display:block}
   font-family:'Amiri',serif;font-size:13px;color:#fff;
   box-shadow:0 0 30px #ff8c00;transition:all .4s;
   pointer-events:none;z-index:35;font-weight:700;max-width:85vw;text-align:center}
-
 #bwOverlay{position:fixed;inset:0;z-index:200;display:none;
   align-items:center;justify-content:center;padding:12px;pointer-events:none}
 #bwOverlay.show{display:flex;pointer-events:auto;animation:iFade .3s ease}
@@ -311,8 +288,6 @@ canvas{display:block}
   font-weight:700;color:#fff;background:linear-gradient(180deg,#ff8c00,#c94000);
   border:2px solid #ffd24a;border-radius:6px}
 .bw-tap{margin-top:10px;font-size:10px;color:#a090d0}
-
-/* ===== MOBILE ===== */
 @media (max-width:640px){
   #mainArea{padding:44px 3px 3px 3px;gap:3px}
   #sideCol{width:64px;gap:3px}
@@ -392,7 +367,6 @@ canvas{display:block}
 
 <div id="game">
   <div id="flash"></div>
-  <canvas id="fx"></canvas>
   <div id="fsBanner">⚡ جولات مجانية ⚡</div>
   <div class="big" id="bigTxt"></div>
   <div id="zeusBubble">مرحباً بك في العاصفة</div>
@@ -412,7 +386,6 @@ canvas{display:block}
       <div class="hudBox" id="fsHud">مجاني <b id="fs">0</b></div>
       <div class="hudBox" id="multHud">مضاعف <b id="mult">0×</b></div>
     </div>
-
     <div id="playRow">
       <div id="sideCol">
         <div id="paytable"><h3>الأرباح</h3><div id="ptRows"></div></div>
@@ -425,7 +398,6 @@ canvas{display:block}
         </div>
       </div>
     </div>
-
     <div id="ctrl">
       <button class="cbtn" id="betDown">− رهان</button>
       <div id="betBox"><small>الرهان</small><b id="betVal">100</b></div>
@@ -434,7 +406,6 @@ canvas{display:block}
       <button class="bonusBtn" id="buyNormal">بونص عادي<small>75×</small><span class="price" id="priceNormal">7500</span></button>
       <button class="bonusBtn" id="buyPremium">بونص مميز<small>300×</small><span class="price" id="pricePremium">30000</span></button>
     </div>
-
     <div id="log"></div>
   </div>
 </div>
@@ -628,20 +599,6 @@ const Aud=(()=>{
       });
     }catch(e){}
   }
-  function bigWin(){
-    if(!on||!ready)return; resume();
-    try{
-      [130.81,164.81,196,261.63,329.63,392,523.25].forEach((f,i)=>{
-        const o=c.createOscillator();o.type='sawtooth';o.frequency.value=f;
-        const g=c.createGain();const t=c.currentTime+i*.08;
-        g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.09,t+.08);
-        g.gain.exponentialRampToValueAtTime(.001,t+1.8);
-        const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2800;
-        o.connect(lp);lp.connect(g);send(g,1,.5);o.start(t);o.stop(t+1.8);
-      });
-      thunder(1.4);
-    }catch(e){}
-  }
   function tumble(){
     if(!on||!ready)return; resume();
     try{
@@ -721,7 +678,7 @@ const Aud=(()=>{
     if(!on)droneOff(); else { init(); resume(); droneOn(); }
     return on;
   }
-  return {thunder,reelStop,reelSpin,mult,win,bigWin,tumble,buy,strike,
+  return {thunder,reelStop,reelSpin,mult,win,tumble,buy,strike,
           droneOn,droneOff,init,resume,toggle,get on(){return on},get ready(){return ready}};
 })();
 
@@ -854,56 +811,29 @@ const COLS=6,ROWS=5,CELL=115,PADX=12,PADY=12;
 const rcv=$('reels');
 const rcx=rcv.getContext('2d');
 
-/* ============================================================
-   💰 جدول الدفع — مضاعفات الرهان (مثل Gates of Olympus)
-   ============================================================ */
+/* جدول دفع للعرض فقط — السيرفر هو من يحسب الفوز */
 const SYM = {
-  zeusFist: { pay: 5.0 },
-  crown:    { pay: 2.0 },
-  chalice:  { pay: 1.5 },
-  hourglass:{ pay: 1.0 },
-  ring:     { pay: 0.5 },
-  flaming:  { pay: 0.30 },
-  gem_red:  { pay: 0.25 },
-  gem_blue: { pay: 0.20 },
-  gem_green:{ pay: 0.15 },
+  zeusFist:  { pay: 5.0  },
+  crown:     { pay: 2.0  },
+  chalice:   { pay: 1.5  },
+  hourglass: { pay: 1.0  },
+  ring:      { pay: 0.5  },
+  flaming:   { pay: 0.30 },
+  gem_red:   { pay: 0.25 },
+  gem_blue:  { pay: 0.20 },
+  gem_green: { pay: 0.15 },
   gem_purple:{ pay: 0.10 }
 };
 
-const ZEUS_NORMAL=[1,2,3,4,5,6,8,10];
-const ZEUS_PREMIUM=[20,25,30,40,50,75,100,150,250,500];
-const ZEUS_MAIN=[2,3,5,10,15,25,50,100,250,500];
 const BETS=[20,50,100,200,500,1000,2000,5000,10000];
 const PRICE_NORMAL_MULT=75;
 const PRICE_PREMIUM_MULT=300;
+const ZEUS_MAIN=[2,3,5,10,15,25,50,100,250,500];
 
 const S={bal:0,bi:2,bet:100,grid:[],spin:false,fs:0,mc:0,lw:0,
-  laps:0,best:0,wagered:0,won:0,fsType:'—',fsZeus:ZEUS_MAIN,fire:false};
+  laps:0,best:0,wagered:0,won:0,fsType:'—',fire:false};
 
-let activeBonus=null;
-
-/* ============ نظام House مع RTP من الأدمن ============ */
-const House = {
-  spins: 0,
-  totalBet: 0,
-  totalWon: 0,
-  adminRTP: null,
-  getRTP(){
-    if(this.adminRTP !== null) return this.adminRTP / 100;
-    const rate = 0.75 - Math.floor(this.spins / 2) * 0.03;
-    return Math.max(0.10, rate);
-  },
-  getBudget(){ return this.totalBet * this.getRTP() + 50000; },
-  getRemaining(){ return Math.max(0, this.getBudget() - this.totalWon); },
-  capWin(a){
-    const r = this.getRemaining();
-    if(r <= 0) return 0;
-    return Math.min(a, r);
-  },
-  register(b, w){ this.spins++; this.totalBet += b; this.totalWon += w; }
-};
-
-/* ============ ExplosionFX — انفجار لطيف ============ */
+/* ============ ExplosionFX ============ */
 const ExplosionFX = (() => {
   const cvs = document.createElement('canvas');
   cvs.id = 'boomFX';
@@ -939,9 +869,7 @@ const ExplosionFX = (() => {
     for(let i = particles.length - 1; i >= 0; i--){
       const p = particles[i];
       p.x += p.vx; p.y += p.vy;
-      p.vy += 0.15;
-      p.vx *= 0.95;
-      p.life -= p.decay;
+      p.vy += 0.15; p.vx *= 0.95; p.life -= p.decay;
       if(p.life <= 0) particles.splice(i, 1);
     }
   }
@@ -1103,6 +1031,25 @@ const RS={
   bounce:new Array(COLS).fill(0),bounceV:new Array(COLS).fill(0)
 };
 
+/* rSym يستخدم للعرض أثناء الدوران فقط — النتيجة النهائية من السيرفر */
+function rSymVisual(){
+  const r=Math.random()*100;
+  if(r<15)return{type:'zeus',v:rnd(ZEUS_MAIN)};
+  if(r<20)return{type:'scatter'};
+  if(r<30)return{type:'gem_purple'};
+  if(r<40)return{type:'gem_green'};
+  if(r<49)return{type:'gem_blue'};
+  if(r<58)return{type:'gem_red'};
+  if(r<66)return{type:'flaming'};
+  if(r<73)return{type:'ring'};
+  if(r<79)return{type:'hourglass'};
+  if(r<84)return{type:'chalice'};
+  if(r<88)return{type:'crown'};
+  if(r<90)return{type:'zeusFist'};
+  return{type:'gem_purple'};
+}
+function stripVisual(){const a=[];for(let i=0;i<ROWS+3;i++)a.push(rSymVisual());return a}
+
 let lt=0;
 function loop(t){
   const dt=Math.min(50,t-lt);lt=t;
@@ -1110,7 +1057,7 @@ function loop(t){
     if(!RS.stop[x]){
       RS.off[x]+=RS.spd[x]*dt/16;
       while(RS.off[x]>=CELL){
-        RS.off[x]-=CELL;RS.str[x].unshift(rSym());RS.str[x].pop();
+        RS.off[x]-=CELL;RS.str[x].unshift(rSymVisual());RS.str[x].pop();
       }
     }else if(Math.abs(RS.bounce[x])>0.1||Math.abs(RS.bounceV[x])>0.1){
       RS.bounceV[x]+=-RS.bounce[x]*.35;
@@ -1252,7 +1199,7 @@ function paintSymbol(g,type,cx,cy,size){
   g.restore();
 }
 
-function drawSymbolAt(x,y,sym,t,fire){
+function drawSymbolAt(x,y,sym,t,fire,winHighlight){
   if(!sym)return;
   const sz=CELL-14,ccx=x+CELL/2,ccy=y+CELL/2;
   const iconSize=sz*.95;
@@ -1263,6 +1210,16 @@ function drawSymbolAt(x,y,sym,t,fire){
     rg.addColorStop(0,fire?'rgba(255,140,0,.8)':sym.type==='zeus'?'rgba(255,210,74,.7)':'rgba(255,255,255,.5)');
     rg.addColorStop(1,'rgba(0,0,0,0)');
     rcx.fillStyle=rg;rcx.fillRect(ccx-sz,ccy-sz,sz*2,sz*2);
+    rcx.restore();
+  }
+  if(winHighlight){
+    rcx.save();
+    rcx.globalAlpha=.55+Math.sin(t/80)*.35;
+    rcx.strokeStyle='#2ecc71';
+    rcx.lineWidth=4;
+    rcx.shadowColor='#2ecc71';
+    rcx.shadowBlur=18;
+    rcx.strokeRect(x+6,y+6,CELL-12,CELL-12);
     rcx.restore();
   }
   paintSymbol(rcx,sym.type,ccx,ccy,iconSize);
@@ -1280,6 +1237,9 @@ function drawSymbolAt(x,y,sym,t,fire){
     rcx.restore();
   }
 }
+
+/* شبكة الفوز الحالية لعرض الإطار الأخضر */
+let currentWinSymbols = [];
 
 function draw(t){
   const W=rcv.width,H=rcv.height;
@@ -1309,21 +1269,24 @@ function draw(t){
     rcx.save();rcx.beginPath();rcx.rect(px,PADY,CELL,ROWS*CELL);rcx.clip();
     if(RS.stop[x]){
       const b=RS.bounce[x];
-      for(let y=0;y<ROWS;y++)if(S.grid[x]&&S.grid[x][y])
-        drawSymbolAt(px,PADY+y*CELL+b,S.grid[x][y],t,S.fire);
+      for(let y=0;y<ROWS;y++)if(S.grid[x]&&S.grid[x][y]){
+        const sym=S.grid[x][y];
+        const hl = currentWinSymbols.includes(sym.type);
+        drawSymbolAt(px,PADY+y*CELL+b,sym,t,S.fire,hl);
+      }
     }else{
       const st=RS.str[x]||[],off=RS.off[x]%CELL;
       rcx.save();rcx.globalAlpha=.2;
       for(let i=0;i<st.length;i++){
         const yy=PADY+i*CELL-off;
         if(yy>PADY-CELL&&yy<PADY+ROWS*CELL+CELL)
-          drawSymbolAt(px,yy,st[i],t,S.fire);
+          drawSymbolAt(px,yy,st[i],t,S.fire,false);
       }
       rcx.restore();
       for(let i=0;i<st.length;i++){
         const yy=PADY+i*CELL-off+14;
         if(yy>PADY-CELL&&yy<PADY+ROWS*CELL+CELL)
-          drawSymbolAt(px,yy,st[i],t,S.fire);
+          drawSymbolAt(px,yy,st[i],t,S.fire,false);
       }
     }
     rcx.restore();
@@ -1336,61 +1299,10 @@ function draw(t){
   }
 }
 
-/* ============ Symbol Generation ============ */
-function rSym(){
-  const r = Math.random() * 100;
-  if(r < 15){
-    const pool = S.fsZeus && S.fsZeus.length ? S.fsZeus : ZEUS_MAIN;
-    return { type:'zeus', v: rnd(pool) };
-  }
-  if(r < 20) return { type:'scatter' };
-  if(r < 30) return { type:'gem_purple' };
-  if(r < 40) return { type:'gem_green' };
-  if(r < 49) return { type:'gem_blue' };
-  if(r < 58) return { type:'gem_red' };
-  if(r < 66) return { type:'flaming' };
-  if(r < 73) return { type:'ring' };
-  if(r < 79) return { type:'hourglass' };
-  if(r < 84) return { type:'chalice' };
-  if(r < 88) return { type:'crown' };
-  if(r < 90) return { type:'zeusFist' };
-  return { type:'gem_purple' };
-}
-function strip(){const a=[];for(let i=0;i<ROWS+3;i++)a.push(rSym());return a}
-
-/* ============ Win Logic ============ */
-function chkWins(g){
-  const c={};
-  for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
-    const s=g[x]&&g[x][y];
-    if(!s||s.type==='zeus'||s.type==='scatter')continue;
-    c[s.type]=(c[s.type]||0)+1;
-  }
-  const w=[];
-  for(const [sym, n] of Object.entries(c)){
-    if(n < 6) continue;
-    const base = SYM[sym].pay * S.bet;
-    let posMult;
-    if(n === 6)       posMult = 1.0;
-    else if(n === 7)  posMult = 1.8;
-    else if(n === 8)  posMult = 3.0;
-    else if(n === 9)  posMult = 5.0;
-    else if(n === 10) posMult = 8.0;
-    else if(n === 11) posMult = 12.0;
-    else              posMult = 20.0;
-    w.push({ symbol: sym, count: n, amount: base * posMult });
-  }
-  return w;
-}
-function zeusSum(g){let s=0;for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++)
-  if(g[x][y]&&g[x][y].type==='zeus')s+=g[x][y].v;return s}
-function cntSc(g){let n=0;for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++)
-  if(g[x][y]&&g[x][y].type==='scatter')n++;return n}
-
 /* ============ Animations ============ */
-async function animSpin(final){
+async function animSpinToGrid(finalGrid){
   for(let x=0;x<COLS;x++){
-    RS.str[x]=strip();RS.off[x]=0;RS.stop[x]=false;
+    RS.str[x]=stripVisual();RS.off[x]=0;RS.stop[x]=false;
     RS.spd[x]=40+Math.random()*20;
     RS.bounce[x]=0;RS.bounceV[x]=0;
     Aud.reelSpin(x);
@@ -1399,7 +1311,7 @@ async function animSpin(final){
   for(let x=0;x<COLS;x++){
     await sl(dl[x]-(x>0?dl[x-1]:0));
     RS.stop[x]=true;RS.off[x]=0;
-    for(let y=0;y<ROWS;y++)S.grid[x][y]=final[x][y];
+    for(let y=0;y<ROWS;y++) S.grid[x][y]=finalGrid[x][y];
     RS.bounce[x]=-14;RS.bounceV[x]=-3;
     Aud.reelStop(x);
     shake(.25,140);
@@ -1407,34 +1319,45 @@ async function animSpin(final){
   await sl(150);
 }
 
-async function animTumble(wt){
+/* tumble: نحذف الرموز الرابحة من الشبكة الحالية ونسقط لملء الفراغات حسب الشبكة القادمة من السيرفر */
+async function animTumbleTo(nextGrid, winningSymbols){
   const boomPoints = [];
-  for(let x = 0; x < COLS; x++) for(let y = 0; y < ROWS; y++){
-    if(S.grid[x][y] && wt.includes(S.grid[x][y].type)){
-      boomPoints.push({x, y});
-      S.grid[x][y] = null;
+  for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
+    if(S.grid[x][y] && winningSymbols.includes(S.grid[x][y].type)){
+      boomPoints.push({x,y});
+      S.grid[x][y]=null;
     }
   }
-  if(boomPoints.length > 0){
-    const rect = rcv.getBoundingClientRect();
-    const scaleX = rect.width / rcv.width;
-    const scaleY = rect.height / rcv.height;
-    boomPoints.forEach((pt, idx) => {
-      setTimeout(() => {
-        const px = rect.left + (PADX + pt.x * CELL + CELL/2) * scaleX;
-        const py = rect.top + (PADY + pt.y * CELL + CELL/2) * scaleY;
-        ExplosionFX.boom(px, py);
-      }, idx * 40);
+  if(boomPoints.length>0){
+    const rect=rcv.getBoundingClientRect();
+    const scaleX=rect.width/rcv.width, scaleY=rect.height/rcv.height;
+    boomPoints.forEach((pt,idx)=>{
+      setTimeout(()=>{
+        const px=rect.left+(PADX+pt.x*CELL+CELL/2)*scaleX;
+        const py=rect.top+(PADY+pt.y*CELL+CELL/2)*scaleY;
+        ExplosionFX.boom(px,py);
+      }, idx*35);
     });
   }
-  shake(0.5, 150);
+  shake(0.5,150);
   Aud.thunder(0.6);
   await sl(260);
-  for(let x = 0; x < COLS; x++){
-    const k = [];
-    for(let y = ROWS - 1; y >= 0; y--) if(S.grid[x][y]) k.push(S.grid[x][y]);
-    while(k.length < ROWS) k.push(rSym());
-    S.grid[x] = k.reverse();
+
+  for(let x=0;x<COLS;x++){
+    // نبني العمود من الشبكة القادمة
+    const targetCol = nextGrid[x];
+    const kept = [];
+    for(let y=ROWS-1;y>=0;y--) if(S.grid[x][y]) kept.push(S.grid[x][y]);
+    // نكمل من الأعلى برموز الشبكة القادمة
+    let ti = 0;
+    while(kept.length<ROWS){
+      // ابحث في الشبكة القادمة عن رمز يستحق أن يسقط
+      // الأسهل: نستخدم رموز الشبكة القادمة من الأعلى
+      if(ti < ROWS) { kept.push(targetCol[ti]); ti++; }
+      else kept.push(rSymVisual());
+    }
+    // لكن هذا قد لا يطابق تمامًا — الأفضل نستخدم الشبكة القادمة كاملة
+    S.grid[x] = targetCol.slice();
     RS.bounce[x] = -10;
     RS.bounceV[x] = -2;
     Aud.reelStop(x);
@@ -1479,123 +1402,161 @@ function multPop(v,x,y){
   setTimeout(()=>el.remove(),1400);
 }
 
-/* ============ Spin ============ */
+/* ============ Spin (منطق السيرفر) ============ */
 async function spin(){
   if(S.spin)return;
-  if(S.fs<=0 && S.bal<S.bet){ toast('رصيد غير كافٍ',true); return; }
+  const isFree = S.fs > 0;
+  if(!isFree && S.bal < S.bet){ toast('رصيد غير كافٍ',true); return; }
   Aud.resume();
   S.spin=true;
   const wheel=$('spinWheel');
   wheel.classList.add('spinning','disabled');
   $('buyNormal').disabled=true;$('buyPremium').disabled=true;
-  const free=S.fs>0;
   const currentBet=S.bet;
-  if(!free){
-    S.bal-=currentBet;S.wagered+=currentBet;
-    House.register(currentBet,0);
-  } else S.fs--;
-  upd();
-  const final=[];
-  for(let x=0;x<COLS;x++){
-    final[x]=[];
-    for(let y=0;y<ROWS;y++)final[x][y]=rSym();
-  }
-  await animSpin(final);
-  let cw=0,chain=0;
-  while(chain<30){
-    const wins=chkWins(S.grid);
-    const zs=zeusSum(S.grid);
-    if(zs>0){
-      Aud.mult(zs);Aud.strike();
-      ZeusChar.setState('angry',1500);
-      const rect=rcv.getBoundingClientRect();
-      for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
-        const s=S.grid[x][y];
-        if(s&&s.type==='zeus'){
-          const px=rect.left+PADX+x*CELL+CELL/2;
-          const py=rect.top+PADY+y*CELL+CELL/2;
-          multPop(s.v+'×',px,py);
-        }
-      }
-    }
-    if(wins.length===0)break;
-    chain++;
-    let rw=wins.reduce((a,w)=>a+w.amount,0);
-    let am=zs;
-    if(free){S.mc+=zs;am=S.mc;$('multHud').classList.add('hot')}
-    if(am>0)rw*=am;
-    if(activeBonus)rw=capBonusWin(rw);
-    else rw=House.capWin(rw);
-    if(rw<=0){cw+=0;break;}
-    cw+=rw;
-    Aud.win(1+chain*.08);
-    if(rw>=500)Aud.thunder(.9);
-    flash(180,.35+Math.min(rw/2500,.4));
-    shake(.9+Math.min(rw/1200,1.5),300);
-    const mt=am>1?' × '+am+'×':'';
-    log('سلسلة '+chain+': '+rw.toFixed(0)+' ل.س'+mt);
-    if(rw>=500)ZeusChar.setState('angry',2500);
-    else if(rw>=150)ZeusChar.setState('happy',2000);
-    await sl(450);Aud.tumble();
-    const wt=[...new Set(wins.map(w=>w.symbol))];
-    await animTumble(wt);
-  }
-  if(!free)House.totalWon+=cw;
-  const sc=cntSc(S.grid);
-  if(sc>=4 && S.fs===0 && !activeBonus){
-    S.fs=15;S.mc=0;S.fsType='عادي';
-    S.fsZeus=ZEUS_NORMAL;
-    activeBonus=rollBonusOutcome('normal',0);
-    activeBonus.target=500+Math.random()*1000;
-    log('⚡ '+sc+' موزعة — 15 جولة مجانية');
-    flash(700,1);shake(2.5,700);
-    fireOn(false);
-    ZeusChar.setState('angry',3000);
-    setTimeout(()=>showBigWinOverlay(cw,15,'fs'),500);
-    await sl(2500);
-  }
-  /* الحد الأقصى للربح */
-  let maxMult = 50;
-  if(currentBet >= 200) maxMult = 30;
-  if(currentBet >= 2000) maxMult = 20;
-  const maxWinPerSpin = currentBet * maxMult;
-  if(cw > maxWinPerSpin){
-    log('⚡ تم تحديد الربح الأقصى: ' + maxWinPerSpin.toFixed(0) + ' ل.س');
-    cw = maxWinPerSpin;
-  }
-  S.bal+=cw;S.lw=cw;S.won+=cw;
-  if(cw>S.best)S.best=cw;
-  const token = localStorage.getItem('sc_token');
-  if(token){
-    api('/api/spin', {
+
+  try {
+    const res = await api('/api/spin', {
       method:'POST',
-      body: JSON.stringify({ bet: currentBet, won: cw })
-    }).then(r => {
-      if(r.success) S.bal = r.balance;
-      upd();
-    }).catch(e => console.error(e));
-  }
-  upd();
-  addHistory(currentBet, cw, S.mc);
-  const tier=getWinTier(cw);
-  if(tier){
-    setTimeout(()=>showBigWinOverlay(cw,0,tier),400);
-    await sl(2500);
-  }
-  if(cw===0){
-    log('— لا فوز —');
-    ZeusChar.setState('sad',2000);
-  } else {
-    log('✅ إجمالي: '+cw.toFixed(0)+' ل.س');
-  }
-  S.spin=false;
-  wheel.classList.remove('spinning','disabled');
-  $('buyNormal').disabled=S.fs>0;$('buyPremium').disabled=S.fs>0;
-  if(S.fs>0){
-    if(S.fs===1)fireOff();
-    setTimeout(spin,700);
+      body: JSON.stringify({ bet: currentBet, freeSpin: isFree })
+    });
+
+    if(isFree) S.fs--;
+
+    const chains = res.chains || [];
+    const finalGrid = res.finalGrid;
+    const totalWin = res.totalWin || 0;
+    const scatterCount = res.scatterCount || 0;
+
+    /* السيرفر أعاد الرصيد الجديد */
+    S.bal = res.balance;
+
+    /* الرصيد يظهر مباشرة */
+    upd();
+
+    /* اختيار الشبكة الأولى للعرض */
+    const firstGrid = chains.length > 0 ? chains[0].grid : finalGrid;
+
+    /* دوران البكرات وإظهار الشبكة الأولى */
+    await animSpinToGrid(firstGrid);
+    S.grid = firstGrid;
+
+    let chainTotal = 0;
+    let cumulativeMult = 0;
+
+    /* معالجة السلاسل */
+    for(let i=0;i<chains.length;i++){
+      const chain = chains[i];
+
+      /* مضاعفات زيوس */
+      if(chain.zeusSum > 0){
+        Aud.mult(chain.zeusSum);Aud.strike();
+        ZeusChar.setState('angry',1500);
+        const rect=rcv.getBoundingClientRect();
+        for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
+          const s=S.grid[x][y];
+          if(s&&s.type==='zeus'){
+            const px=rect.left+PADX+x*CELL+CELL/2;
+            const py=rect.top+PADY+y*CELL+CELL/2;
+            multPop(s.v+'×',px,py);
+          }
+        }
+        await sl(400);
+      }
+
+      /* إبراز الرموز الرابحة */
+      currentWinSymbols = chain.wins.map(w=>w.symbol);
+      const chainWin = chain.winAmount;
+      chainTotal += chainWin;
+      cumulativeMult = chain.cumulativeMult || 0;
+      S.mc = cumulativeMult;
+
+      if(isFree && cumulativeMult > 0) $('multHud').classList.add('hot');
+
+      Aud.win(1 + i*0.08);
+      if(chainWin >= 500) Aud.thunder(.9);
+      flash(180, .35 + Math.min(chainWin/2500, .4));
+      shake(.9 + Math.min(chainWin/1200, 1.5), 300);
+
+      const mt = chain.multiplier > 1 ? ' × '+chain.multiplier+'×' : '';
+      log('سلسلة '+(i+1)+': '+Math.floor(chainWin)+' ل.س'+mt);
+      if(chainWin >= 500) ZeusChar.setState('angry',2500);
+      else if(chainWin >= 150) ZeusChar.setState('happy',2000);
+
+      await sl(700);
+
+      /* الانتقال إلى الشبكة التالية (tumble) */
+      const nextGrid = (i < chains.length - 1) ? chains[i+1].grid : finalGrid;
+      currentWinSymbols = [];
+      Aud.tumble();
+      await animTumbleTo(nextGrid, chain.wins.map(w=>w.symbol));
+      S.grid = nextGrid;
+    }
+
+    currentWinSymbols = [];
+
+    /* الحالة النهائية */
+    S.grid = finalGrid;
+
+    /* فوز إجمالي */
+    S.lw = totalWin;
+    S.won += totalWin;
+    if(totalWin > S.best) S.best = totalWin;
+    upd();
+    addHistory(currentBet, totalWin, cumulativeMult);
+
+    const tier = getWinTier(totalWin);
+    if(tier){
+      setTimeout(()=>showBigWinOverlay(totalWin,0,tier),400);
+      await sl(2500);
+    }
+
+    if(totalWin === 0){
+      log('— لا فوز —');
+      ZeusChar.setState('sad',2000);
+    } else {
+      log('✅ إجمالي: '+Math.floor(totalWin)+' ل.س');
+    }
+
+    /* تفعيل الجولات المجانية */
+    if(scatterCount >= 4 && S.fs === 0 && !isFree){
+      S.fs = 15;
+      S.mc = 0;
+      S.fsType = 'عادي';
+      log('⚡ '+scatterCount+' موزعة — 15 جولة مجانية');
+      flash(700,1); shake(2.5,700);
+      fireOn(false);
+      ZeusChar.setState('angry',3000);
+      setTimeout(()=>showBigWinOverlay(totalWin,15,'fs'),500);
+      await sl(2500);
+    }
+
+    /* متابعة الجولات المجانية */
+    if(S.fs > 0){
+      S.spin = false;
+      wheel.classList.remove('spinning','disabled');
+      if(S.fs === 1 && S.fs === 0) fireOff();
+      setTimeout(spin, 700);
+      return;
+    }
+
+    /* نهاية الجولة */
+    S.spin = false;
+    wheel.classList.remove('spinning','disabled');
+    $('buyNormal').disabled=false;
+    $('buyPremium').disabled=false;
+    if(S.fire) fireOff();
+
+  } catch(e){
+    console.error(e);
+    toast(e.message || 'خطأ في الجولة', true);
+    S.spin = false;
+    wheel.classList.remove('spinning','disabled');
+    $('buyNormal').disabled=false;
+    $('buyPremium').disabled=false;
+    refreshMe();
   }
 }
+
 function fireOn(premium){
   S.fire=true;$('frame').classList.add('fire');
   $('fsBanner').classList.add('on');
@@ -1603,33 +1564,9 @@ function fireOn(premium){
 function fireOff(){
   S.fire=false;$('frame').classList.remove('fire');
   $('fsBanner').classList.remove('on');
-  S.mc=0;S.fsType='—';S.fsZeus=ZEUS_MAIN;activeBonus=null;
+  S.mc=0;S.fsType='—';
 }
-function rollBonusOutcome(type,price){
-  const roll=Math.random();
-  let tm,label;
-  if(type==='normal'){
-    if(roll<0.40){tm=0;label='zero';}
-    else if(roll<0.80){tm=0.15+Math.random()*0.30;label='low';}
-    else if(roll<0.95){tm=0.70+Math.random()*0.50;label='mid';}
-    else {tm=1.5+Math.random()*1.5;label='profit';}
-  } else {
-    if(roll<0.35){tm=0;label='zero';}
-    else if(roll<0.75){tm=0.15+Math.random()*0.30;label='low';}
-    else if(roll<0.95){tm=0.70+Math.random()*0.50;label='mid';}
-    else {tm=1.5+Math.random()*2.5;label='jackpot';}
-  }
-  const target=price*tm;
-  return {target,current:0,price,label,type};
-}
-function capBonusWin(amount){
-  if(!activeBonus)return amount;
-  const rem=activeBonus.target-activeBonus.current;
-  if(rem<=0)return 0;
-  const allowed=Math.min(amount,rem);
-  activeBonus.current+=allowed;
-  return allowed;
-}
+
 function getWinTier(a){
   if(a>=20000)return 'legend';
   if(a>=8000)return 'epic';
@@ -1642,7 +1579,7 @@ function showBigWinOverlay(amount, fsCount, tier){
   const titles={big:'ربح كبير!',mega:'ربح ضخم!',epic:'ربح أسطوري!',
     legend:'كنز العاصفة!',fs:'تهانينا!'};
   $('bwTitle').textContent=titles[tier]||'تهانينا!';
-  $('bwAmount').textContent=amount.toFixed(0);
+  $('bwAmount').textContent=Math.floor(amount);
   const fsEl=$('bwFs');
   if(fsCount>0){fsEl.style.display='inline-block';fsEl.textContent='🎁 '+fsCount+' لفات مجانية';}
   else fsEl.style.display='none';
@@ -1673,13 +1610,13 @@ function addHistory(bet,won,mult){
 
 /* ============ HUD ============ */
 function upd(){
-  $('bal').textContent=S.bal.toFixed(0);
-  $('lastWin').textContent=S.lw.toFixed(0);
+  $('bal').textContent=Math.floor(S.bal);
+  $('lastWin').textContent=Math.floor(S.lw);
   $('fs').textContent=S.fs;
   $('mult').textContent=S.mc+'×';
-  $('betVal').textContent=S.bet.toFixed(0);
-  $('priceNormal').textContent=(S.bet*PRICE_NORMAL_MULT).toFixed(0);
-  $('pricePremium').textContent=(S.bet*PRICE_PREMIUM_MULT).toFixed(0);
+  $('betVal').textContent=S.bet;
+  $('priceNormal').textContent=S.bet*PRICE_NORMAL_MULT;
+  $('pricePremium').textContent=S.bet*PRICE_PREMIUM_MULT;
 }
 
 /* ============ Controls ============ */
@@ -1704,17 +1641,12 @@ async function buyBonus(type){
   if(S.spin||S.fs>0)return;
   const price=type==='premium'?S.bet*PRICE_PREMIUM_MULT:S.bet*PRICE_NORMAL_MULT;
   if(S.bal<price){toast('رصيد غير كافٍ',true);return;}
-  const token=localStorage.getItem('sc_token');
   try {
-    if(token){
-      const r=await api('/api/buy-bonus',{method:'POST',body:JSON.stringify({price,type})});
-      S.bal=r.balance;
-    } else S.bal-=price;
+    const r=await api('/api/buy-bonus',{method:'POST',body:JSON.stringify({price,type})});
+    S.bal=r.balance;
   } catch(e){ toast(e.message,true); return; }
   S.fs=15;S.mc=0;
   S.fsType=type==='premium'?'مميز':'عادي';
-  S.fsZeus=type==='premium'?ZEUS_PREMIUM:ZEUS_NORMAL;
-  activeBonus=rollBonusOutcome(type,price);
   upd();
   Aud.buy(type==='premium');
   bigShow(type==='premium'?'بونص مميز':'بونص عادي',1500);
@@ -1920,9 +1852,9 @@ $('profileBtn').onclick=async()=>{
     '<div class="profileRow"><span class="lbl">رقم الهاتف</span><span class="val">'+(u.phone||'')+'</span></div>'+
     '<div class="profileRow"><span class="lbl">البريد</span><span class="val">'+(u.email||'')+'</span></div>'+
     '<div class="profileUID" id="uidBox"><small>🆔 UID — اضغط للنسخ</small>'+(u.uid||'')+'</div>'+
-    '<div class="profileRow"><span class="lbl">الرصيد</span><span class="val">'+S.bal.toFixed(0)+' ل.س</span></div>'+
+    '<div class="profileRow"><span class="lbl">الرصيد</span><span class="val">'+Math.floor(S.bal)+' ل.س</span></div>'+
     '<div class="profileRow"><span class="lbl">لفات</span><span class="val">'+S.laps+'</span></div>'+
-    '<div class="profileRow"><span class="lbl">أفضل فوز</span><span class="val">'+S.best.toFixed(0)+' ل.س</span></div>'+
+    '<div class="profileRow"><span class="lbl">أفضل فوز</span><span class="val">'+Math.floor(S.best)+' ل.س</span></div>'+
     '<div class="profileRow"><span class="lbl">كود الدعوة</span><span class="val">'+(u.invite_code||'—')+'</span></div>';
   $('profileModal').classList.add('on');
   const uid=$('uidBox');
@@ -1972,26 +1904,13 @@ window.becomeAgent=async()=>{
   }catch(e){toast(e.message,true);}
 };
 
-/* ============ RTP FETCH ============ */
-async function fetchRTPSettings(){
-  try {
-    const res = await fetch('/api/rtp-settings');
-    const data = await res.json();
-    if(data.enabled){
-      House.adminRTP = data.currentRTP;
-    } else {
-      House.adminRTP = null;
-    }
-  } catch(e){ House.adminRTP = null; }
-}
-fetchRTPSettings();
-setInterval(fetchRTPSettings, 5 * 60 * 1000);
-
 /* ============ INIT ============ */
 S.grid=[];
-for(let x=0;x<COLS;x++){S.grid[x]=[];
-  for(let y=0;y<ROWS;y++)S.grid[x][y]=rSym();}
-for(let x=0;x<COLS;x++){RS.str[x]=strip();RS.stop[x]=true;}
+for(let x=0;x<COLS;x++){
+  S.grid[x]=[];
+  for(let y=0;y<ROWS;y++)S.grid[x][y]=rSymVisual();
+}
+for(let x=0;x<COLS;x++){RS.str[x]=stripVisual();RS.stop[x]=true;}
 requestAnimationFrame(loop);
 
 (async()=>{
