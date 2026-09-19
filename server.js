@@ -1,9 +1,6 @@
 /* ============================================================
    STORMCROWN — server.js
-   - PostgreSQL دائم
-   - منطق اللفة في السيرفر
-   - RTP متوازن + توزيع زيوس واقعي
-   - دعم الجولات المجانية
+   نسخة متوازنة: زيوس نادر، مضاعفات معقولة، 8 لفات مجانية
    ============================================================ */
 
 const express = require('express');
@@ -17,33 +14,23 @@ const { Pool } = require('pg');
 const app = express();
 
 process.on('uncaughtException', (e) => {
-  console.error('💥 UNCAUGHT EXCEPTION:');
-  console.error(e && e.stack ? e.stack : e);
+  console.error('💥 UNCAUGHT:', e && e.stack ? e.stack : e);
 });
 process.on('unhandledRejection', (e) => {
-  console.error('💥 UNHANDLED REJECTION:');
-  console.error(e && e.stack ? e.stack : e);
+  console.error('💥 UNHANDLED:', e && e.stack ? e.stack : e);
 });
 
 const PORT = process.env.PORT || 3000;
 
 console.log('🔍 فحص المتغيرات...');
-console.log('   PORT:', PORT);
+console.log('   DATABASE_URL:', process.env.DATABASE_URL ? '✅' : '❌');
+console.log('   JWT_SECRET:', process.env.JWT_SECRET ? '✅' : '❌');
 console.log('   NODE_ENV:', process.env.NODE_ENV || '(غير مضبوط)');
-console.log('   DATABASE_URL:', process.env.DATABASE_URL ? '✅ موجود' : '❌ مفقود');
-console.log('   JWT_SECRET:', process.env.JWT_SECRET ? '✅ موجود' : '❌ مفقود');
 
 const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  console.error('❌ JWT_SECRET غير مضبوط');
-  setTimeout(() => process.exit(1), 2000);
-}
-
+if (!JWT_SECRET) { console.error('❌ JWT_SECRET مفقود'); setTimeout(()=>process.exit(1), 2000); }
 const DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) {
-  console.error('❌ DATABASE_URL غير مضبوط');
-  setTimeout(() => process.exit(1), 2000);
-}
+if (!DATABASE_URL) { console.error('❌ DATABASE_URL مفقود'); setTimeout(()=>process.exit(1), 2000); }
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change-me-now';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || crypto.randomBytes(24).toString('hex');
@@ -68,7 +55,6 @@ const PAYMENT_METHODS = [
   { code: 'usdt_trc20', name: 'USDT (TRC20)',          currency: 'USDT', min: 5,   max: 5000,    rate: USDT_TO_SYP }
 ];
 
-/* ===== قاعدة البيانات ===== */
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
@@ -76,109 +62,60 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000
 });
 
-pool.on('error', (e) => {
-  console.error('💥 خطأ في pool:', e);
-});
+pool.on('error', (e) => console.error('💥 pool error:', e));
 
 async function initDB() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       uid VARCHAR(20) UNIQUE NOT NULL,
-      first_name VARCHAR(100),
-      last_name VARCHAR(100),
-      phone VARCHAR(50) UNIQUE,
-      email VARCHAR(200) UNIQUE,
+      first_name VARCHAR(100), last_name VARCHAR(100),
+      phone VARCHAR(50) UNIQUE, email VARCHAR(200) UNIQUE,
       password_hash VARCHAR(200),
-      balance BIGINT DEFAULT 0,
-      laps INT DEFAULT 0,
-      best_win BIGINT DEFAULT 0,
-      wagered BIGINT DEFAULT 0,
-      won BIGINT DEFAULT 0,
-      banned INT DEFAULT 0,
-      referred_by VARCHAR(20),
-      agent_level INT DEFAULT 0,
-      invite_code VARCHAR(20) UNIQUE,
-      total_commission BIGINT DEFAULT 0,
-      notes TEXT DEFAULT '',
-      created_at BIGINT,
-      last_login BIGINT,
-      last_ip VARCHAR(50)
+      balance BIGINT DEFAULT 0, laps INT DEFAULT 0,
+      best_win BIGINT DEFAULT 0, wagered BIGINT DEFAULT 0, won BIGINT DEFAULT 0,
+      banned INT DEFAULT 0, referred_by VARCHAR(20),
+      agent_level INT DEFAULT 0, invite_code VARCHAR(20) UNIQUE,
+      total_commission BIGINT DEFAULT 0, notes TEXT DEFAULT '',
+      created_at BIGINT, last_login BIGINT, last_ip VARCHAR(50)
     );
     CREATE TABLE IF NOT EXISTS spins (
-      id SERIAL PRIMARY KEY,
-      uid VARCHAR(20),
-      bet BIGINT,
-      won BIGINT,
-      net BIGINT,
-      created_at BIGINT,
-      ip VARCHAR(50)
+      id SERIAL PRIMARY KEY, uid VARCHAR(20), bet BIGINT, won BIGINT,
+      net BIGINT, created_at BIGINT, ip VARCHAR(50)
     );
     CREATE TABLE IF NOT EXISTS login_log (
-      id SERIAL PRIMARY KEY,
-      uid VARCHAR(20),
-      phone VARCHAR(100),
-      success INT,
-      ip VARCHAR(50),
-      user_agent TEXT,
-      created_at BIGINT
+      id SERIAL PRIMARY KEY, uid VARCHAR(20), phone VARCHAR(100),
+      success INT, ip VARCHAR(50), user_agent TEXT, created_at BIGINT
     );
     CREATE TABLE IF NOT EXISTS transactions (
-      id SERIAL PRIMARY KEY,
-      uid VARCHAR(20),
-      type VARCHAR(50),
-      amount BIGINT,
-      balance_after BIGINT,
-      note TEXT,
-      admin VARCHAR(50),
-      created_at BIGINT
+      id SERIAL PRIMARY KEY, uid VARCHAR(20), type VARCHAR(50),
+      amount BIGINT, balance_after BIGINT, note TEXT,
+      admin VARCHAR(50), created_at BIGINT
     );
     CREATE TABLE IF NOT EXISTS user_wallets (
       uid VARCHAR(20) PRIMARY KEY,
-      sham_syp VARCHAR(200) DEFAULT '',
-      sham_usd VARCHAR(200) DEFAULT '',
-      usdt_bep20 VARCHAR(200) DEFAULT '',
-      usdt_trc20 VARCHAR(200) DEFAULT '',
+      sham_syp VARCHAR(200) DEFAULT '', sham_usd VARCHAR(200) DEFAULT '',
+      usdt_bep20 VARCHAR(200) DEFAULT '', usdt_trc20 VARCHAR(200) DEFAULT '',
       updated_at BIGINT
     );
     CREATE TABLE IF NOT EXISTS deposit_requests (
-      id SERIAL PRIMARY KEY,
-      uid VARCHAR(20),
-      method_code VARCHAR(50),
-      amount NUMERIC,
-      amount_syp BIGINT,
-      tx_hash VARCHAR(200),
-      status VARCHAR(20) DEFAULT 'pending',
-      admin_note TEXT DEFAULT '',
-      created_at BIGINT,
-      processed_at BIGINT,
-      processed_by VARCHAR(50)
+      id SERIAL PRIMARY KEY, uid VARCHAR(20), method_code VARCHAR(50),
+      amount NUMERIC, amount_syp BIGINT, tx_hash VARCHAR(200),
+      status VARCHAR(20) DEFAULT 'pending', admin_note TEXT DEFAULT '',
+      created_at BIGINT, processed_at BIGINT, processed_by VARCHAR(50)
     );
     CREATE TABLE IF NOT EXISTS withdraw_requests (
-      id SERIAL PRIMARY KEY,
-      uid VARCHAR(20),
-      method_code VARCHAR(50),
-      amount NUMERIC,
-      amount_syp BIGINT,
-      wallet_to VARCHAR(300),
-      status VARCHAR(20) DEFAULT 'pending',
-      admin_note TEXT DEFAULT '',
-      created_at BIGINT,
-      processed_at BIGINT,
-      processed_by VARCHAR(50)
+      id SERIAL PRIMARY KEY, uid VARCHAR(20), method_code VARCHAR(50),
+      amount NUMERIC, amount_syp BIGINT, wallet_to VARCHAR(300),
+      status VARCHAR(20) DEFAULT 'pending', admin_note TEXT DEFAULT '',
+      created_at BIGINT, processed_at BIGINT, processed_by VARCHAR(50)
     );
     CREATE TABLE IF NOT EXISTS commissions (
-      id SERIAL PRIMARY KEY,
-      agent_uid VARCHAR(20),
-      source_uid VARCHAR(20),
-      amount BIGINT,
-      type VARCHAR(50),
-      note TEXT,
-      created_at BIGINT
+      id SERIAL PRIMARY KEY, agent_uid VARCHAR(20), source_uid VARCHAR(20),
+      amount BIGINT, type VARCHAR(50), note TEXT, created_at BIGINT
     );
     CREATE INDEX IF NOT EXISTS idx_users_uid ON users(uid);
     CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
-    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_spins_uid ON spins(uid);
     CREATE INDEX IF NOT EXISTS idx_deposits_status ON deposit_requests(status);
     CREATE INDEX IF NOT EXISTS idx_withdraws_status ON withdraw_requests(status);
@@ -187,7 +124,6 @@ async function initDB() {
   console.log('✅ قاعدة البيانات جاهزة');
 }
 
-/* ===== منطق اللعبة ===== */
 const COLS = 6, ROWS = 5;
 
 const SYM = {
@@ -203,57 +139,53 @@ const SYM = {
   gem_purple:{ pay: 0.10 }
 };
 
-const ZEUS_MAIN    = [2, 3, 5, 10, 15, 25, 50, 100, 250, 500];
-const ZEUS_PREMIUM = [50, 75, 100, 150, 200, 250, 350, 500];
+const ZEUS_MAIN    = [2, 3, 5, 10, 15, 25, 50];
+const ZEUS_PREMIUM = [50, 75, 100, 150, 200, 250];
 
 function rint(max) { return crypto.randomInt(0, max); }
-function rnd(a)   { return a[rint(a.length)]; }
 
 /* ============================================================
-   🎯 توزيع قيم زيوس — واقعي ومتوازن
-   - القيم الصغيرة شائعة (2، 3، 5)
-   - القيم الكبيرة نادرة جدًا (250، 500)
+   🎯 توزيع زيوس الجديد — حاد جدًا
+   اللفات العادية: 2 و3 = 80%، لا يوجد 250 أو 500
+   البونص المميز: 50 و75 = 65%
    ============================================================ */
 function pickZeusValue(pool) {
   const r = rint(1000);
   const isPremium = Array.isArray(pool) && pool[0] >= 50;
   if (isPremium) {
-    if (r < 300) return 50;
-    if (r < 550) return 75;
-    if (r < 750) return 100;
-    if (r < 870) return 150;
-    if (r < 940) return 200;
-    if (r < 975) return 250;
-    if (r < 995) return 350;
-    return 500;
+    if (r < 400) return 50;   // 40%
+    if (r < 650) return 75;   // 25%
+    if (r < 830) return 100;  // 18%
+    if (r < 930) return 150;  // 10%
+    if (r < 970) return 200;  // 4%
+    if (r < 990) return 250;  // 2%
+    return 350;               // 1%
   } else {
-    if (r < 400) return 2;
-    if (r < 650) return 3;
-    if (r < 800) return 5;
-    if (r < 880) return 10;
-    if (r < 930) return 15;
-    if (r < 960) return 25;
-    if (r < 980) return 50;
-    if (r < 993) return 100;
-    if (r < 999) return 250;
-    return 500;
+    if (r < 550) return 2;    // 55%
+    if (r < 800) return 3;    // 25%
+    if (r < 920) return 5;    // 12%
+    if (r < 970) return 10;   // 5%
+    if (r < 990) return 15;   // 2%
+    if (r < 997) return 25;   // 0.7%
+    if (r < 999) return 50;   // 0.2%
+    return 100;               // 0.1%
   }
 }
 
 function rSym(zeusPool) {
   const r = rint(100);
-  if (r < 7) return { type: 'zeus', v: pickZeusValue(zeusPool) };
-  if (r < 12) return { type: 'scatter' };
-  if (r < 22) return { type: 'gem_purple' };
-  if (r < 32) return { type: 'gem_green' };
-  if (r < 42) return { type: 'gem_blue' };
-  if (r < 52) return { type: 'gem_red' };
-  if (r < 60) return { type: 'flaming' };
-  if (r < 68) return { type: 'ring' };
-  if (r < 75) return { type: 'hourglass' };
-  if (r < 81) return { type: 'chalice' };
-  if (r < 86) return { type: 'crown' };
-  if (r < 89) return { type: 'zeusFist' };
+  if (r < 3)  return { type: 'zeus', v: pickZeusValue(zeusPool) };  // 3%
+  if (r < 8)  return { type: 'scatter' };
+  if (r < 18) return { type: 'gem_purple' };
+  if (r < 28) return { type: 'gem_green' };
+  if (r < 38) return { type: 'gem_blue' };
+  if (r < 48) return { type: 'gem_red' };
+  if (r < 56) return { type: 'flaming' };
+  if (r < 64) return { type: 'ring' };
+  if (r < 71) return { type: 'hourglass' };
+  if (r < 77) return { type: 'chalice' };
+  if (r < 83) return { type: 'crown' };
+  if (r < 86) return { type: 'zeusFist' };
   return { type: 'gem_purple' };
 }
 
@@ -345,7 +277,6 @@ function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
   return { chains, totalWin, finalGrid: grid, cumulativeMult: cumMult };
 }
 
-/* ===== Helpers ===== */
 function genUID() {
   let uid = '';
   for (let i = 0; i < 15; i++) uid += rint(10);
@@ -363,7 +294,6 @@ function getClientIP(req) {
           req.socket.remoteAddress || '').replace('::ffff:', '');
 }
 
-/* ===== Middleware ===== */
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -402,7 +332,6 @@ function authAdmin(req, res, next) {
   next();
 }
 
-/* ===== Auth ===== */
 app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
   try {
     const { first, last, phone, email, password, inviteCode } = req.body;
@@ -414,9 +343,7 @@ app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
     if (!password || password.length < 4) return res.status(400).json({ error: 'كلمة المرور قصيرة' });
 
     const exists = await pool.query(
-      'SELECT uid FROM users WHERE phone = $1 OR email = $2 LIMIT 1',
-      [phone, email]
-    );
+      'SELECT uid FROM users WHERE phone = $1 OR email = $2 LIMIT 1', [phone, email]);
     if (exists.rows.length) return res.status(409).json({ error: 'الرقم أو البريد مسجل مسبقاً' });
 
     let referrerUid = null;
@@ -460,7 +387,7 @@ app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
       user: { uid, first, last, phone, email, balance: 0, laps: 0, best: 0,
               wagered: 0, won: 0, invite_code: code, agent_level: 0, total_commission: 0 }
     });
-  } catch (e) { console.error('register error:', e); res.status(500).json({ error: 'خطأ في السيرفر' }); }
+  } catch (e) { console.error('register:', e); res.status(500).json({ error: 'خطأ' }); }
 });
 
 app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
@@ -470,9 +397,7 @@ app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
     if (!id || !password) return res.status(400).json({ error: 'أدخل البيانات' });
 
     const r = await pool.query(
-      'SELECT * FROM users WHERE phone = $1 OR email = $1 OR uid = $1 LIMIT 1',
-      [id]
-    );
+      'SELECT * FROM users WHERE phone = $1 OR email = $1 OR uid = $1 LIMIT 1', [id]);
     const user = r.rows[0];
 
     if (!user) {
@@ -491,10 +416,8 @@ app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
     }
     if (user.banned) return res.status(403).json({ error: 'الحساب محظور' });
 
-    await pool.query(
-      'UPDATE users SET last_login = $1, last_ip = $2 WHERE uid = $3',
-      [Date.now(), ip, user.uid]
-    );
+    await pool.query('UPDATE users SET last_login = $1, last_ip = $2 WHERE uid = $3',
+      [Date.now(), ip, user.uid]);
     await pool.query(`
       INSERT INTO login_log (uid, phone, success, ip, user_agent, created_at)
       VALUES ($1,$2,1,$3,$4,$5)
@@ -511,7 +434,7 @@ app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
         agent_level: user.agent_level, total_commission: Number(user.total_commission)
       }
     });
-  } catch (e) { console.error('login error:', e); res.status(500).json({ error: 'خطأ في السيرفر' }); }
+  } catch (e) { console.error('login:', e); res.status(500).json({ error: 'خطأ' }); }
 });
 
 app.get('/api/me', authUser, async (req, res) => {
@@ -535,7 +458,6 @@ app.get('/api/me', authUser, async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
-/* ===== Spin ===== */
 app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
   const u = req.user;
   const ip = getClientIP(req);
@@ -576,12 +498,11 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
         if (commission > 0) {
           await pool.query(
             'UPDATE users SET balance = balance + $1, total_commission = total_commission + $1 WHERE uid = $2',
-            [commission, ref.uid]
-          );
+            [commission, ref.uid]);
           await pool.query(`
             INSERT INTO commissions (agent_uid, source_uid, amount, type, note, created_at)
             VALUES ($1,$2,$3,'loss_commission',$4,$5)
-          `, [ref.uid, u.uid, commission, 'عمولة من خسارة ' + Math.abs(net), Date.now()]);
+          `, [ref.uid, u.uid, commission, 'عمولة ' + Math.abs(net), Date.now()]);
         }
       }
     }
@@ -595,12 +516,11 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
       scatterCount, freeSpinsTriggered: scatterCount >= 4 && !freeSpin
     });
   } catch (e) {
-    console.error('spin error:', e);
-    res.status(500).json({ error: 'خطأ في السيرفر' });
+    console.error('spin:', e);
+    res.status(500).json({ error: 'خطأ' });
   }
 });
 
-/* ===== Buy bonus ===== */
 app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
   try {
     const { price, type } = req.body;
@@ -621,7 +541,6 @@ app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
-/* ===== Wallet ===== */
 app.get('/api/wallet/methods', (req, res) => {
   res.json({ methods: PAYMENT_METHODS.map(m => ({ ...m, company_wallet: COMPANY_WALLETS[m.code] || '' })) });
 });
@@ -659,14 +578,13 @@ app.post('/api/wallet/deposit', authUser, rateLimit(15, 60000), async (req, res)
     const amountSyp = Math.floor(amountNum * method.rate);
     const pending = await pool.query(
       "SELECT id FROM deposit_requests WHERE uid = $1 AND status = 'pending' LIMIT 1",
-      [req.user.uid]
-    );
+      [req.user.uid]);
     if (pending.rows.length) return res.status(400).json({ error: 'لديك طلب إيداع معلق' });
     await pool.query(`
       INSERT INTO deposit_requests (uid, method_code, amount, amount_syp, tx_hash, status, created_at)
       VALUES ($1,$2,$3,$4,$5,'pending',$6)
     `, [req.user.uid, method_code, amountNum, amountSyp, tx_hash || '', Date.now()]);
-    res.json({ success: true, message: 'تم استلام الطلب، سيتم مراجعته قريباً', amount_syp: amountSyp });
+    res.json({ success: true, message: 'تم استلام الطلب', amount_syp: amountSyp });
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
@@ -683,8 +601,7 @@ app.post('/api/wallet/withdraw', authUser, rateLimit(5, 60000), async (req, res)
     if (Number(req.user.balance) < amountSyp) return res.status(400).json({ error: 'رصيد غير كافٍ' });
     const pending = await pool.query(
       "SELECT id FROM withdraw_requests WHERE uid = $1 AND status = 'pending' LIMIT 1",
-      [req.user.uid]
-    );
+      [req.user.uid]);
     if (pending.rows.length) return res.status(400).json({ error: 'لديك طلب سحب معلق' });
     const newBal = Number(req.user.balance) - amountSyp;
     await pool.query('UPDATE users SET balance = $1 WHERE uid = $2', [newBal, req.user.uid]);
@@ -692,7 +609,7 @@ app.post('/api/wallet/withdraw', authUser, rateLimit(5, 60000), async (req, res)
       INSERT INTO withdraw_requests (uid, method_code, amount, amount_syp, wallet_to, status, created_at)
       VALUES ($1,$2,$3,$4,$5,'pending',$6)
     `, [req.user.uid, method_code, amountNum, amountSyp, wallet_to, Date.now()]);
-    res.json({ success: true, message: 'تم استلام الطلب، سيعالج خلال 1-24 ساعة', amount_syp: amountSyp });
+    res.json({ success: true, message: 'تم استلام الطلب', amount_syp: amountSyp });
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
@@ -704,7 +621,6 @@ app.get('/api/wallet/history', authUser, async (req, res) => {
   res.json({ deposits: deposits.rows, withdraws: withdraws.rows });
 });
 
-/* ===== Agent ===== */
 app.get('/api/agent/info', authUser, async (req, res) => {
   const u = req.user;
   const referrals = await pool.query(
@@ -735,12 +651,10 @@ app.post('/api/agent/become', authUser, async (req, res) => {
   res.json({ success: true, message: 'تم ترقيتك إلى وكيل المستوى 1' });
 });
 
-/* ===== RTP info ===== */
 app.get('/api/rtp', (req, res) => {
   res.json({ rtp: RTP, houseEdge: 1 - RTP, maxWinMult: MAX_WIN_MULT });
 });
 
-/* ===== Admin ===== */
 app.post('/api/admin/login', rateLimit(5, 60000), (req, res) => {
   const { password } = req.body;
   if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'كلمة مرور خاطئة' });
@@ -821,11 +735,9 @@ app.get('/api/admin/user/:uid', authAdmin, async (req, res) => {
     const withdraws = await pool.query('SELECT * FROM withdraw_requests WHERE uid = $1 ORDER BY id DESC LIMIT 50', [user.uid]);
     const referrals = await pool.query('SELECT uid, first_name, last_name, created_at FROM users WHERE referred_by = $1', [user.uid]);
     const commissions = await pool.query('SELECT * FROM commissions WHERE agent_uid = $1 ORDER BY id DESC LIMIT 50', [user.uid]);
-    res.json({
-      user, spins: spins.rows, transactions: transactions.rows,
+    res.json({ user, spins: spins.rows, transactions: transactions.rows,
       logins: logins.rows, deposits: deposits.rows, withdraws: withdraws.rows,
-      referrals: referrals.rows, commissions: commissions.rows
-    });
+      referrals: referrals.rows, commissions: commissions.rows });
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
@@ -965,19 +877,15 @@ app.post('/api/admin/withdraws/process', authAdmin, async (req, res) => {
 
 app.get('/api/admin/recent-spins', authAdmin, async (req, res) => {
   const r = await pool.query(`
-    SELECT s.*, u.first_name, u.last_name
-      FROM spins s LEFT JOIN users u ON u.uid = s.uid
-     ORDER BY s.id DESC LIMIT 100
-  `);
+    SELECT s.*, u.first_name, u.last_name FROM spins s
+    LEFT JOIN users u ON u.uid = s.uid ORDER BY s.id DESC LIMIT 100`);
   res.json({ spins: r.rows });
 });
 
 app.get('/api/admin/recent-logins', authAdmin, async (req, res) => {
   const r = await pool.query(`
-    SELECT l.*, u.first_name, u.last_name
-      FROM login_log l LEFT JOIN users u ON u.uid = l.uid
-     ORDER BY l.id DESC LIMIT 100
-  `);
+    SELECT l.*, u.first_name, u.last_name FROM login_log l
+    LEFT JOIN users u ON u.uid = l.uid ORDER BY l.id DESC LIMIT 100`);
   res.json({ logins: r.rows });
 });
 
@@ -987,16 +895,13 @@ app.get('/api/admin/agents', authAdmin, async (req, res) => {
            u.total_commission, u.balance, u.created_at,
            (SELECT COUNT(*)::int FROM users x WHERE x.referred_by = u.uid) AS referrals
       FROM users u WHERE u.agent_level > 0
-      ORDER BY u.total_commission DESC LIMIT 200
-  `);
+      ORDER BY u.total_commission DESC LIMIT 200`);
   res.json({ agents: r.rows });
 });
 
-/* ===== Routes ===== */
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 
-/* ===== Startup ===== */
 (async () => {
   try {
     console.log('🚀 بدء التشغيل...');
@@ -1006,11 +911,9 @@ app.use((req, res) => res.status(404).json({ error: 'Not found' }));
       console.log('Port:', PORT);
       console.log('RTP:', (RTP * 100).toFixed(2) + '%');
       console.log('MaxWin:', MAX_WIN_MULT + 'x');
-      console.log('Game:  http://localhost:' + PORT + '/');
-      console.log('Admin: http://localhost:' + PORT + '/admin');
     });
   } catch (e) {
-    console.error('❌ فشل تشغيل السيرفر:');
+    console.error('❌ فشل التشغيل:');
     console.error(e && e.stack ? e.stack : e);
     setTimeout(() => process.exit(1), 3000);
   }
