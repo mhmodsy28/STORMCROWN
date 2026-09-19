@@ -1,9 +1,10 @@
 /* ============================================================
    STORMCROWN — server.js
-   - قاعدة بيانات PostgreSQL دائمة
+   - PostgreSQL دائم
    - منطق اللفة في السيرفر
-   - RTP ثابت عادل (افتراضي 94%)
-   - دعم الجولات المجانية (free spins)
+   - RTP ثابت 94%
+   - دعم الجولات المجانية
+   - معالجة أخطاء شاملة
    ============================================================ */
 
 const express = require('express');
@@ -15,13 +16,39 @@ const crypto = require('crypto');
 const { Pool } = require('pg');
 
 const app = express();
+
+/* ===== التقاط أي خطأ غير معالج ===== */
+process.on('uncaughtException', (e) => {
+  console.error('💥 UNCAUGHT EXCEPTION:');
+  console.error(e && e.stack ? e.stack : e);
+});
+process.on('unhandledRejection', (e) => {
+  console.error('💥 UNHANDLED REJECTION:');
+  console.error(e && e.stack ? e.stack : e);
+});
+
 const PORT = process.env.PORT || 3000;
 
+/* ===== متغيرات البيئة ===== */
+console.log('🔍 فحص المتغيرات...');
+console.log('   PORT:', PORT);
+console.log('   NODE_ENV:', process.env.NODE_ENV || '(غير مضبوط)');
+console.log('   DATABASE_URL:', process.env.DATABASE_URL ? '✅ موجود' : '❌ مفقود');
+console.log('   JWT_SECRET:', process.env.JWT_SECRET ? '✅ موجود' : '❌ مفقود');
+console.log('   ADMIN_PASSWORD:', process.env.ADMIN_PASSWORD ? '✅ موجود' : '⚠️ يستخدم الافتراضي');
+console.log('   ADMIN_TOKEN:', process.env.ADMIN_TOKEN ? '✅ موجود' : '⚠️ يُولَّد عشوائيًا');
+
 const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) { console.error('❌ JWT_SECRET غير مضبوط'); process.exit(1); }
+if (!JWT_SECRET) {
+  console.error('❌ JWT_SECRET غير مضبوط — أضفه في Environment');
+  setTimeout(() => process.exit(1), 2000);
+}
 
 const DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) { console.error('❌ DATABASE_URL غير مضبوط'); process.exit(1); }
+if (!DATABASE_URL) {
+  console.error('❌ DATABASE_URL غير مضبوط — أضفه في Environment');
+  setTimeout(() => process.exit(1), 2000);
+}
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change-me-now';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || crypto.randomBytes(24).toString('hex');
@@ -29,9 +56,7 @@ const ADMIN_TOKEN = process.env.ADMIN_TOKEN || crypto.randomBytes(24).toString('
 const USDT_TO_SYP = 15000;
 const USD_TO_SYP  = 15000;
 
-/* ============================================================
-   🎯 RTP — نسبة العائد للاعب
-   ============================================================ */
+/* ===== RTP ===== */
 const RTP = Math.min(0.97, Math.max(0.85, parseFloat(process.env.RTP || '0.94')));
 const MAX_WIN_MULT = 5000;
 
@@ -49,16 +74,21 @@ const PAYMENT_METHODS = [
   { code: 'usdt_trc20', name: 'USDT (TRC20)',          currency: 'USDT', min: 5,   max: 5000,    rate: USDT_TO_SYP }
 ];
 
-/* ============================================================
-   📦 قاعدة البيانات
-   ============================================================ */
+/* ===== قاعدة البيانات ===== */
+console.log('📦 تهيئة pool قاعدة البيانات...');
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 10
+  max: 10,
+  connectionTimeoutMillis: 10000
+});
+
+pool.on('error', (e) => {
+  console.error('💥 خطأ غير متوقع في pool:', e);
 });
 
 async function initDB() {
+  console.log('🛠️ إنشاء الجداول...');
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
@@ -165,9 +195,7 @@ async function initDB() {
   console.log('✅ قاعدة البيانات جاهزة');
 }
 
-/* ============================================================
-   🎰 منطق اللعبة — في السيرفر فقط
-   ============================================================ */
+/* ===== منطق اللعبة ===== */
 const COLS = 6, ROWS = 5;
 
 const SYM = {
@@ -183,9 +211,7 @@ const SYM = {
   gem_purple:{ pay: 0.10 }
 };
 
-const ZEUS_NORMAL  = [1, 2, 3, 4, 5, 6, 8, 10];
-const ZEUS_PREMIUM = [20, 25, 30, 40, 50, 75, 100, 150, 250, 500];
-const ZEUS_MAIN    = [2, 3, 5, 10, 15, 25, 50, 100, 250, 500];
+const ZEUS_MAIN = [2, 3, 5, 10, 15, 25, 50, 100, 250, 500];
 
 function rint(max) { return crypto.randomInt(0, max); }
 function rnd(a)   { return a[rint(a.length)]; }
@@ -263,7 +289,6 @@ function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
   for (let chain = 0; chain < MAX_CHAINS; chain++) {
     const wins = chkWins(grid, bet);
     const zs = zeusSum(grid);
-
     if (wins.length === 0) break;
 
     let chainWin = wins.reduce((a, w) => a + w.amount, 0);
@@ -296,9 +321,7 @@ function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
   return { chains, totalWin, finalGrid: grid, cumulativeMult: cumMult };
 }
 
-/* ============================================================
-   🔧 Helpers
-   ============================================================ */
+/* ===== Helpers ===== */
 function genUID() {
   let uid = '';
   for (let i = 0; i < 15; i++) uid += rint(10);
@@ -316,9 +339,7 @@ function getClientIP(req) {
           req.socket.remoteAddress || '').replace('::ffff:', '');
 }
 
-/* ============================================================
-   🛡️ Middleware
-   ============================================================ */
+/* ===== Middleware ===== */
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -357,9 +378,7 @@ function authAdmin(req, res, next) {
   next();
 }
 
-/* ============================================================
-   🔐 المصادقة
-   ============================================================ */
+/* ===== المصادقة ===== */
 app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
   try {
     const { first, last, phone, email, password, inviteCode } = req.body;
@@ -417,7 +436,7 @@ app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
       user: { uid, first, last, phone, email, balance: 0, laps: 0, best: 0,
               wagered: 0, won: 0, invite_code: code, agent_level: 0, total_commission: 0 }
     });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ في السيرفر' }); }
+  } catch (e) { console.error('register error:', e); res.status(500).json({ error: 'خطأ في السيرفر' }); }
 });
 
 app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
@@ -468,7 +487,7 @@ app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
         agent_level: user.agent_level, total_commission: Number(user.total_commission)
       }
     });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ في السيرفر' }); }
+  } catch (e) { console.error('login error:', e); res.status(500).json({ error: 'خطأ في السيرفر' }); }
 });
 
 app.get('/api/me', authUser, async (req, res) => {
@@ -492,13 +511,10 @@ app.get('/api/me', authUser, async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
-/* ============================================================
-   🎰 /api/spin — السيرفر يحسب كل شيء
-   ============================================================ */
+/* ===== Spin ===== */
 app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
   const u = req.user;
   const ip = getClientIP(req);
-
   try {
     const { bet, freeSpin } = req.body;
     if (typeof bet !== 'number' || bet <= 0 || bet > 1000000)
@@ -507,7 +523,6 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
       return res.status(400).json({ error: 'رصيد غير كافٍ' });
 
     const result = runSpin(bet, ZEUS_MAIN, !!freeSpin, 0);
-
     let totalWin = result.totalWin;
     const maxWin = bet * MAX_WIN_MULT;
     if (totalWin > maxWin) totalWin = maxWin;
@@ -519,8 +534,7 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
     await pool.query(`
       UPDATE users
          SET balance = $1, laps = laps + 1, wagered = wagered + $2,
-             won = won + $3,
-             best_win = GREATEST(best_win, $4)
+             won = won + $3, best_win = GREATEST(best_win, $4)
        WHERE uid = $5
     `, [newBalance, freeSpin ? 0 : bet, totalWin, totalWin, u.uid]);
 
@@ -529,7 +543,6 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
       VALUES ($1,$2,$3,$4,$5,$6)
     `, [u.uid, freeSpin ? 0 : bet, totalWin, net, Date.now(), ip]);
 
-    /* عمولة الوكيل عند الخسارة */
     if (net < 0 && u.referred_by) {
       const refR = await pool.query('SELECT * FROM users WHERE uid = $1', [u.referred_by]);
       const ref = refR.rows[0];
@@ -552,15 +565,10 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
     const scatterCount = cntSc(result.finalGrid);
 
     res.json({
-      success: true,
-      balance: newBalance,
-      bet: freeSpin ? 0 : bet,
-      totalWin,
-      net,
-      chains: result.chains,
-      finalGrid: result.finalGrid,
-      scatterCount,
-      freeSpinsTriggered: scatterCount >= 4 && !freeSpin
+      success: true, balance: newBalance,
+      bet: freeSpin ? 0 : bet, totalWin, net,
+      chains: result.chains, finalGrid: result.finalGrid,
+      scatterCount, freeSpinsTriggered: scatterCount >= 4 && !freeSpin
     });
   } catch (e) {
     console.error('spin error:', e);
@@ -568,9 +576,7 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
   }
 });
 
-/* ============================================================
-   💰 /api/buy-bonus
-   ============================================================ */
+/* ===== Buy bonus ===== */
 app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
   try {
     const { price, type } = req.body;
@@ -591,9 +597,7 @@ app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
-/* ============================================================
-   💳 المحفظة
-   ============================================================ */
+/* ===== Wallet ===== */
 app.get('/api/wallet/methods', (req, res) => {
   res.json({ methods: PAYMENT_METHODS.map(m => ({ ...m, company_wallet: COMPANY_WALLETS[m.code] || '' })) });
 });
@@ -613,10 +617,8 @@ app.post('/api/wallet/save-address', authUser, async (req, res) => {
     INSERT INTO user_wallets (uid, sham_syp, sham_usd, usdt_bep20, usdt_trc20, updated_at)
     VALUES ($1,$2,$3,$4,$5,$6)
     ON CONFLICT (uid) DO UPDATE SET
-      sham_syp = EXCLUDED.sham_syp,
-      sham_usd = EXCLUDED.sham_usd,
-      usdt_bep20 = EXCLUDED.usdt_bep20,
-      usdt_trc20 = EXCLUDED.usdt_trc20,
+      sham_syp = EXCLUDED.sham_syp, sham_usd = EXCLUDED.sham_usd,
+      usdt_bep20 = EXCLUDED.usdt_bep20, usdt_trc20 = EXCLUDED.usdt_trc20,
       updated_at = EXCLUDED.updated_at
   `, [req.user.uid, sham_syp || '', sham_usd || '', usdt_bep20 || '', usdt_trc20 || '', Date.now()]);
   res.json({ success: true });
@@ -627,23 +629,19 @@ app.post('/api/wallet/deposit', authUser, rateLimit(15, 60000), async (req, res)
     const { method_code, amount, tx_hash } = req.body;
     const method = PAYMENT_METHODS.find(m => m.code === method_code);
     if (!method) return res.status(400).json({ error: 'وسيلة غير صحيحة' });
-
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum < method.min || amountNum > method.max)
       return res.status(400).json({ error: 'المبلغ بين ' + method.min + ' و ' + method.max });
-
     const amountSyp = Math.floor(amountNum * method.rate);
     const pending = await pool.query(
       "SELECT id FROM deposit_requests WHERE uid = $1 AND status = 'pending' LIMIT 1",
       [req.user.uid]
     );
     if (pending.rows.length) return res.status(400).json({ error: 'لديك طلب إيداع معلق' });
-
     await pool.query(`
       INSERT INTO deposit_requests (uid, method_code, amount, amount_syp, tx_hash, status, created_at)
       VALUES ($1,$2,$3,$4,$5,'pending',$6)
     `, [req.user.uid, method_code, amountNum, amountSyp, tx_hash || '', Date.now()]);
-
     res.json({ success: true, message: 'تم استلام الطلب، سيتم مراجعته قريباً', amount_syp: amountSyp });
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
@@ -653,59 +651,43 @@ app.post('/api/wallet/withdraw', authUser, rateLimit(5, 60000), async (req, res)
     const { method_code, amount, wallet_to } = req.body;
     const method = PAYMENT_METHODS.find(m => m.code === method_code);
     if (!method) return res.status(400).json({ error: 'وسيلة غير صحيحة' });
-    if (!wallet_to || wallet_to.length < 5)
-      return res.status(400).json({ error: 'أدخل عنوان المحفظة' });
-
+    if (!wallet_to || wallet_to.length < 5) return res.status(400).json({ error: 'أدخل عنوان المحفظة' });
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum < method.min || amountNum > method.max)
       return res.status(400).json({ error: 'المبلغ بين ' + method.min + ' و ' + method.max });
-
     const amountSyp = Math.floor(amountNum * method.rate);
-    if (Number(req.user.balance) < amountSyp)
-      return res.status(400).json({ error: 'رصيد غير كافٍ' });
-
+    if (Number(req.user.balance) < amountSyp) return res.status(400).json({ error: 'رصيد غير كافٍ' });
     const pending = await pool.query(
       "SELECT id FROM withdraw_requests WHERE uid = $1 AND status = 'pending' LIMIT 1",
       [req.user.uid]
     );
     if (pending.rows.length) return res.status(400).json({ error: 'لديك طلب سحب معلق' });
-
     const newBal = Number(req.user.balance) - amountSyp;
     await pool.query('UPDATE users SET balance = $1 WHERE uid = $2', [newBal, req.user.uid]);
     await pool.query(`
       INSERT INTO withdraw_requests (uid, method_code, amount, amount_syp, wallet_to, status, created_at)
       VALUES ($1,$2,$3,$4,$5,'pending',$6)
     `, [req.user.uid, method_code, amountNum, amountSyp, wallet_to, Date.now()]);
-
     res.json({ success: true, message: 'تم استلام الطلب، سيعالج خلال 1-24 ساعة', amount_syp: amountSyp });
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
 app.get('/api/wallet/history', authUser, async (req, res) => {
   const deposits = await pool.query(
-    'SELECT * FROM deposit_requests WHERE uid = $1 ORDER BY id DESC LIMIT 30',
-    [req.user.uid]
-  );
+    'SELECT * FROM deposit_requests WHERE uid = $1 ORDER BY id DESC LIMIT 30', [req.user.uid]);
   const withdraws = await pool.query(
-    'SELECT * FROM withdraw_requests WHERE uid = $1 ORDER BY id DESC LIMIT 30',
-    [req.user.uid]
-  );
+    'SELECT * FROM withdraw_requests WHERE uid = $1 ORDER BY id DESC LIMIT 30', [req.user.uid]);
   res.json({ deposits: deposits.rows, withdraws: withdraws.rows });
 });
 
-/* ============================================================
-   👥 الوكالة
-   ============================================================ */
+/* ===== Agent ===== */
 app.get('/api/agent/info', authUser, async (req, res) => {
   const u = req.user;
   const referrals = await pool.query(
     'SELECT uid, first_name, last_name, balance, laps, wagered, won, created_at, last_login FROM users WHERE referred_by = $1 ORDER BY created_at DESC',
-    [u.uid]
-  );
+    [u.uid]);
   const commissions = await pool.query(
-    'SELECT * FROM commissions WHERE agent_uid = $1 ORDER BY id DESC LIMIT 100',
-    [u.uid]
-  );
+    'SELECT * FROM commissions WHERE agent_uid = $1 ORDER BY id DESC LIMIT 100', [u.uid]);
   const refs = referrals.rows.map(r => ({
     uid: r.uid, first_name: r.first_name, last_name: r.last_name,
     balance: Number(r.balance), laps: r.laps, wagered: Number(r.wagered),
@@ -714,13 +696,10 @@ app.get('/api/agent/info', authUser, async (req, res) => {
   const totalRefWagered = refs.reduce((s, r) => s + r.wagered, 0);
   const totalRefWon = refs.reduce((s, r) => s + r.won, 0);
   const totalRefLost = Math.max(0, totalRefWagered - totalRefWon);
-
   res.json({
-    invite_code: u.invite_code,
-    agent_level: u.agent_level,
+    invite_code: u.invite_code, agent_level: u.agent_level,
     total_commission: Number(u.total_commission),
-    referrals_count: refs.length,
-    referrals: refs,
+    referrals_count: refs.length, referrals: refs,
     commissions: commissions.rows.map(c => ({ ...c, amount: Number(c.amount), created_at: Number(c.created_at) })),
     stats: { total_ref_wagered: totalRefWagered, total_ref_won: totalRefWon, total_ref_lost: totalRefLost }
   });
@@ -732,16 +711,12 @@ app.post('/api/agent/become', authUser, async (req, res) => {
   res.json({ success: true, message: 'تم ترقيتك إلى وكيل المستوى 1' });
 });
 
-/* ============================================================
-   📢 RTP — معلومات عامة
-   ============================================================ */
+/* ===== RTP info ===== */
 app.get('/api/rtp', (req, res) => {
   res.json({ rtp: RTP, houseEdge: 1 - RTP, maxWinMult: MAX_WIN_MULT });
 });
 
-/* ============================================================
-   🔒 Admin
-   ============================================================ */
+/* ===== Admin ===== */
 app.post('/api/admin/login', rateLimit(5, 60000), (req, res) => {
   const { password } = req.body;
   if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'كلمة مرور خاطئة' });
@@ -761,22 +736,14 @@ app.get('/api/admin/stats', authAdmin, async (req, res) => {
     const pendingWithdraws = await pool.query("SELECT COUNT(*)::int AS c FROM withdraw_requests WHERE status='pending'");
     const agents = await pool.query('SELECT COUNT(*)::int AS c FROM users WHERE agent_level > 0');
     const totalCommission = await pool.query('SELECT COALESCE(SUM(amount),0)::bigint AS s FROM commissions');
-
     const tw = Number(totalWagered.rows[0].s);
     const wn = Number(totalWon.rows[0].s);
-
     res.json({
-      totalUsers: users.rows[0].c,
-      totalBalance: Number(totalBalance.rows[0].s),
-      totalWagered: tw,
-      totalWon: wn,
-      totalSpins: spins.rows[0].c,
-      activeToday: activeToday.rows[0].c,
-      banned: banned.rows[0].c,
-      pendingDeposits: pendingDeposits.rows[0].c,
-      pendingWithdraws: pendingWithdraws.rows[0].c,
-      agents: agents.rows[0].c,
-      totalCommission: Number(totalCommission.rows[0].s),
+      totalUsers: users.rows[0].c, totalBalance: Number(totalBalance.rows[0].s),
+      totalWagered: tw, totalWon: wn, totalSpins: spins.rows[0].c,
+      activeToday: activeToday.rows[0].c, banned: banned.rows[0].c,
+      pendingDeposits: pendingDeposits.rows[0].c, pendingWithdraws: pendingWithdraws.rows[0].c,
+      agents: agents.rows[0].c, totalCommission: Number(totalCommission.rows[0].s),
       houseProfit: tw - wn,
       rtp: tw > 0 ? (wn / tw * 100).toFixed(2) + '%' : '—'
     });
@@ -799,15 +766,12 @@ app.get('/api/admin/users', authAdmin, async (req, res) => {
       commission: 'total_commission DESC'
     };
     const orderBy = sortMap[sort] || sortMap.created;
-
     const total = await pool.query(`SELECT COUNT(*)::int AS c FROM users ${whereSql}`, params);
     params.push(parseInt(limit));
     params.push(parseInt(offset));
     const users = await pool.query(
       `SELECT * FROM users ${whereSql} ORDER BY ${orderBy} LIMIT $${params.length - 1} OFFSET $${params.length}`,
-      params
-    );
-
+      params);
     const mapped = users.rows.map(u => ({
       id: u.id, uid: u.uid, first_name: u.first_name, last_name: u.last_name,
       phone: u.phone, email: u.email, balance: Number(u.balance), laps: u.laps,
@@ -817,7 +781,6 @@ app.get('/api/admin/users', authAdmin, async (req, res) => {
       notes: u.notes, created_at: Number(u.created_at), last_login: Number(u.last_login),
       last_ip: u.last_ip
     }));
-
     res.json({ users: mapped, total: total.rows[0].c });
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
@@ -834,7 +797,6 @@ app.get('/api/admin/user/:uid', authAdmin, async (req, res) => {
     const withdraws = await pool.query('SELECT * FROM withdraw_requests WHERE uid = $1 ORDER BY id DESC LIMIT 50', [user.uid]);
     const referrals = await pool.query('SELECT uid, first_name, last_name, created_at FROM users WHERE referred_by = $1', [user.uid]);
     const commissions = await pool.query('SELECT * FROM commissions WHERE agent_uid = $1 ORDER BY id DESC LIMIT 50', [user.uid]);
-
     res.json({
       user, spins: spins.rows, transactions: transactions.rows,
       logins: logins.rows, deposits: deposits.rows, withdraws: withdraws.rows,
@@ -912,7 +874,6 @@ app.post('/api/admin/deposits/process', authAdmin, async (req, res) => {
     if (!dr.rows.length) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'غير موجود' }); }
     const deposit = dr.rows[0];
     if (deposit.status !== 'pending') { await client.query('ROLLBACK'); return res.status(400).json({ error: 'تمت معالجته' }); }
-
     if (action === 'approve') {
       const ur = await client.query('SELECT balance FROM users WHERE uid = $1 FOR UPDATE', [deposit.uid]);
       if (!ur.rows.length) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'المستخدم غير موجود' }); }
@@ -926,8 +887,7 @@ app.post('/api/admin/deposits/process', authAdmin, async (req, res) => {
     }
     await client.query(
       'UPDATE deposit_requests SET status = $1, admin_note = $2, processed_at = $3, processed_by = $4 WHERE id = $5',
-      [action === 'approve' ? 'approved' : 'rejected', admin_note || '', Date.now(), 'admin', id]
-    );
+      [action === 'approve' ? 'approved' : 'rejected', admin_note || '', Date.now(), 'admin', id]);
     await client.query('COMMIT');
     res.json({ success: true });
   } catch (e) {
@@ -956,7 +916,6 @@ app.post('/api/admin/withdraws/process', authAdmin, async (req, res) => {
     if (!wr.rows.length) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'غير موجود' }); }
     const withdraw = wr.rows[0];
     if (withdraw.status !== 'pending') { await client.query('ROLLBACK'); return res.status(400).json({ error: 'تمت معالجته' }); }
-
     if (action === 'reject') {
       const ur = await client.query('SELECT balance FROM users WHERE uid = $1 FOR UPDATE', [withdraw.uid]);
       if (ur.rows.length) {
@@ -970,8 +929,7 @@ app.post('/api/admin/withdraws/process', authAdmin, async (req, res) => {
     }
     await client.query(
       'UPDATE withdraw_requests SET status = $1, admin_note = $2, processed_at = $3, processed_by = $4 WHERE id = $5',
-      [action === 'approve' ? 'approved' : 'rejected', admin_note || '', Date.now(), 'admin', id]
-    );
+      [action === 'approve' ? 'approved' : 'rejected', admin_note || '', Date.now(), 'admin', id]);
     await client.query('COMMIT');
     res.json({ success: true });
   } catch (e) {
@@ -1010,17 +968,14 @@ app.get('/api/admin/agents', authAdmin, async (req, res) => {
   res.json({ agents: r.rows });
 });
 
-/* ============================================================
-   Routes
-   ============================================================ */
+/* ===== Routes ===== */
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 
-/* ============================================================
-   Startup
-   ============================================================ */
+/* ===== Startup ===== */
 (async () => {
   try {
+    console.log('🚀 بدء التشغيل...');
     await initDB();
     app.listen(PORT, () => {
       console.log('⚡ STORMCROWN SERVER');
@@ -1031,10 +986,14 @@ app.use((req, res) => res.status(404).json({ error: 'Not found' }));
       console.log('Admin: http://localhost:' + PORT + '/admin');
     });
   } catch (e) {
-    console.error('❌ فشل تشغيل السيرفر:', e);
-    process.exit(1);
+    console.error('❌ فشل تشغيل السيرفر:');
+    console.error(e && e.stack ? e.stack : e);
+    console.error('DATABASE_URL set?', !!process.env.DATABASE_URL);
+    console.error('JWT_SECRET set?', !!process.env.JWT_SECRET);
+    console.error('NODE_ENV =', process.env.NODE_ENV);
+    setTimeout(() => process.exit(1), 3000);
   }
-});
+})();
 
 process.on('SIGTERM', async () => { await pool.end(); process.exit(0); });
 process.on('SIGINT', async () => { await pool.end(); process.exit(0); });
