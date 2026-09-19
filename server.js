@@ -2,9 +2,8 @@
    STORMCROWN — server.js
    - PostgreSQL دائم
    - منطق اللفة في السيرفر
-   - RTP ثابت 94%
+   - RTP متوازن + توزيع زيوس واقعي
    - دعم الجولات المجانية
-   - معالجة أخطاء شاملة
    ============================================================ */
 
 const express = require('express');
@@ -17,7 +16,6 @@ const { Pool } = require('pg');
 
 const app = express();
 
-/* ===== التقاط أي خطأ غير معالج ===== */
 process.on('uncaughtException', (e) => {
   console.error('💥 UNCAUGHT EXCEPTION:');
   console.error(e && e.stack ? e.stack : e);
@@ -29,24 +27,21 @@ process.on('unhandledRejection', (e) => {
 
 const PORT = process.env.PORT || 3000;
 
-/* ===== متغيرات البيئة ===== */
 console.log('🔍 فحص المتغيرات...');
 console.log('   PORT:', PORT);
 console.log('   NODE_ENV:', process.env.NODE_ENV || '(غير مضبوط)');
 console.log('   DATABASE_URL:', process.env.DATABASE_URL ? '✅ موجود' : '❌ مفقود');
 console.log('   JWT_SECRET:', process.env.JWT_SECRET ? '✅ موجود' : '❌ مفقود');
-console.log('   ADMIN_PASSWORD:', process.env.ADMIN_PASSWORD ? '✅ موجود' : '⚠️ يستخدم الافتراضي');
-console.log('   ADMIN_TOKEN:', process.env.ADMIN_TOKEN ? '✅ موجود' : '⚠️ يُولَّد عشوائيًا');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  console.error('❌ JWT_SECRET غير مضبوط — أضفه في Environment');
+  console.error('❌ JWT_SECRET غير مضبوط');
   setTimeout(() => process.exit(1), 2000);
 }
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
-  console.error('❌ DATABASE_URL غير مضبوط — أضفه في Environment');
+  console.error('❌ DATABASE_URL غير مضبوط');
   setTimeout(() => process.exit(1), 2000);
 }
 
@@ -56,7 +51,6 @@ const ADMIN_TOKEN = process.env.ADMIN_TOKEN || crypto.randomBytes(24).toString('
 const USDT_TO_SYP = 15000;
 const USD_TO_SYP  = 15000;
 
-/* ===== RTP ===== */
 const RTP = Math.min(0.97, Math.max(0.85, parseFloat(process.env.RTP || '0.94')));
 const MAX_WIN_MULT = 5000;
 
@@ -75,7 +69,6 @@ const PAYMENT_METHODS = [
 ];
 
 /* ===== قاعدة البيانات ===== */
-console.log('📦 تهيئة pool قاعدة البيانات...');
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
@@ -84,11 +77,10 @@ const pool = new Pool({
 });
 
 pool.on('error', (e) => {
-  console.error('💥 خطأ غير متوقع في pool:', e);
+  console.error('💥 خطأ في pool:', e);
 });
 
 async function initDB() {
-  console.log('🛠️ إنشاء الجداول...');
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
@@ -211,25 +203,57 @@ const SYM = {
   gem_purple:{ pay: 0.10 }
 };
 
-const ZEUS_MAIN = [2, 3, 5, 10, 15, 25, 50, 100, 250, 500];
+const ZEUS_MAIN    = [2, 3, 5, 10, 15, 25, 50, 100, 250, 500];
+const ZEUS_PREMIUM = [50, 75, 100, 150, 200, 250, 350, 500];
 
 function rint(max) { return crypto.randomInt(0, max); }
 function rnd(a)   { return a[rint(a.length)]; }
 
+/* ============================================================
+   🎯 توزيع قيم زيوس — واقعي ومتوازن
+   - القيم الصغيرة شائعة (2، 3، 5)
+   - القيم الكبيرة نادرة جدًا (250، 500)
+   ============================================================ */
+function pickZeusValue(pool) {
+  const r = rint(1000);
+  const isPremium = Array.isArray(pool) && pool[0] >= 50;
+  if (isPremium) {
+    if (r < 300) return 50;
+    if (r < 550) return 75;
+    if (r < 750) return 100;
+    if (r < 870) return 150;
+    if (r < 940) return 200;
+    if (r < 975) return 250;
+    if (r < 995) return 350;
+    return 500;
+  } else {
+    if (r < 400) return 2;
+    if (r < 650) return 3;
+    if (r < 800) return 5;
+    if (r < 880) return 10;
+    if (r < 930) return 15;
+    if (r < 960) return 25;
+    if (r < 980) return 50;
+    if (r < 993) return 100;
+    if (r < 999) return 250;
+    return 500;
+  }
+}
+
 function rSym(zeusPool) {
   const r = rint(100);
-  if (r < 15) return { type: 'zeus', v: rnd(zeusPool) };
-  if (r < 20) return { type: 'scatter' };
-  if (r < 30) return { type: 'gem_purple' };
-  if (r < 40) return { type: 'gem_green' };
-  if (r < 49) return { type: 'gem_blue' };
-  if (r < 58) return { type: 'gem_red' };
-  if (r < 66) return { type: 'flaming' };
-  if (r < 73) return { type: 'ring' };
-  if (r < 79) return { type: 'hourglass' };
-  if (r < 84) return { type: 'chalice' };
-  if (r < 88) return { type: 'crown' };
-  if (r < 90) return { type: 'zeusFist' };
+  if (r < 7) return { type: 'zeus', v: pickZeusValue(zeusPool) };
+  if (r < 12) return { type: 'scatter' };
+  if (r < 22) return { type: 'gem_purple' };
+  if (r < 32) return { type: 'gem_green' };
+  if (r < 42) return { type: 'gem_blue' };
+  if (r < 52) return { type: 'gem_red' };
+  if (r < 60) return { type: 'flaming' };
+  if (r < 68) return { type: 'ring' };
+  if (r < 75) return { type: 'hourglass' };
+  if (r < 81) return { type: 'chalice' };
+  if (r < 86) return { type: 'crown' };
+  if (r < 89) return { type: 'zeusFist' };
   return { type: 'gem_purple' };
 }
 
@@ -378,7 +402,7 @@ function authAdmin(req, res, next) {
   next();
 }
 
-/* ===== المصادقة ===== */
+/* ===== Auth ===== */
 app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
   try {
     const { first, last, phone, email, password, inviteCode } = req.body;
@@ -988,9 +1012,6 @@ app.use((req, res) => res.status(404).json({ error: 'Not found' }));
   } catch (e) {
     console.error('❌ فشل تشغيل السيرفر:');
     console.error(e && e.stack ? e.stack : e);
-    console.error('DATABASE_URL set?', !!process.env.DATABASE_URL);
-    console.error('JWT_SECRET set?', !!process.env.JWT_SECRET);
-    console.error('NODE_ENV =', process.env.NODE_ENV);
     setTimeout(() => process.exit(1), 3000);
   }
 })();
