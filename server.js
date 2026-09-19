@@ -1,6 +1,6 @@
 /* ============================================================
    STORMCROWN — server.js
-   v6 — فوز أقل تكرارًا وأعلى قيمة
+   v7 — توازن حقيقي: فوز صغير متكرر + فوز كبير نادر
    ============================================================ */
 
 const express = require('express');
@@ -21,11 +21,6 @@ process.on('unhandledRejection', (e) => {
 });
 
 const PORT = process.env.PORT || 3000;
-
-console.log('🔍 فحص المتغيرات...');
-console.log('   DATABASE_URL:', process.env.DATABASE_URL ? '✅' : '❌');
-console.log('   JWT_SECRET:', process.env.JWT_SECRET ? '✅' : '❌');
-console.log('   NODE_ENV:', process.env.NODE_ENV || '(غير مضبوط)');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) { console.error('❌ JWT_SECRET مفقود'); setTimeout(()=>process.exit(1), 2000); }
@@ -127,19 +122,20 @@ async function initDB() {
 const COLS = 6, ROWS = 5;
 
 /* ============================================================
-   💰 جدول الدفع v6 — دفعات أعلى
+   💰 جدول الدفع v7 — متوازن
+   الرموز الصغيرة تدفع معقول، الرموز النادرة تدفع جيد
    ============================================================ */
 const SYM = {
-  zeusFist:  { pay: 4.0  },
-  crown:     { pay: 2.0  },
-  chalice:   { pay: 1.4  },
-  hourglass: { pay: 1.0  },
-  ring:      { pay: 0.65 },
-  flaming:   { pay: 0.45 },
-  gem_red:   { pay: 0.35 },
-  gem_blue:  { pay: 0.28 },
-  gem_green: { pay: 0.22 },
-  gem_purple:{ pay: 0.15 }
+  zeusFist:  { pay: 3.0  },   // نادر — يدفع جيد
+  crown:     { pay: 1.5  },
+  chalice:   { pay: 1.0  },
+  hourglass: { pay: 0.7  },
+  ring:      { pay: 0.5  },
+  flaming:   { pay: 0.35 },
+  gem_red:   { pay: 0.28 },
+  gem_blue:  { pay: 0.22 },
+  gem_green: { pay: 0.16 },
+  gem_purple:{ pay: 0.10 }    // شائع — دفع صغير
 };
 
 const ZEUS_MAIN    = [2, 3, 5, 10, 15, 25];
@@ -148,7 +144,7 @@ const ZEUS_PREMIUM = [10, 15, 25, 50, 75, 100];
 function rint(max) { return crypto.randomInt(0, max); }
 
 /* ============================================================
-   🎯 توزيع زيوس — v3 (متوازن)
+   🎯 توزيع زيوس
    ============================================================ */
 function pickZeusValue(pool) {
   const r = rint(1000);
@@ -171,22 +167,23 @@ function pickZeusValue(pool) {
 }
 
 /* ============================================================
-   🎯 rSym v6 — gem_purple نادر (8%)، الرموز الأخرى موزعة
+   🎯 rSym v7 — توزيع متوازن
+   gem_purple شائع (يدفع صغير) + رموز نادرة تدفع جيد
    ============================================================ */
 function rSym(zeusPool) {
   const r = rint(1000);
   if (r < 40)  return { type: 'zeus', v: pickZeusValue(zeusPool) };  // 4%
   if (r < 60)  return { type: 'scatter' };                          // 2%
-  if (r < 140) return { type: 'gem_purple' };                       // 8% ← قليل
-  if (r < 260) return { type: 'gem_green' };                        // 12%
-  if (r < 380) return { type: 'gem_blue' };                         // 12%
-  if (r < 500) return { type: 'gem_red' };                          // 12%
-  if (r < 620) return { type: 'flaming' };                          // 12%
-  if (r < 740) return { type: 'ring' };                             // 12%
-  if (r < 850) return { type: 'hourglass' };                        // 11%
-  if (r < 930) return { type: 'chalice' };                          // 8%
-  if (r < 980) return { type: 'crown' };                            // 5%
-  return { type: 'zeusFist' };                                       // 2%
+  if (r < 200) return { type: 'gem_purple' };                       // 14% شائع
+  if (r < 320) return { type: 'gem_green' };                        // 12%
+  if (r < 430) return { type: 'gem_blue' };                         // 11%
+  if (r < 530) return { type: 'gem_red' };                          // 10%
+  if (r < 620) return { type: 'flaming' };                          // 9%
+  if (r < 710) return { type: 'ring' };                             // 9%
+  if (r < 800) return { type: 'hourglass' };                        // 9%
+  if (r < 890) return { type: 'chalice' };                          // 9%
+  if (r < 970) return { type: 'crown' };                            // 8%
+  return { type: 'zeusFist' };                                       // 3%
 }
 
 function genGrid(zeusPool) {
@@ -199,7 +196,8 @@ function genGrid(zeusPool) {
 }
 
 /* ============================================================
-   🎯 chkWins v6 — الحد الأدنى 8 رموز، مضاعفات مرتفعة
+   🎯 chkWins v7 — حد 6 رموز (فوز أكثر تكرارًا)
+   مضاعفات معقولة
    ============================================================ */
 function chkWins(g, bet) {
   const c = {};
@@ -210,14 +208,15 @@ function chkWins(g, bet) {
   }
   const wins = [];
   for (const [sym, n] of Object.entries(c)) {
-    if (n < 8) continue;
+    if (n < 6) continue;
     const base = SYM[sym].pay * bet;
     let posMult = 1;
-    if (n === 9)       posMult = 2.0;
-    else if (n === 10) posMult = 4.0;
-    else if (n === 11) posMult = 7.0;
-    else if (n === 12) posMult = 12.0;
-    else if (n >= 13)  posMult = 20.0;
+    if (n === 7)       posMult = 2.0;
+    else if (n === 8)  posMult = 4.0;
+    else if (n === 9)  posMult = 7.0;
+    else if (n === 10) posMult = 12.0;
+    else if (n === 11) posMult = 20.0;
+    else if (n >= 12)  posMult = 35.0;
     wins.push({ symbol: sym, count: n, amount: Math.floor(base * posMult) });
   }
   return wins;
@@ -237,9 +236,8 @@ function cntSc(g) {
   return n;
 }
 
-/* أقصى سلاسل انفجار = 10 */
 function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
-  const MAX_CHAINS = 10;
+  const MAX_CHAINS = 8;
   const chains = [];
   let grid = genGrid(zeusPool);
   let totalWin = 0;
