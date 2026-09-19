@@ -1,8 +1,9 @@
 /* ============================================================
    STORMCROWN — server.js
-   - قاعدة بيانات PostgreSQL دائمة (لا فقدان بيانات على Render)
-   - منطق اللفة في السيرفر (لا يمكن للاعب التلاعب بالفوز)
+   - قاعدة بيانات PostgreSQL دائمة
+   - منطق اللفة في السيرفر
    - RTP ثابت عادل (افتراضي 94%)
+   - دعم الجولات المجانية (free spins)
    ============================================================ */
 
 const express = require('express');
@@ -30,8 +31,6 @@ const USD_TO_SYP  = 15000;
 
 /* ============================================================
    🎯 RTP — نسبة العائد للاعب
-   القيمة الافتراضية 94% (House Edge = 6%)
-   يمكن تغييرها عبر متغير البيئة RTP (بين 0.85 و 0.97)
    ============================================================ */
 const RTP = Math.min(0.97, Math.max(0.85, parseFloat(process.env.RTP || '0.94')));
 const MAX_WIN_MULT = 5000;
@@ -167,7 +166,7 @@ async function initDB() {
 }
 
 /* ============================================================
-   🎰 منطق اللعبة — يعمل في السيرفر فقط
+   🎰 منطق اللعبة — في السيرفر فقط
    ============================================================ */
 const COLS = 6, ROWS = 5;
 
@@ -254,7 +253,6 @@ function cntSc(g) {
   return n;
 }
 
-/* يحاكي جولة كاملة مع سلاسل tumble ويعيد كل الحالات للعميل للعرض */
 function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
   const MAX_CHAINS = 30;
   const chains = [];
@@ -502,19 +500,19 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
   const ip = getClientIP(req);
 
   try {
-    const { bet } = req.body;
+    const { bet, freeSpin } = req.body;
     if (typeof bet !== 'number' || bet <= 0 || bet > 1000000)
       return res.status(400).json({ error: 'رهان غير صحيح' });
-    if (u.balance < bet)
+    if (!freeSpin && u.balance < bet)
       return res.status(400).json({ error: 'رصيد غير كافٍ' });
 
-    const result = runSpin(bet, ZEUS_MAIN, false, 0);
+    const result = runSpin(bet, ZEUS_MAIN, !!freeSpin, 0);
 
     let totalWin = result.totalWin;
     const maxWin = bet * MAX_WIN_MULT;
     if (totalWin > maxWin) totalWin = maxWin;
 
-    const net = totalWin - bet;
+    const net = totalWin - (freeSpin ? 0 : bet);
     const newBalance = Number(u.balance) + net;
     if (newBalance < 0) return res.status(400).json({ error: 'رصيد غير كافٍ' });
 
@@ -524,14 +522,14 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
              won = won + $3,
              best_win = GREATEST(best_win, $4)
        WHERE uid = $5
-    `, [newBalance, bet, totalWin, totalWin, u.uid]);
+    `, [newBalance, freeSpin ? 0 : bet, totalWin, totalWin, u.uid]);
 
     await pool.query(`
       INSERT INTO spins (uid, bet, won, net, created_at, ip)
       VALUES ($1,$2,$3,$4,$5,$6)
-    `, [u.uid, bet, totalWin, net, Date.now(), ip]);
+    `, [u.uid, freeSpin ? 0 : bet, totalWin, net, Date.now(), ip]);
 
-    // عمولة الوكيل عند الخسارة
+    /* عمولة الوكيل عند الخسارة */
     if (net < 0 && u.referred_by) {
       const refR = await pool.query('SELECT * FROM users WHERE uid = $1', [u.referred_by]);
       const ref = refR.rows[0];
@@ -551,19 +549,18 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
       }
     }
 
-    // عدد الموزعات في الشبكة النهائية
     const scatterCount = cntSc(result.finalGrid);
 
     res.json({
       success: true,
       balance: newBalance,
-      bet,
+      bet: freeSpin ? 0 : bet,
       totalWin,
       net,
       chains: result.chains,
       finalGrid: result.finalGrid,
       scatterCount,
-      freeSpinsTriggered: scatterCount >= 4
+      freeSpinsTriggered: scatterCount >= 4 && !freeSpin
     });
   } catch (e) {
     console.error('spin error:', e);
@@ -736,7 +733,7 @@ app.post('/api/agent/become', authUser, async (req, res) => {
 });
 
 /* ============================================================
-   📢 RTP — معلومات عامة (شفافية)
+   📢 RTP — معلومات عامة
    ============================================================ */
 app.get('/api/rtp', (req, res) => {
   res.json({ rtp: RTP, houseEdge: 1 - RTP, maxWinMult: MAX_WIN_MULT });
