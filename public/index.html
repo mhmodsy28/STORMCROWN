@@ -811,7 +811,6 @@ const COLS=6,ROWS=5,CELL=115,PADX=12,PADY=12;
 const rcv=$('reels');
 const rcx=rcv.getContext('2d');
 
-/* جدول دفع للعرض فقط — السيرفر هو من يحسب الفوز */
 const SYM = {
   zeusFist:  { pay: 5.0  },
   crown:     { pay: 2.0  },
@@ -833,7 +832,6 @@ const ZEUS_MAIN=[2,3,5,10,15,25,50,100,250,500];
 const S={bal:0,bi:2,bet:100,grid:[],spin:false,fs:0,mc:0,lw:0,
   laps:0,best:0,wagered:0,won:0,fsType:'—',fire:false};
 
-/* ============ ExplosionFX ============ */
 const ExplosionFX = (() => {
   const cvs = document.createElement('canvas');
   cvs.id = 'boomFX';
@@ -889,7 +887,6 @@ const ExplosionFX = (() => {
   return { boom };
 })();
 
-/* ============ Zeus Character ============ */
 const ZeusChar=(()=>{
   const back=$('zeusBackdrop');
   const bc=back.getContext('2d');
@@ -1024,14 +1021,12 @@ const ZeusChar=(()=>{
   return {setState,say};
 })();
 
-/* ============ REELS ============ */
 const RS={
   off:new Array(COLS).fill(0),spd:new Array(COLS).fill(0),
   stop:new Array(COLS).fill(true),str:[],
   bounce:new Array(COLS).fill(0),bounceV:new Array(COLS).fill(0)
 };
 
-/* rSym يستخدم للعرض أثناء الدوران فقط — النتيجة النهائية من السيرفر */
 function rSymVisual(){
   const r=Math.random()*100;
   if(r<15)return{type:'zeus',v:rnd(ZEUS_MAIN)};
@@ -1071,7 +1066,6 @@ function loop(t){
   draw(t);requestAnimationFrame(loop);
 }
 
-/* ============ Paint Symbols ============ */
 function paintSymbol(g,type,cx,cy,size){
   const s=size/64;
   g.save();g.translate(cx,cy);
@@ -1238,7 +1232,6 @@ function drawSymbolAt(x,y,sym,t,fire,winHighlight){
   }
 }
 
-/* شبكة الفوز الحالية لعرض الإطار الأخضر */
 let currentWinSymbols = [];
 
 function draw(t){
@@ -1299,7 +1292,6 @@ function draw(t){
   }
 }
 
-/* ============ Animations ============ */
 async function animSpinToGrid(finalGrid){
   for(let x=0;x<COLS;x++){
     RS.str[x]=stripVisual();RS.off[x]=0;RS.stop[x]=false;
@@ -1319,7 +1311,6 @@ async function animSpinToGrid(finalGrid){
   await sl(150);
 }
 
-/* tumble: نحذف الرموز الرابحة من الشبكة الحالية ونسقط لملء الفراغات حسب الشبكة القادمة من السيرفر */
 async function animTumbleTo(nextGrid, winningSymbols){
   const boomPoints = [];
   for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
@@ -1344,20 +1335,7 @@ async function animTumbleTo(nextGrid, winningSymbols){
   await sl(260);
 
   for(let x=0;x<COLS;x++){
-    // نبني العمود من الشبكة القادمة
-    const targetCol = nextGrid[x];
-    const kept = [];
-    for(let y=ROWS-1;y>=0;y--) if(S.grid[x][y]) kept.push(S.grid[x][y]);
-    // نكمل من الأعلى برموز الشبكة القادمة
-    let ti = 0;
-    while(kept.length<ROWS){
-      // ابحث في الشبكة القادمة عن رمز يستحق أن يسقط
-      // الأسهل: نستخدم رموز الشبكة القادمة من الأعلى
-      if(ti < ROWS) { kept.push(targetCol[ti]); ti++; }
-      else kept.push(rSymVisual());
-    }
-    // لكن هذا قد لا يطابق تمامًا — الأفضل نستخدم الشبكة القادمة كاملة
-    S.grid[x] = targetCol.slice();
+    S.grid[x] = nextGrid[x].slice();
     RS.bounce[x] = -10;
     RS.bounceV[x] = -2;
     Aud.reelStop(x);
@@ -1402,7 +1380,7 @@ function multPop(v,x,y){
   setTimeout(()=>el.remove(),1400);
 }
 
-/* ============ Spin (منطق السيرفر) ============ */
+/* ============ Spin ============ */
 async function spin(){
   if(S.spin)return;
   const isFree = S.fs > 0;
@@ -1427,27 +1405,18 @@ async function spin(){
     const totalWin = res.totalWin || 0;
     const scatterCount = res.scatterCount || 0;
 
-    /* السيرفر أعاد الرصيد الجديد */
     S.bal = res.balance;
-
-    /* الرصيد يظهر مباشرة */
     upd();
 
-    /* اختيار الشبكة الأولى للعرض */
     const firstGrid = chains.length > 0 ? chains[0].grid : finalGrid;
-
-    /* دوران البكرات وإظهار الشبكة الأولى */
     await animSpinToGrid(firstGrid);
     S.grid = firstGrid;
 
-    let chainTotal = 0;
     let cumulativeMult = 0;
 
-    /* معالجة السلاسل */
     for(let i=0;i<chains.length;i++){
       const chain = chains[i];
 
-      /* مضاعفات زيوس */
       if(chain.zeusSum > 0){
         Aud.mult(chain.zeusSum);Aud.strike();
         ZeusChar.setState('angry',1500);
@@ -1463,10 +1432,8 @@ async function spin(){
         await sl(400);
       }
 
-      /* إبراز الرموز الرابحة */
       currentWinSymbols = chain.wins.map(w=>w.symbol);
       const chainWin = chain.winAmount;
-      chainTotal += chainWin;
       cumulativeMult = chain.cumulativeMult || 0;
       S.mc = cumulativeMult;
 
@@ -1484,7 +1451,6 @@ async function spin(){
 
       await sl(700);
 
-      /* الانتقال إلى الشبكة التالية (tumble) */
       const nextGrid = (i < chains.length - 1) ? chains[i+1].grid : finalGrid;
       currentWinSymbols = [];
       Aud.tumble();
@@ -1493,11 +1459,8 @@ async function spin(){
     }
 
     currentWinSymbols = [];
-
-    /* الحالة النهائية */
     S.grid = finalGrid;
 
-    /* فوز إجمالي */
     S.lw = totalWin;
     S.won += totalWin;
     if(totalWin > S.best) S.best = totalWin;
@@ -1517,20 +1480,18 @@ async function spin(){
       log('✅ إجمالي: '+Math.floor(totalWin)+' ل.س');
     }
 
-    /* تفعيل الجولات المجانية */
     if(scatterCount >= 4 && S.fs === 0 && !isFree){
-      S.fs = 15;
+      S.fs = 8;
       S.mc = 0;
       S.fsType = 'عادي';
-      log('⚡ '+scatterCount+' موزعة — 15 جولة مجانية');
+      log('⚡ '+scatterCount+' موزعة — 8 جولات مجانية');
       flash(700,1); shake(2.5,700);
       fireOn(false);
       ZeusChar.setState('angry',3000);
-      setTimeout(()=>showBigWinOverlay(totalWin,15,'fs'),500);
+      setTimeout(()=>showBigWinOverlay(totalWin,8,'fs'),500);
       await sl(2500);
     }
 
-    /* متابعة الجولات المجانية */
     if(S.fs > 0){
       S.spin = false;
       wheel.classList.remove('spinning','disabled');
@@ -1539,7 +1500,6 @@ async function spin(){
       return;
     }
 
-    /* نهاية الجولة */
     S.spin = false;
     wheel.classList.remove('spinning','disabled');
     $('buyNormal').disabled=false;
@@ -1589,7 +1549,6 @@ function showBigWinOverlay(amount, fsCount, tier){
   setTimeout(hide,5000);
 }
 
-/* ============ Log ============ */
 function log(m){
   const e=$('log');e.innerHTML=m+'<br>'+e.innerHTML;
   while(e.children.length>30)e.removeChild(e.lastChild);
@@ -1608,7 +1567,6 @@ function addHistory(bet,won,mult){
   while(list.children.length>20)list.removeChild(list.lastChild);
 }
 
-/* ============ HUD ============ */
 function upd(){
   $('bal').textContent=Math.floor(S.bal);
   $('lastWin').textContent=Math.floor(S.lw);
@@ -1619,7 +1577,6 @@ function upd(){
   $('pricePremium').textContent=S.bet*PRICE_PREMIUM_MULT;
 }
 
-/* ============ Controls ============ */
 $('betDown').onclick=()=>{
   if(S.spin||S.fs>0)return;
   if(S.bi>0){S.bi--;S.bet=BETS[S.bi];upd();Aud.reelStop(0)}
@@ -1645,7 +1602,8 @@ async function buyBonus(type){
     const r=await api('/api/buy-bonus',{method:'POST',body:JSON.stringify({price,type})});
     S.bal=r.balance;
   } catch(e){ toast(e.message,true); return; }
-  S.fs=15;S.mc=0;
+  S.fs=8;
+  S.mc=0;
   S.fsType=type==='premium'?'مميز':'عادي';
   upd();
   Aud.buy(type==='premium');
@@ -1655,7 +1613,6 @@ async function buyBonus(type){
   setTimeout(spin,800);
 }
 
-/* ============ Paytable ============ */
 (function buildPaytable(){
   const box=$('ptRows');
   const order=['zeusFist','crown','chalice','hourglass','ring','flaming',
@@ -1677,7 +1634,6 @@ async function buyBonus(type){
   });
 })();
 
-/* ============ Wallet ============ */
 const PAY_INFO={
   sham_syp:{name:'شام كاش ل.س',rate:1,min:200,max:5000000,cur:'ل.س'},
   sham_usd:{name:'شام كاش $',rate:15000,min:5,max:5000,cur:'$'},
@@ -1844,7 +1800,6 @@ $('saveAddrBtn').onclick=async()=>{
   }catch(e){toast(e.message,true);}
 };
 
-/* ============ Profile ============ */
 $('profileBtn').onclick=async()=>{
   const u=JSON.parse(localStorage.getItem('sc_user')||'{}');
   $('profileContent').innerHTML=
@@ -1867,7 +1822,6 @@ $('profileBtn').onclick=async()=>{
   };
 };
 
-/* ============ Agent ============ */
 $('agentBadge').onclick=async()=>{
   $('agentModal').classList.add('on');
   try{
@@ -1904,7 +1858,6 @@ window.becomeAgent=async()=>{
   }catch(e){toast(e.message,true);}
 };
 
-/* ============ INIT ============ */
 S.grid=[];
 for(let x=0;x<COLS;x++){
   S.grid[x]=[];
