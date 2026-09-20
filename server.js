@@ -1,8 +1,8 @@
 /* ============================================================
-   STORMCROWN — server.js v11
-   - بونص: 50× / 200× (أسعار كازينو حقيقي)
-   - تتبع رصيد البونص الفعلي
-   - RTP متوازن
+   STORMCROWN — server.js v12
+   - المضاعف التراكمي في البونص (يستمر بين 15 لفة)
+   - مضاعفات زيوس تتجمع مثل Gates of Olympus
+   - تحسينات عامة
    ============================================================ */
 
 const express = require('express');
@@ -30,6 +30,13 @@ const USDT_TO_SYP = 15000, USD_TO_SYP = 15000;
 const RTP = Math.min(0.97, Math.max(0.85, parseFloat(process.env.RTP || '0.94')));
 const MAX_WIN_MULT = 5000;
 const FREE_SPINS_COUNT = 15;
+
+/* ============================================================
+   🎯 نظام البونص النشط — في الذاكرة
+   المفتاح: uid
+   القيمة: { spinsLeft, cumulativeMult, totalWonInBonus, initialBet, bestWin, startBalance }
+   ============================================================ */
+const activeBonuses = new Map();
 
 const WHEEL_VALUES = [0, 100, 500, 1000, 2000, 5000, 10000, 25000];
 const WHEEL_WEIGHTS = [40, 25, 15, 10, 5, 3, 1.5, 0.5];
@@ -136,22 +143,29 @@ const SYM = {
   gem_purple:{ pay: 0.07 }
 };
 
+/* المضاعفات في اللفات العادية */
 const ZEUS_MAIN    = [2, 3, 5, 10, 15, 25];
-const ZEUS_PREMIUM = [10, 15, 25, 50, 75, 100];
+/* المضاعفات في البونص — قيم أعلى مثل GoO */
+const ZEUS_PREMIUM = [2, 3, 5, 10, 15, 25, 50, 100];
 
 function rint(max) { return crypto.randomInt(0, max); }
 
+/* اللفات العادية: زيوس نادر */
 function pickZeusValue(pool) {
   const r = rint(1000);
-  const isPremium = Array.isArray(pool) && pool[0] >= 10;
+  const isPremium = Array.isArray(pool) && pool[0] >= 2 && pool.length > 6;
   if (isPremium) {
-    if (r < 400) return 10;
-    if (r < 700) return 15;
-    if (r < 880) return 25;
-    if (r < 960) return 50;
-    if (r < 990) return 75;
+    /* في البونص: قيم متنوعة تتراكم */
+    if (r < 350) return 2;
+    if (r < 550) return 3;
+    if (r < 700) return 5;
+    if (r < 820) return 10;
+    if (r < 900) return 15;
+    if (r < 950) return 25;
+    if (r < 985) return 50;
     return 100;
   } else {
+    /* في اللفات العادية: قيم صغيرة */
     if (r < 500) return 2;
     if (r < 780) return 3;
     if (r < 920) return 5;
@@ -223,12 +237,18 @@ function cntSc(g) {
   return n;
 }
 
-function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
+/* ============================================================
+   🎯 runSpin — مع دعم المضاعف التراكمي المستمر
+   إذا كان freeSpinsActive:
+     - cumulativeMultValue = المضاعف المتراكم حتى الآن
+     - المضاعفات الجديدة تُضاف إليه
+   ============================================================ */
+function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMultValue) {
   const MAX_CHAINS = 5;
   const chains = [];
   let grid = genGrid(zeusPool);
   let totalWin = 0;
-  let cumMult = cumulativeMult || 0;
+  let cumMult = cumulativeMultValue || 0;
 
   for (let chain = 0; chain < MAX_CHAINS; chain++) {
     const wins = chkWins(grid, bet);
@@ -236,13 +256,24 @@ function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
     if (wins.length === 0) break;
 
     let chainWin = wins.reduce((a, w) => a + w.amount, 0);
-    let appliedMult = zs;
-    if (freeSpinsActive) { cumMult += zs; appliedMult = cumMult; }
+
+    /* في البونص: المضاعف التراكمي يُطبق */
+    /* في اللفات العادية: مضاعفات زيوس في هذه الشبكة تُجمع وتُطبق */
+    let appliedMult;
+    if (freeSpinsActive) {
+      /* إضافة مضاعفات هذه الجولة إلى المضاعف التراكمي */
+      cumMult += zs;
+      appliedMult = cumMult;
+    } else {
+      appliedMult = zs;
+    }
+
     if (appliedMult > 0) chainWin *= appliedMult;
 
     chains.push({
       grid: JSON.parse(JSON.stringify(grid)),
-      wins, zeusSum: zs,
+      wins: wins,
+      zeusSum: zs,
       multiplier: appliedMult,
       cumulativeMult: cumMult,
       winAmount: chainWin
@@ -260,6 +291,7 @@ function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
       grid[x] = kept.reverse();
     }
   }
+
   return { chains, totalWin, finalGrid: grid, cumulativeMult: cumMult };
 }
 
@@ -429,6 +461,7 @@ app.get('/api/me', authUser, async (req, res) => {
     const u = req.user;
     const w = await pool.query('SELECT * FROM user_wallets WHERE uid = $1', [u.uid]);
     const wallet = w.rows[0] || {};
+    const bonus = activeBonuses.get(u.uid);
     res.json({
       uid: u.uid, first: u.first_name, last: u.last_name,
       phone: u.phone, email: u.email,
@@ -438,6 +471,11 @@ app.get('/api/me', authUser, async (req, res) => {
       total_commission: Number(u.total_commission),
       created: Number(u.created_at), lastLogin: Number(u.last_login),
       lastWheel: Number(u.last_wheel || 0),
+      activeBonus: bonus ? {
+        spinsLeft: bonus.spinsLeft,
+        cumulativeMult: bonus.cumulativeMult,
+        totalWonInBonus: bonus.totalWonInBonus
+      } : null,
       wallets: {
         sham_syp: wallet.sham_syp || '', sham_usd: wallet.sham_usd || '',
         usdt_bep20: wallet.usdt_bep20 || '', usdt_trc20: wallet.usdt_trc20 || ''
@@ -451,59 +489,147 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
   const u = req.user;
   const ip = getClientIP(req);
   try {
-    const { bet, freeSpin } = req.body;
+    const { bet } = req.body;
     if (typeof bet !== 'number' || bet <= 0 || bet > 1000000)
       return res.status(400).json({ error: 'رهان غير صحيح' });
-    if (!freeSpin && u.balance < bet)
+
+    /* هل يوجد بونص نشط؟ */
+    const activeBonus = activeBonuses.get(u.uid);
+    const isFree = !!activeBonus;
+
+    if (!isFree && u.balance < bet)
       return res.status(400).json({ error: 'رصيد غير كافٍ' });
 
-    const result = runSpin(bet, ZEUS_MAIN, !!freeSpin, 0);
+    /* الرهان المُستخدم */
+    const betUsed = isFree ? activeBonus.initialBet : bet;
+
+    /* المضاعف التراكمي حتى الآن */
+    const startCumMult = isFree ? activeBonus.cumulativeMult : 0;
+
+    /* تنفيذ اللفة */
+    const zeusPool = isFree ? ZEUS_PREMIUM : ZEUS_MAIN;
+    const result = runSpin(betUsed, zeusPool, isFree, startCumMult);
+
     let totalWin = result.totalWin;
-    const maxWin = bet * MAX_WIN_MULT;
+    const maxWin = betUsed * MAX_WIN_MULT;
     if (totalWin > maxWin) totalWin = maxWin;
 
-    const net = totalWin - (freeSpin ? 0 : bet);
-    const newBalance = Number(u.balance) + net;
-    if (newBalance < 0) return res.status(400).json({ error: 'رصيد غير كافٍ' });
+    let net;
+    let newBalance = Number(u.balance);
+    let bonusEnded = false;
+    let bonusSummary = null;
 
-    await pool.query(`
-      UPDATE users
-         SET balance = $1, laps = laps + 1, wagered = wagered + $2,
-             won = won + $3, best_win = GREATEST(best_win, $4)
-       WHERE uid = $5
-    `, [newBalance, freeSpin ? 0 : bet, totalWin, totalWin, u.uid]);
+    if (isFree) {
+      /* في البونص: لا خصم، فقط إضافة الربح */
+      net = totalWin;
+      newBalance = Number(u.balance) + totalWin;
 
-    await pool.query(`
-      INSERT INTO spins (uid, bet, won, net, created_at, ip)
-      VALUES ($1,$2,$3,$4,$5,$6)
-    `, [u.uid, freeSpin ? 0 : bet, totalWin, net, Date.now(), ip]);
+      /* تحديث البونص */
+      activeBonus.spinsLeft -= 1;
+      activeBonus.cumulativeMult = result.cumulativeMult;
+      activeBonus.totalWonInBonus += totalWin;
+      if (totalWin > activeBonus.bestWin) activeBonus.bestWin = totalWin;
 
-    if (net < 0 && u.referred_by) {
-      const refR = await pool.query('SELECT * FROM users WHERE uid = $1', [u.referred_by]);
-      const ref = refR.rows[0];
-      if (ref && ref.agent_level > 0) {
-        const rate = ref.agent_level === 1 ? 0.03 : ref.agent_level === 2 ? 0.05 : 0.08;
-        const commission = Math.floor(Math.abs(net) * rate);
-        if (commission > 0) {
-          await pool.query(
-            'UPDATE users SET balance = balance + $1, total_commission = total_commission + $1 WHERE uid = $2',
-            [commission, ref.uid]);
-          await pool.query(`
-            INSERT INTO commissions (agent_uid, source_uid, amount, type, note, created_at)
-            VALUES ($1,$2,$3,'loss_commission',$4,$5)
-          `, [ref.uid, u.uid, commission, 'عمولة ' + Math.abs(net), Date.now()]);
+      /* هل انتهى البونص؟ */
+      if (activeBonus.spinsLeft <= 0) {
+        bonusEnded = true;
+        bonusSummary = {
+          spins: FREE_SPINS_COUNT,
+          initialBet: activeBonus.initialBet,
+          totalWon: activeBonus.totalWonInBonus,
+          bestWin: activeBonus.bestWin,
+          finalMultiplier: result.cumulativeMult
+        };
+        activeBonuses.delete(u.uid);
+      }
+
+      /* نستخدم الرهان الأصلي للرهان */
+      await pool.query(`
+        UPDATE users
+           SET balance = $1, laps = laps + 1,
+               won = won + $2, best_win = GREATEST(best_win, $3)
+         WHERE uid = $4
+      `, [newBalance, totalWin, totalWin, u.uid]);
+
+      await pool.query(`
+        INSERT INTO spins (uid, bet, won, net, created_at, ip)
+        VALUES ($1,$2,$3,$4,$5,$6)
+      `, [u.uid, 0, totalWin, totalWin, Date.now(), ip]);
+
+    } else {
+      /* لفة عادية */
+      net = totalWin - bet;
+      newBalance = Number(u.balance) + net;
+      if (newBalance < 0) return res.status(400).json({ error: 'رصيد غير كافٍ' });
+
+      await pool.query(`
+        UPDATE users
+           SET balance = $1, laps = laps + 1, wagered = wagered + $2,
+               won = won + $3, best_win = GREATEST(best_win, $4)
+         WHERE uid = $5
+      `, [newBalance, bet, totalWin, totalWin, u.uid]);
+
+      await pool.query(`
+        INSERT INTO spins (uid, bet, won, net, created_at, ip)
+        VALUES ($1,$2,$3,$4,$5,$6)
+      `, [u.uid, bet, totalWin, net, Date.now(), ip]);
+
+      /* عمولة الوكيل */
+      if (net < 0 && u.referred_by) {
+        const refR = await pool.query('SELECT * FROM users WHERE uid = $1', [u.referred_by]);
+        const ref = refR.rows[0];
+        if (ref && ref.agent_level > 0) {
+          const rate = ref.agent_level === 1 ? 0.03 : ref.agent_level === 2 ? 0.05 : 0.08;
+          const commission = Math.floor(Math.abs(net) * rate);
+          if (commission > 0) {
+            await pool.query(
+              'UPDATE users SET balance = balance + $1, total_commission = total_commission + $1 WHERE uid = $2',
+              [commission, ref.uid]);
+            await pool.query(`
+              INSERT INTO commissions (agent_uid, source_uid, amount, type, note, created_at)
+              VALUES ($1,$2,$3,'loss_commission',$4,$5)
+            `, [ref.uid, u.uid, commission, 'عمولة ' + Math.abs(net), Date.now()]);
+          }
         }
       }
     }
 
+    /* هل ظهرت 4+ موزعات؟ (فقط في اللفات العادية) */
     const scatterCount = cntSc(result.finalGrid);
+    let freeSpinsTriggered = false;
+    if (scatterCount >= 4 && !isFree && !activeBonuses.has(u.uid)) {
+      activeBonuses.set(u.uid, {
+        spinsLeft: FREE_SPINS_COUNT,
+        cumulativeMult: 0,
+        totalWonInBonus: 0,
+        initialBet: bet,
+        bestWin: 0,
+        startBalance: newBalance
+      });
+      freeSpinsTriggered = true;
+    }
 
     res.json({
-      success: true, balance: newBalance,
-      bet: freeSpin ? 0 : bet, totalWin, net,
-      chains: result.chains, finalGrid: result.finalGrid,
-      scatterCount, freeSpinsTriggered: scatterCount >= 4 && !freeSpin
+      success: true,
+      balance: newBalance,
+      bet: isFree ? 0 : bet,
+      betUsed,
+      isFree,
+      totalWin,
+      net,
+      chains: result.chains,
+      finalGrid: result.finalGrid,
+      scatterCount,
+      freeSpinsTriggered,
+      bonusEnded,
+      bonusSummary,
+      activeBonus: activeBonuses.has(u.uid) ? {
+        spinsLeft: activeBonuses.get(u.uid).spinsLeft,
+        cumulativeMult: activeBonuses.get(u.uid).cumulativeMult,
+        totalWonInBonus: activeBonuses.get(u.uid).totalWonInBonus
+      } : null
     });
+
   } catch (e) {
     console.error('spin:', e);
     res.status(500).json({ error: 'خطأ' });
@@ -588,6 +714,8 @@ app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
       return res.status(400).json({ error: 'سعر غير صحيح' });
     if (Number(u.balance) < price)
       return res.status(400).json({ error: 'رصيد غير كافٍ' });
+    if (activeBonuses.has(u.uid))
+      return res.status(400).json({ error: 'لديك بونص نشط' });
 
     const newBalance = Number(u.balance) - price;
     await pool.query('UPDATE users SET balance = $1 WHERE uid = $2', [newBalance, u.uid]);
@@ -596,7 +724,27 @@ app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
       VALUES ($1,'bonus_buy',$2,$3,$4,NULL,$5)
     `, [u.uid, -price, newBalance, 'بونص ' + type, Date.now()]);
 
-    res.json({ success: true, balance: newBalance });
+    /* تفعيل البونص */
+    const bet = type === 'premium' ? Math.floor(price / 200) : Math.floor(price / 50);
+    activeBonuses.set(u.uid, {
+      spinsLeft: FREE_SPINS_COUNT,
+      cumulativeMult: 0,
+      totalWonInBonus: 0,
+      initialBet: bet,
+      bestWin: 0,
+      startBalance: newBalance
+    });
+
+    res.json({
+      success: true,
+      balance: newBalance,
+      bet,
+      activeBonus: {
+        spinsLeft: FREE_SPINS_COUNT,
+        cumulativeMult: 0,
+        totalWonInBonus: 0
+      }
+    });
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
@@ -968,10 +1116,11 @@ app.use((req, res) => res.status(404).json({ error: 'Not found' }));
     console.log('🚀 بدء التشغيل...');
     await initDB();
     app.listen(PORT, () => {
-      console.log('⚡ STORMCROWN SERVER v11');
+      console.log('⚡ STORMCROWN SERVER v12');
       console.log('Port:', PORT);
       console.log('RTP:', (RTP * 100).toFixed(2) + '%');
       console.log('FreeSpins:', FREE_SPINS_COUNT);
+      console.log('🎯 Cumulative Multiplier: ON');
     });
   } catch (e) {
     console.error('❌ فشل التشغيل:');
