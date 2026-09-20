@@ -1,6 +1,9 @@
 /* ============================================================
-   STORMCROWN — server.js
-   v8 — توازن حقيقي، سلاسل قليلة، دفعات معتدلة
+   STORMCROWN — server.js v10
+   - بونص 15 لفة
+   - زر ضاعف (Gamble 50/50 ×5 مرات)
+   - عجلة حظ يومية
+   - إحصائيات + إضافات احترافية
    ============================================================ */
 
 const express = require('express');
@@ -13,28 +16,27 @@ const { Pool } = require('pg');
 
 const app = express();
 
-process.on('uncaughtException', (e) => {
-  console.error('💥 UNCAUGHT:', e && e.stack ? e.stack : e);
-});
-process.on('unhandledRejection', (e) => {
-  console.error('💥 UNHANDLED:', e && e.stack ? e.stack : e);
-});
+process.on('uncaughtException', (e) => console.error('💥', e && e.stack ? e.stack : e));
+process.on('unhandledRejection', (e) => console.error('💥', e && e.stack ? e.stack : e));
 
 const PORT = process.env.PORT || 3000;
-
 const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) { console.error('❌ JWT_SECRET مفقود'); setTimeout(()=>process.exit(1), 2000); }
 const DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) { console.error('❌ DATABASE_URL مفقود'); setTimeout(()=>process.exit(1), 2000); }
+if (!JWT_SECRET) { console.error('❌ JWT_SECRET مفقود'); process.exit(1); }
+if (!DATABASE_URL) { console.error('❌ DATABASE_URL مفقود'); process.exit(1); }
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change-me-now';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || crypto.randomBytes(24).toString('hex');
 
-const USDT_TO_SYP = 15000;
-const USD_TO_SYP  = 15000;
-
+const USDT_TO_SYP = 15000, USD_TO_SYP = 15000;
 const RTP = Math.min(0.97, Math.max(0.85, parseFloat(process.env.RTP || '0.94')));
 const MAX_WIN_MULT = 5000;
+const FREE_SPINS_COUNT = 15;
+
+/* ===== عجلة الحظ — القيم ===== */
+const WHEEL_VALUES = [0, 100, 500, 1000, 2000, 5000, 10000, 25000];
+/* الاحتمالات (مجموع 100) */
+const WHEEL_WEIGHTS = [40, 25, 15, 10, 5, 3, 1.5, 0.5];
 
 const COMPANY_WALLETS = {
   sham_syp:   '066f10afcd1b2d1a8f66dbe1a1eb3f17',
@@ -57,7 +59,7 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000
 });
 
-pool.on('error', (e) => console.error('💥 pool error:', e));
+pool.on('error', (e) => console.error('💥 pool:', e));
 
 async function initDB() {
   await pool.query(`
@@ -72,7 +74,8 @@ async function initDB() {
       banned INT DEFAULT 0, referred_by VARCHAR(20),
       agent_level INT DEFAULT 0, invite_code VARCHAR(20) UNIQUE,
       total_commission BIGINT DEFAULT 0, notes TEXT DEFAULT '',
-      created_at BIGINT, last_login BIGINT, last_ip VARCHAR(50)
+      created_at BIGINT, last_login BIGINT, last_ip VARCHAR(50),
+      last_wheel BIGINT DEFAULT 0
     );
     CREATE TABLE IF NOT EXISTS spins (
       id SERIAL PRIMARY KEY, uid VARCHAR(20), bet BIGINT, won BIGINT,
@@ -109,21 +112,22 @@ async function initDB() {
       id SERIAL PRIMARY KEY, agent_uid VARCHAR(20), source_uid VARCHAR(20),
       amount BIGINT, type VARCHAR(50), note TEXT, created_at BIGINT
     );
+    CREATE TABLE IF NOT EXISTS wheel_spins (
+      id SERIAL PRIMARY KEY, uid VARCHAR(20), amount BIGINT, created_at BIGINT
+    );
     CREATE INDEX IF NOT EXISTS idx_users_uid ON users(uid);
     CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
     CREATE INDEX IF NOT EXISTS idx_spins_uid ON spins(uid);
     CREATE INDEX IF NOT EXISTS idx_deposits_status ON deposit_requests(status);
     CREATE INDEX IF NOT EXISTS idx_withdraws_status ON withdraw_requests(status);
     CREATE INDEX IF NOT EXISTS idx_commissions_agent ON commissions(agent_uid);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS last_wheel BIGINT DEFAULT 0;
   `);
   console.log('✅ قاعدة البيانات جاهزة');
 }
 
 const COLS = 6, ROWS = 5;
 
-/* ============================================================
-   💰 جدول الدفع v8 — متوازن ومضبوط
-   ============================================================ */
 const SYM = {
   zeusFist:  { pay: 2.0  },
   crown:     { pay: 1.0  },
@@ -162,23 +166,20 @@ function pickZeusValue(pool) {
   }
 }
 
-/* ============================================================
-   🎯 rSym v8 — gem_purple 10%، رموز متوسطة موزعة
-   ============================================================ */
 function rSym(zeusPool) {
   const r = rint(1000);
-  if (r < 40)  return { type: 'zeus', v: pickZeusValue(zeusPool) };  // 4%
-  if (r < 60)  return { type: 'scatter' };                          // 2%
-  if (r < 160) return { type: 'gem_purple' };                       // 10%
-  if (r < 280) return { type: 'gem_green' };                        // 12%
-  if (r < 400) return { type: 'gem_blue' };                         // 12%
-  if (r < 510) return { type: 'gem_red' };                          // 11%
-  if (r < 610) return { type: 'flaming' };                          // 10%
-  if (r < 710) return { type: 'ring' };                             // 10%
-  if (r < 800) return { type: 'hourglass' };                        // 9%
-  if (r < 880) return { type: 'chalice' };                          // 8%
-  if (r < 950) return { type: 'crown' };                            // 7%
-  return { type: 'zeusFist' };                                       // 5%
+  if (r < 40)  return { type: 'zeus', v: pickZeusValue(zeusPool) };
+  if (r < 60)  return { type: 'scatter' };
+  if (r < 160) return { type: 'gem_purple' };
+  if (r < 280) return { type: 'gem_green' };
+  if (r < 400) return { type: 'gem_blue' };
+  if (r < 510) return { type: 'gem_red' };
+  if (r < 610) return { type: 'flaming' };
+  if (r < 710) return { type: 'ring' };
+  if (r < 800) return { type: 'hourglass' };
+  if (r < 880) return { type: 'chalice' };
+  if (r < 950) return { type: 'crown' };
+  return { type: 'zeusFist' };
 }
 
 function genGrid(zeusPool) {
@@ -190,9 +191,6 @@ function genGrid(zeusPool) {
   return g;
 }
 
-/* ============================================================
-   🎯 chkWins v8 — حد 7 رموز، مضاعفات متوازنة
-   ============================================================ */
 function chkWins(g, bet) {
   const c = {};
   for (let x = 0; x < COLS; x++) for (let y = 0; y < ROWS; y++) {
@@ -230,10 +228,6 @@ function cntSc(g) {
   return n;
 }
 
-/* ============================================================
-   🎯 runSpin v8 — سلاسل انفجار = 5 فقط
-   هذا يحدّ من تضاعف الأرباح بشكل جنوني
-   ============================================================ */
 function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
   const MAX_CHAINS = 5;
   const chains = [];
@@ -253,8 +247,7 @@ function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
 
     chains.push({
       grid: JSON.parse(JSON.stringify(grid)),
-      wins: wins,
-      zeusSum: zs,
+      wins, zeusSum: zs,
       multiplier: appliedMult,
       cumulativeMult: cumMult,
       winAmount: chainWin
@@ -272,7 +265,6 @@ function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
       grid[x] = kept.reverse();
     }
   }
-
   return { chains, totalWin, finalGrid: grid, cumulativeMult: cumMult };
 }
 
@@ -331,12 +323,13 @@ function authAdmin(req, res, next) {
   next();
 }
 
+/* ==================== AUTH ==================== */
 app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
   try {
     const { first, last, phone, email, password, inviteCode } = req.body;
     const ip = getClientIP(req);
     if (!first || first.length < 2) return res.status(400).json({ error: 'الاسم مطلوب' });
-    if (!last  || last.length  < 2) return res.status(400).json({ error: 'الكنية مطلوبة' });
+    if (!last || last.length < 2) return res.status(400).json({ error: 'الكنية مطلوبة' });
     if (!phone || phone.length < 8) return res.status(400).json({ error: 'رقم الهاتف غير صحيح' });
     if (!email || !email.includes('@')) return res.status(400).json({ error: 'البريد غير صحيح' });
     if (!password || password.length < 4) return res.status(400).json({ error: 'كلمة المرور قصيرة' });
@@ -371,8 +364,8 @@ app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
       INSERT INTO users (uid, first_name, last_name, phone, email, password_hash,
                          balance, laps, best_win, wagered, won, banned,
                          referred_by, agent_level, invite_code, total_commission,
-                         created_at, last_login, last_ip)
-      VALUES ($1,$2,$3,$4,$5,$6,0,0,0,0,0,0,$7,0,$8,0,$9,$9,$10)
+                         created_at, last_login, last_ip, last_wheel)
+      VALUES ($1,$2,$3,$4,$5,$6,0,0,0,0,0,0,$7,0,$8,0,$9,$9,$10,0)
     `, [uid, first, last, phone, email, hash, referrerUid, code, now, ip]);
 
     await pool.query(`
@@ -449,6 +442,7 @@ app.get('/api/me', authUser, async (req, res) => {
       invite_code: u.invite_code, agent_level: u.agent_level,
       total_commission: Number(u.total_commission),
       created: Number(u.created_at), lastLogin: Number(u.last_login),
+      lastWheel: Number(u.last_wheel || 0),
       wallets: {
         sham_syp: wallet.sham_syp || '', sham_usd: wallet.sham_usd || '',
         usdt_bep20: wallet.usdt_bep20 || '', usdt_trc20: wallet.usdt_trc20 || ''
@@ -457,6 +451,7 @@ app.get('/api/me', authUser, async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
+/* ==================== SPIN ==================== */
 app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
   const u = req.user;
   const ip = getClientIP(req);
@@ -520,6 +515,79 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
   }
 });
 
+/* ==================== GAMBLE (زر الضاعف) ==================== */
+app.post('/api/gamble', authUser, rateLimit(30, 60000), async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const u = req.user;
+    if (typeof amount !== 'number' || amount <= 0)
+      return res.status(400).json({ error: 'مبلغ غير صحيح' });
+    if (amount > 10000000)
+      return res.status(400).json({ error: 'الحد الأقصى للضاعف' });
+
+    const isWin = crypto.randomInt(0, 2) === 0; // 50/50
+    if (isWin) {
+      const newBal = Number(u.balance) + amount;
+      await pool.query('UPDATE users SET balance = $1, won = won + $2 WHERE uid = $3',
+        [newBal, amount, u.uid]);
+      await pool.query(`
+        INSERT INTO transactions (uid, type, amount, balance_after, note, admin, created_at)
+        VALUES ($1,'gamble_win',$2,$3,$4,NULL,$5)
+      `, [u.uid, amount, newBal, 'ضاعف ناجح — ربح ' + amount, Date.now()]);
+      return res.json({ success: true, won: true, newBalance: newBal, awarded: amount });
+    } else {
+      return res.json({ success: true, won: false, awarded: 0 });
+    }
+  } catch (e) { console.error('gamble:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+/* ==================== WHEEL (عجلة الحظ) ==================== */
+app.get('/api/wheel/status', authUser, async (req, res) => {
+  const u = req.user;
+  const last = Number(u.last_wheel || 0);
+  const now = Date.now();
+  const elapsed = now - last;
+  const ONE_DAY = 24 * 60 * 60 * 1000;
+  const canSpin = elapsed >= ONE_DAY;
+  const nextAvailable = canSpin ? now : last + ONE_DAY;
+  res.json({ canSpin, nextAvailable, lastSpin: last });
+});
+
+app.post('/api/wheel/spin', authUser, rateLimit(5, 60000), async (req, res) => {
+  try {
+    const u = req.user;
+    const last = Number(u.last_wheel || 0);
+    const now = Date.now();
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    if (now - last < ONE_DAY)
+      return res.status(400).json({ error: 'العجلة متاحة مرة واحدة كل 24 ساعة' });
+
+    // اختيار قيمة بالوزن
+    const total = WHEEL_WEIGHTS.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    let idx = 0;
+    for (let i = 0; i < WHEEL_WEIGHTS.length; i++) {
+      r -= WHEEL_WEIGHTS[i];
+      if (r <= 0) { idx = i; break; }
+    }
+    const amount = WHEEL_VALUES[idx];
+
+    const newBal = Number(u.balance) + amount;
+    await pool.query('UPDATE users SET balance = $1, last_wheel = $2, won = won + $3 WHERE uid = $4',
+      [newBal, now, amount, u.uid]);
+    await pool.query(`
+      INSERT INTO wheel_spins (uid, amount, created_at) VALUES ($1,$2,$3)
+    `, [u.uid, amount, now]);
+    await pool.query(`
+      INSERT INTO transactions (uid, type, amount, balance_after, note, admin, created_at)
+      VALUES ($1,'wheel',$2,$3,$4,NULL,$5)
+    `, [u.uid, amount, newBal, 'عجلة الحظ — ربح ' + amount, Date.now()]);
+
+    res.json({ success: true, amount, index: idx, newBalance: newBal });
+  } catch (e) { console.error('wheel:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+/* ==================== BUY BONUS ==================== */
 app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
   try {
     const { price, type } = req.body;
@@ -540,6 +608,7 @@ app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
 });
 
+/* ==================== WALLET ==================== */
 app.get('/api/wallet/methods', (req, res) => {
   res.json({ methods: PAYMENT_METHODS.map(m => ({ ...m, company_wallet: COMPANY_WALLETS[m.code] || '' })) });
 });
@@ -620,6 +689,7 @@ app.get('/api/wallet/history', authUser, async (req, res) => {
   res.json({ deposits: deposits.rows, withdraws: withdraws.rows });
 });
 
+/* ==================== AGENT ==================== */
 app.get('/api/agent/info', authUser, async (req, res) => {
   const u = req.user;
   const referrals = await pool.query(
@@ -650,10 +720,12 @@ app.post('/api/agent/become', authUser, async (req, res) => {
   res.json({ success: true, message: 'تم ترقيتك إلى وكيل المستوى 1' });
 });
 
+/* ==================== RTP info ==================== */
 app.get('/api/rtp', (req, res) => {
   res.json({ rtp: RTP, houseEdge: 1 - RTP, maxWinMult: MAX_WIN_MULT });
 });
 
+/* ==================== ADMIN ==================== */
 app.post('/api/admin/login', rateLimit(5, 60000), (req, res) => {
   const { password } = req.body;
   if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'كلمة مرور خاطئة' });
@@ -704,8 +776,7 @@ app.get('/api/admin/users', authAdmin, async (req, res) => {
     };
     const orderBy = sortMap[sort] || sortMap.created;
     const total = await pool.query(`SELECT COUNT(*)::int AS c FROM users ${whereSql}`, params);
-    params.push(parseInt(limit));
-    params.push(parseInt(offset));
+    params.push(parseInt(limit)); params.push(parseInt(offset));
     const users = await pool.query(
       `SELECT * FROM users ${whereSql} ORDER BY ${orderBy} LIMIT $${params.length - 1} OFFSET $${params.length}`,
       params);
@@ -906,9 +977,10 @@ app.use((req, res) => res.status(404).json({ error: 'Not found' }));
     console.log('🚀 بدء التشغيل...');
     await initDB();
     app.listen(PORT, () => {
-      console.log('⚡ STORMCROWN SERVER');
+      console.log('⚡ STORMCROWN SERVER v10');
       console.log('Port:', PORT);
       console.log('RTP:', (RTP * 100).toFixed(2) + '%');
+      console.log('FreeSpins:', FREE_SPINS_COUNT);
       console.log('MaxWin:', MAX_WIN_MULT + 'x');
     });
   } catch (e) {
