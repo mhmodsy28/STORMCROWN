@@ -1,9 +1,8 @@
 /* ============================================================
-   STORMCROWN — server.js v10
-   - بونص 15 لفة
-   - زر ضاعف (Gamble 50/50 ×5 مرات)
-   - عجلة حظ يومية
-   - إحصائيات + إضافات احترافية
+   STORMCROWN — server.js v11
+   - بونص: 50× / 200× (أسعار كازينو حقيقي)
+   - تتبع رصيد البونص الفعلي
+   - RTP متوازن
    ============================================================ */
 
 const express = require('express');
@@ -15,15 +14,14 @@ const crypto = require('crypto');
 const { Pool } = require('pg');
 
 const app = express();
-
 process.on('uncaughtException', (e) => console.error('💥', e && e.stack ? e.stack : e));
 process.on('unhandledRejection', (e) => console.error('💥', e && e.stack ? e.stack : e));
 
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
 const DATABASE_URL = process.env.DATABASE_URL;
-if (!JWT_SECRET) { console.error('❌ JWT_SECRET مفقود'); process.exit(1); }
-if (!DATABASE_URL) { console.error('❌ DATABASE_URL مفقود'); process.exit(1); }
+if (!JWT_SECRET) { console.error('❌ JWT_SECRET'); process.exit(1); }
+if (!DATABASE_URL) { console.error('❌ DATABASE_URL'); process.exit(1); }
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change-me-now';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || crypto.randomBytes(24).toString('hex');
@@ -33,9 +31,7 @@ const RTP = Math.min(0.97, Math.max(0.85, parseFloat(process.env.RTP || '0.94'))
 const MAX_WIN_MULT = 5000;
 const FREE_SPINS_COUNT = 15;
 
-/* ===== عجلة الحظ — القيم ===== */
 const WHEEL_VALUES = [0, 100, 500, 1000, 2000, 5000, 10000, 25000];
-/* الاحتمالات (مجموع 100) */
 const WHEEL_WEIGHTS = [40, 25, 15, 10, 5, 3, 1.5, 0.5];
 
 const COMPANY_WALLETS = {
@@ -121,7 +117,6 @@ async function initDB() {
     CREATE INDEX IF NOT EXISTS idx_deposits_status ON deposit_requests(status);
     CREATE INDEX IF NOT EXISTS idx_withdraws_status ON withdraw_requests(status);
     CREATE INDEX IF NOT EXISTS idx_commissions_agent ON commissions(agent_uid);
-    ALTER TABLE users ADD COLUMN IF NOT EXISTS last_wheel BIGINT DEFAULT 0;
   `);
   console.log('✅ قاعدة البيانات جاهزة');
 }
@@ -515,7 +510,7 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
   }
 });
 
-/* ==================== GAMBLE (زر الضاعف) ==================== */
+/* ==================== GAMBLE ==================== */
 app.post('/api/gamble', authUser, rateLimit(30, 60000), async (req, res) => {
   try {
     const { amount } = req.body;
@@ -525,7 +520,7 @@ app.post('/api/gamble', authUser, rateLimit(30, 60000), async (req, res) => {
     if (amount > 10000000)
       return res.status(400).json({ error: 'الحد الأقصى للضاعف' });
 
-    const isWin = crypto.randomInt(0, 2) === 0; // 50/50
+    const isWin = crypto.randomInt(0, 2) === 0;
     if (isWin) {
       const newBal = Number(u.balance) + amount;
       await pool.query('UPDATE users SET balance = $1, won = won + $2 WHERE uid = $3',
@@ -541,14 +536,13 @@ app.post('/api/gamble', authUser, rateLimit(30, 60000), async (req, res) => {
   } catch (e) { console.error('gamble:', e); res.status(500).json({ error: 'خطأ' }); }
 });
 
-/* ==================== WHEEL (عجلة الحظ) ==================== */
+/* ==================== WHEEL ==================== */
 app.get('/api/wheel/status', authUser, async (req, res) => {
   const u = req.user;
   const last = Number(u.last_wheel || 0);
   const now = Date.now();
-  const elapsed = now - last;
   const ONE_DAY = 24 * 60 * 60 * 1000;
-  const canSpin = elapsed >= ONE_DAY;
+  const canSpin = now - last >= ONE_DAY;
   const nextAvailable = canSpin ? now : last + ONE_DAY;
   res.json({ canSpin, nextAvailable, lastSpin: last });
 });
@@ -562,7 +556,6 @@ app.post('/api/wheel/spin', authUser, rateLimit(5, 60000), async (req, res) => {
     if (now - last < ONE_DAY)
       return res.status(400).json({ error: 'العجلة متاحة مرة واحدة كل 24 ساعة' });
 
-    // اختيار قيمة بالوزن
     const total = WHEEL_WEIGHTS.reduce((a, b) => a + b, 0);
     let r = Math.random() * total;
     let idx = 0;
@@ -575,9 +568,8 @@ app.post('/api/wheel/spin', authUser, rateLimit(5, 60000), async (req, res) => {
     const newBal = Number(u.balance) + amount;
     await pool.query('UPDATE users SET balance = $1, last_wheel = $2, won = won + $3 WHERE uid = $4',
       [newBal, now, amount, u.uid]);
-    await pool.query(`
-      INSERT INTO wheel_spins (uid, amount, created_at) VALUES ($1,$2,$3)
-    `, [u.uid, amount, now]);
+    await pool.query('INSERT INTO wheel_spins (uid, amount, created_at) VALUES ($1,$2,$3)',
+      [u.uid, amount, now]);
     await pool.query(`
       INSERT INTO transactions (uid, type, amount, balance_after, note, admin, created_at)
       VALUES ($1,'wheel',$2,$3,$4,NULL,$5)
@@ -720,7 +712,6 @@ app.post('/api/agent/become', authUser, async (req, res) => {
   res.json({ success: true, message: 'تم ترقيتك إلى وكيل المستوى 1' });
 });
 
-/* ==================== RTP info ==================== */
 app.get('/api/rtp', (req, res) => {
   res.json({ rtp: RTP, houseEdge: 1 - RTP, maxWinMult: MAX_WIN_MULT });
 });
@@ -977,11 +968,10 @@ app.use((req, res) => res.status(404).json({ error: 'Not found' }));
     console.log('🚀 بدء التشغيل...');
     await initDB();
     app.listen(PORT, () => {
-      console.log('⚡ STORMCROWN SERVER v10');
+      console.log('⚡ STORMCROWN SERVER v11');
       console.log('Port:', PORT);
       console.log('RTP:', (RTP * 100).toFixed(2) + '%');
       console.log('FreeSpins:', FREE_SPINS_COUNT);
-      console.log('MaxWin:', MAX_WIN_MULT + 'x');
     });
   } catch (e) {
     console.error('❌ فشل التشغيل:');
