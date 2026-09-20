@@ -12,6 +12,11 @@ html,body{height:100%;overflow:hidden;background:#05000f;color:#fff;
   font-family:'Amiri',serif;user-select:none;touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 canvas{display:block}
+
+/* ===== ICONS ===== */
+.svg-ico{width:100%;height:100%;display:block}
+
+/* ===== AUTH ===== */
 #auth{position:fixed;inset:0;z-index:2000;
   background:radial-gradient(ellipse at 50% 100%,#3a0505 0%,#0a0014 45%,#000 100%);
   overflow:hidden;display:flex;align-items:center;justify-content:center;padding:16px}
@@ -48,6 +53,8 @@ canvas{display:block}
   border:1px solid #6b0a0a;border-radius:6px;color:#ff8080;
   font-size:12px;text-align:center;display:none}
 .authErr.on{display:block}
+
+/* ===== GAME ===== */
 #game{position:fixed;inset:0;opacity:0;visibility:hidden;transition:opacity 1s;
   z-index:5;display:none;flex-direction:column;overflow:hidden;
   width:100vw;height:100vh;height:100dvh;
@@ -57,24 +64,39 @@ canvas{display:block}
     radial-gradient(ellipse at 50% 50%,#1a0533 0%,#0a0218 60%,#05000a 100%)}
 #game.on{opacity:1;visibility:visible;display:flex}
 #flash{position:fixed;inset:0;z-index:30;background:#fff;opacity:0;pointer-events:none}
+
 #topBtns{position:fixed;top:6px;left:0;right:0;z-index:60;height:100px;
   display:none;pointer-events:none}
 #topBtns.on{display:block}
 #topBtns button{pointer-events:auto;position:absolute;border-radius:50%;
-  width:36px;height:36px;font-size:15px;border:2px solid;cursor:pointer;
+  width:38px;height:38px;border:2px solid;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:transform .15s;padding:0;line-height:1}
+  transition:transform .15s;padding:6px;line-height:1;overflow:hidden}
 #topBtns button:active{transform:scale(.9)}
-#soundBtn{top:0;right:6px;background:rgba(30,10,60,.9);border-color:#6a4a9a;color:#ffd24a}
-#wheelBtn{top:0;right:48px;background:rgba(120,60,10,.95);border-color:#ffd24a;color:#ffd24a}
-#profileBtn{top:0;left:6px;background:rgba(60,20,120,.95);border-color:#ffd24a;color:#ffd24a}
-#walletBtn{top:0;left:48px;background:rgba(30,90,60,.95);border-color:#2ecc71;color:#2ecc71}
-#agentBadge{top:42px;left:6px;background:rgba(60,30,110,.95);border-color:#9b59ff;color:#c89bff}
-#logoutTopBtn{top:42px;left:48px;background:rgba(139,0,0,.95);border-color:#ff2a00;color:#ff8080}
-#turboBtn{top:42px;right:6px;background:rgba(60,20,120,.95);border-color:#ff8c00;color:#ff8c00;font-size:12px}
-#autoBtn{top:42px;right:48px;background:rgba(60,20,120,.95);border-color:#9b59ff;color:#c89bff;font-size:12px}
+#topBtns button svg{width:100%;height:100%;display:block}
+#soundBtn{top:0;right:6px;background:linear-gradient(180deg,rgba(50,20,90,.95),rgba(20,5,40,.95));border-color:#6a4a9a}
+#soundBtn svg{fill:#ffd24a}
+#wheelBtn{top:0;right:52px;background:linear-gradient(180deg,rgba(150,80,20,.95),rgba(60,20,5,.95));border-color:#ffd24a}
+#wheelBtn svg{fill:#ffd24a}
+#profileBtn{top:0;left:6px;background:linear-gradient(180deg,rgba(80,30,150,.95),rgba(30,5,60,.95));border-color:#ffd24a}
+#profileBtn svg{fill:#ffd24a}
+#walletBtn{top:0;left:52px;background:linear-gradient(180deg,rgba(30,110,70,.95),rgba(5,40,20,.95));border-color:#2ecc71}
+#walletBtn svg{fill:#2ecc71}
+#agentBadge{top:46px;left:6px;background:linear-gradient(180deg,rgba(80,40,150,.95),rgba(25,5,60,.95));border-color:#9b59ff}
+#agentBadge svg{fill:#c89bff}
+#logoutTopBtn{top:46px;left:52px;background:linear-gradient(180deg,rgba(150,20,20,.95),rgba(60,5,5,.95));border-color:#ff2a00}
+#logoutTopBtn svg{fill:#ff8080}
+#turboBtn{top:46px;right:6px;background:linear-gradient(180deg,rgba(80,30,150,.95),rgba(30,5,60,.95));border-color:#ff8c00}
+#turboBtn svg{fill:#ff8c00}
+#turboBtn.active{background:linear-gradient(180deg,rgba(255,140,0,.95),rgba(150,60,0,.95));border-color:#ffd24a}
+#turboBtn.active svg{fill:#1a0230}
+#autoBtn{top:46px;right:52px;background:linear-gradient(180deg,rgba(80,30,150,.95),rgba(30,5,60,.95));border-color:#9b59ff}
+#autoBtn svg{fill:#c89bff}
+#autoBtn.active{background:linear-gradient(180deg,rgba(46,204,113,.95),rgba(10,80,40,.95));border-color:#2ecc71}
+#autoBtn.active svg{fill:#000}
+
 #mainArea{display:flex;flex-direction:column;width:100%;height:100%;
-  padding:46px 4px 4px 4px;gap:4px;overflow:hidden}
+  padding:52px 4px 4px 4px;gap:4px;overflow:hidden}
 #hud{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;
   width:100%;flex-shrink:0}
 .hudBox{background:linear-gradient(180deg,rgba(60,30,110,.85),rgba(15,5,40,.9));
@@ -82,8 +104,10 @@ canvas{display:block}
   font-size:9px;color:#c8b0e8;white-space:nowrap}
 .hudBox b{color:#ffd24a;font-family:monospace;font-size:11px;margin-right:2px}
 .hudBox.hot{border-color:#ff8c00;box-shadow:0 0 15px #ff8c00}
+
 #playRow{display:flex;gap:4px;flex:1;min-height:0;width:100%;
   align-items:center;justify-content:center;overflow:hidden}
+
 #sideCol{display:flex;flex-direction:column;gap:4px;width:100px;
   height:100%;max-height:100%;overflow:hidden;flex-shrink:0}
 #paytable,#historyPanel,#statsPanel{
@@ -116,6 +140,7 @@ canvas{display:block}
 .statRow{display:flex;justify-content:space-between;padding:1px 3px;
   font-family:monospace;font-size:7px;color:#a090c0}
 .statRow b{color:#ffd24a}
+
 #frameWrap{flex:1;display:flex;align-items:center;justify-content:center;
   min-width:0;min-height:0;padding:0;overflow:hidden}
 #frame{position:relative;padding:4px;border-radius:10px;
@@ -130,6 +155,7 @@ canvas{display:block}
 #zeusBackdrop{position:absolute;top:4px;left:4px;border-radius:5px;
   pointer-events:none;z-index:1;
   max-width:100%;max-height:100%;width:auto;height:auto}
+
 #ctrl{display:flex;gap:3px;align-items:center;justify-content:center;
   flex-shrink:0;flex-wrap:wrap;width:100%;padding:2px 0}
 .cbtn{padding:5px 8px;font-family:'Amiri',serif;font-size:10px;font-weight:700;
@@ -141,8 +167,8 @@ canvas{display:block}
   padding:3px 8px;border-radius:5px;min-width:70px;text-align:center}
 #betBox small{display:block;font-size:8px;color:#a090d0}
 #betBox b{color:#ffd24a;font-family:monospace;font-size:11px}
-#spinWrap{width:58px;height:58px;flex-shrink:0;position:relative}
-#spinWheel{width:58px;height:58px;border-radius:50%;cursor:pointer;
+#spinWrap{width:60px;height:60px;flex-shrink:0;position:relative}
+#spinWheel{width:60px;height:60px;border-radius:50%;cursor:pointer;
   background:radial-gradient(circle at 50% 30%,#fff8e0,#ffd24a 30%,#ff8c00 55%,#8b4000 80%,#4a0a0a);
   border:2px solid #ffd24a;display:flex;align-items:center;justify-content:center;
   box-shadow:0 0 20px rgba(255,140,0,.6),inset 0 -4px 12px rgba(0,0,0,.5),
@@ -158,6 +184,7 @@ canvas{display:block}
   display:none;align-items:center;justify-content:center;z-index:5;
   font-family:monospace;border:2px solid #fff}
 #autoCounter.on{display:flex}
+
 .bonusBtn{padding:5px 7px;font-family:'Amiri',serif;font-size:9px;font-weight:700;
   border-radius:6px;cursor:pointer;position:relative;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0}
@@ -167,27 +194,32 @@ canvas{display:block}
   border:2px solid #2ecc71;color:#d0ffe0}
 #buyPremium{background:linear-gradient(180deg,#6a1a5a,#3a0540);
   border:2px solid #ffd24a;color:#ffe8a0}
+
 #log{height:26px;overflow-y:auto;width:100%;font-size:8px;
   background:rgba(5,0,20,.85);padding:2px 6px;border-radius:4px;
   border:1px solid rgba(106,74,154,.35);color:#a090c0;flex-shrink:0}
 #log b{color:#ffd24a}
+
 .big{position:fixed;top:50%;left:50%;z-index:40;pointer-events:none;
   transform:translate(-50%,-50%) scale(.3);opacity:0;text-align:center;
   font-family:'Cinzel Decorative',serif;font-size:clamp(40px,9vw,90px);font-weight:900;
   background:linear-gradient(180deg,#fff,#ffd24a 40%,#ff8c00 70%,#b8860b);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   filter:drop-shadow(0 0 30px rgba(255,210,74,.7))}
+
 #fsBanner{position:fixed;top:0;left:0;right:0;z-index:25;padding:6px;
   text-align:center;font-family:'Amiri',serif;font-weight:700;font-size:12px;color:#fff;
   background:linear-gradient(180deg,rgba(255,140,0,.5),transparent);
   border-bottom:2px solid #ff8c00;opacity:0;transform:translateY(-100%);
   transition:all .7s;pointer-events:none}
 #fsBanner.on{opacity:1;transform:translateY(0)}
-#fsProgress{position:fixed;top:30px;left:50%;transform:translateX(-50%);
-  z-index:26;background:rgba(0,0,0,.75);padding:4px 12px;border-radius:20px;
+
+#fsProgress{position:fixed;top:32px;left:50%;transform:translateX(-50%);
+  z-index:26;background:rgba(0,0,0,.8);padding:5px 14px;border-radius:20px;
   border:2px solid #ffd24a;font-size:11px;font-weight:700;color:#ffd24a;
-  display:none;font-family:monospace}
+  display:none;font-family:monospace;box-shadow:0 0 20px rgba(255,210,74,.5)}
 #fsProgress.on{display:block}
+
 .mpop{position:fixed;z-index:36;font-family:'Cinzel Decorative',serif;
   font-size:24px;font-weight:900;pointer-events:none;
   background:linear-gradient(180deg,#fff,#c89bff,#9b59ff);
@@ -198,6 +230,7 @@ canvas{display:block}
   20%{transform:translate(-50%,-50%) scale(1.3);opacity:1}
   40%{transform:translate(-50%,-50%) scale(1)}
   100%{transform:translate(-50%,-180%) scale(.9);opacity:0}}
+
 .modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.9);
   display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);
   padding:12px;overflow-y:auto}
@@ -209,6 +242,7 @@ canvas{display:block}
   text-shadow:0 0 15px #ff8c00}
 .closeX{position:absolute;top:6px;left:6px;background:none;border:none;
   color:#ff4a4a;font-size:20px;cursor:pointer;padding:4px 8px}
+
 .walletTabs{display:flex;gap:5px;margin-bottom:12px;justify-content:center;flex-wrap:wrap}
 .walletTab{padding:6px 12px;background:linear-gradient(180deg,#1a3a2a,#0a1a10);
   border:1px solid #2ecc71;border-radius:6px;color:#c8ffd8;
@@ -310,6 +344,7 @@ canvas{display:block}
   font-weight:700;color:#fff;background:linear-gradient(180deg,#ff8c00,#c94000);
   border:2px solid #ffd24a;border-radius:6px}
 .bw-tap{margin-top:10px;font-size:10px;color:#a090d0}
+
 #tierBadge{position:fixed;top:50%;left:50%;z-index:38;pointer-events:none;
   transform:translate(-50%,-50%);font-family:'Cinzel Decorative',serif;
   font-size:clamp(20px,5vw,38px);font-weight:900;opacity:0;text-align:center;
@@ -327,6 +362,7 @@ canvas{display:block}
 .tier-red{background:linear-gradient(180deg,#5a0a1a,#300005);border-color:#ff2a00;color:#ffb0b0;box-shadow:0 0 40px #ff2a00}
 .tier-gold{background:linear-gradient(180deg,#8a6a0a,#3a2010);border-color:#ffd24a;color:#fff0c0;box-shadow:0 0 60px #ffd24a;animation:tierShow 2.5s ease-out forwards,glow 0.6s ease-in-out infinite alternate}
 @keyframes glow{to{box-shadow:0 0 90px #ffd24a,0 0 120px #ff8c00}}
+
 #gambleOverlay{position:fixed;inset:0;z-index:210;display:none;
   align-items:center;justify-content:center;padding:12px}
 #gambleOverlay.show{display:flex;animation:iFade .3s ease}
@@ -350,6 +386,7 @@ canvas{display:block}
   border-color:#ff2a00;color:#ffb0b0}
 .gamble-btn.double:hover{background:linear-gradient(180deg,#ff2a00,#8b0000)}
 .gamble-rounds{font-size:10px;color:#a090d0;margin-top:10px}
+
 #wheelOverlay{position:fixed;inset:0;z-index:220;display:none;
   align-items:center;justify-content:center;padding:12px}
 #wheelOverlay.show{display:flex;animation:iFade .3s ease}
@@ -369,6 +406,7 @@ canvas{display:block}
   color:#fff;box-shadow:0 0 20px rgba(255,210,74,.5)}
 #wheelSpinBtn:disabled{opacity:.5;cursor:not-allowed}
 #wheelTimer{font-size:11px;color:#a090d0;margin-top:8px}
+
 #bonusSummaryOverlay{position:fixed;inset:0;z-index:215;display:none;
   align-items:center;justify-content:center;padding:12px}
 #bonusSummaryOverlay.show{display:flex;animation:iFade .3s ease}
@@ -399,6 +437,7 @@ canvas{display:block}
 .bonus-summary-close{margin-top:14px;padding:10px 24px;font-family:'Amiri',serif;
   font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;
   background:linear-gradient(180deg,#ff8c00,#c94000);border:2px solid #ffd24a;color:#fff}
+
 #autoMenu{position:fixed;inset:0;z-index:180;display:none;
   align-items:center;justify-content:center;padding:12px}
 #autoMenu.show{display:flex;animation:iFade .2s ease}
@@ -413,8 +452,9 @@ canvas{display:block}
   border:2px solid #9b59ff;color:#e0d0ff;cursor:pointer}
 .auto-btn:hover{background:linear-gradient(180deg,#9b59ff,#4a1a7a);color:#fff}
 .auto-btn.cancel{background:linear-gradient(180deg,#6a1a1a,#3a0505);border-color:#ff4a4a;color:#ffb0b0}
+
 @media (max-width:640px){
-  #mainArea{padding:44px 3px 3px 3px;gap:3px}
+  #mainArea{padding:50px 3px 3px 3px;gap:3px}
   #sideCol{width:78px;gap:3px}
   #paytable,#historyPanel,#statsPanel{padding:3px}
   #paytable h3,#historyPanel h3,#statsPanel h3{font-size:7px;padding-bottom:1px;margin-bottom:2px}
@@ -430,18 +470,19 @@ canvas{display:block}
   #betBox{padding:2px 6px;min-width:60px}
   #betBox small{font-size:7px}
   #betBox b{font-size:10px}
-  #spinWrap,#spinWheel{width:52px;height:52px}
+  #spinWrap,#spinWheel{width:54px;height:54px}
   #spinLabel{font-size:10px}
   .bonusBtn{padding:4px 5px;font-size:8px;min-width:50px}
   .bonusBtn small{font-size:6px}
   .bonusBtn .price{font-size:8px}
   #log{height:22px;font-size:8px}
-  #topBtns button{width:32px;height:32px;font-size:13px}
-  #walletBtn{left:42px}
-  #agentBadge{top:38px;left:6px}
-  #logoutTopBtn{top:38px;left:42px}
-  #turboBtn{top:38px;right:6px;width:32px;height:32px;font-size:11px}
-  #autoBtn{top:38px;right:42px;width:32px;height:32px;font-size:11px}
+  #topBtns button{width:34px;height:34px;padding:5px}
+  #wheelBtn{right:48px}
+  #walletBtn{left:48px}
+  #agentBadge{top:44px;left:6px}
+  #logoutTopBtn{top:44px;left:48px}
+  #turboBtn{top:44px;right:6px}
+  #autoBtn{top:44px;right:48px}
   #frame{padding:3px}
 }
 @media (max-width:430px){
@@ -451,15 +492,58 @@ canvas{display:block}
   .hudBox b{font-size:9px}
   .cbtn{padding:3px 5px;font-size:8px}
   #betBox{min-width:50px}
-  #spinWrap,#spinWheel{width:46px;height:46px}
+  #spinWrap,#spinWheel{width:48px;height:48px}
   #spinLabel{font-size:9px}
   .bonusBtn{padding:3px 4px;font-size:7px}
   #log{height:18px;font-size:7px}
-  #mainArea{padding:40px 2px 2px 2px}
+  #mainArea{padding:46px 2px 2px 2px}
+  #topBtns button{width:32px;height:32px;padding:5px}
 }
 </style>
 </head>
 <body>
+
+<!-- ==================== SVG ICON LIBRARY ==================== -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- Sound -->
+    <symbol id="ic-sound-on" viewBox="0 0 24 24">
+      <path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+    </symbol>
+    <symbol id="ic-sound-off" viewBox="0 0 24 24">
+      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+    </symbol>
+    <!-- Wheel -->
+    <symbol id="ic-wheel" viewBox="0 0 24 24">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+    </symbol>
+    <!-- Profile -->
+    <symbol id="ic-profile" viewBox="0 0 24 24">
+      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+    </symbol>
+    <!-- Wallet -->
+    <symbol id="ic-wallet" viewBox="0 0 24 24">
+      <path d="M21 7.28V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-2.28c.59-.35 1-.98 1-1.72V9c0-.74-.41-1.37-1-1.72zM20 9v6h-7V9h7zM5 19V5h14v2h-6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h6v2H5z"/>
+      <circle cx="16" cy="12" r="1.5"/>
+    </symbol>
+    <!-- Agent -->
+    <symbol id="ic-agent" viewBox="0 0 24 24">
+      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+    </symbol>
+    <!-- Logout -->
+    <symbol id="ic-logout" viewBox="0 0 24 24">
+      <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+    </symbol>
+    <!-- Turbo (lightning) -->
+    <symbol id="ic-turbo" viewBox="0 0 24 24">
+      <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+    </symbol>
+    <!-- Auto (circular arrows) -->
+    <symbol id="ic-auto" viewBox="0 0 24 24">
+      <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+    </symbol>
+  </defs>
+</svg>
 
 <div id="auth">
   <div class="authWrap">
@@ -496,14 +580,30 @@ canvas{display:block}
   <div id="zeusBubble">مرحباً بك في العاصفة</div>
 
   <div id="topBtns">
-    <button id="profileBtn" title="الملف الشخصي">👤</button>
-    <button id="walletBtn" title="المحفظة">💰</button>
-    <button id="agentBadge" title="الوكالة">👥</button>
-    <button id="logoutTopBtn" title="خروج">🚪</button>
-    <button id="soundBtn" title="الصوت">🔊</button>
-    <button id="wheelBtn" title="عجلة الحظ">🎡</button>
-    <button id="turboBtn" title="Turbo">⚡</button>
-    <button id="autoBtn" title="Auto">🔄</button>
+    <button id="profileBtn" title="الملف الشخصي">
+      <svg><use href="#ic-profile"/></svg>
+    </button>
+    <button id="walletBtn" title="المحفظة">
+      <svg><use href="#ic-wallet"/></svg>
+    </button>
+    <button id="agentBadge" title="الوكالة">
+      <svg><use href="#ic-agent"/></svg>
+    </button>
+    <button id="logoutTopBtn" title="خروج">
+      <svg><use href="#ic-logout"/></svg>
+    </button>
+    <button id="soundBtn" title="الصوت">
+      <svg id="soundIcon"><use href="#ic-sound-on"/></svg>
+    </button>
+    <button id="wheelBtn" title="عجلة الحظ">
+      <svg><use href="#ic-wheel"/></svg>
+    </button>
+    <button id="turboBtn" title="Turbo">
+      <svg><use href="#ic-turbo"/></svg>
+    </button>
+    <button id="autoBtn" title="Auto">
+      <svg><use href="#ic-auto"/></svg>
+    </button>
   </div>
 
   <div id="mainArea">
@@ -539,8 +639,8 @@ canvas{display:block}
         <div id="spinWheel"><span id="spinLabel">دور</span></div>
         <div id="autoCounter">0</div>
       </div>
-      <button class="bonusBtn" id="buyNormal">بونص عادي<small>75×</small><span class="price" id="priceNormal">7500</span></button>
-      <button class="bonusBtn" id="buyPremium">بونص مميز<small>300×</small><span class="price" id="pricePremium">30000</span></button>
+      <button class="bonusBtn" id="buyNormal">بونص عادي<small>50×</small><span class="price" id="priceNormal">5000</span></button>
+      <button class="bonusBtn" id="buyPremium">بونص مميز<small>200×</small><span class="price" id="pricePremium">20000</span></button>
     </div>
     <div id="log"></div>
   </div>
@@ -730,6 +830,8 @@ const Aud=(()=>{
     const d=c.createGain();d.gain.value=dry;node.connect(d);d.connect(mg);
     const w=c.createGain();w.gain.value=wet;node.connect(w);w.connect(rev);
   }
+
+  /* الرعد */
   function thunder(i=1){
     if(!on||!ready)return; resume();
     try{
@@ -752,6 +854,7 @@ const Aud=(()=>{
       s.connect(lp);lp.connect(g);send(g,1,.5);s.start();
     }catch(e){}
   }
+
   function reelStop(col){
     if(!on||!ready)return; resume();
     try{
@@ -787,29 +890,77 @@ const Aud=(()=>{
       o.connect(g);send(g,1,.4);o.start();o.stop(c.currentTime+.42);
     }catch(e){}
   }
+
+  /* صوت الفوز الاحترافي - لحن فاخر متدرج */
   function winLevel(level=1){
     if(!on||!ready)return; resume();
     try{
-      const scales = {
-        1:[261.63,329.63],                     // صغير
-        2:[261.63,329.63,392],                 // متوسط
-        3:[261.63,329.63,392,523.25],          // كبير
-        4:[261.63,329.63,392,523.25,659.25],   // ضخم
-        5:[130.81,164.81,196,261.63,329.63,392,523.25,659.25] // أسطوري
+      const melodies = {
+        1: [  // صغير - نغمة واحدة ناعمة
+          {f: 523.25, d: 0.15, w: 0.04},
+          {f: 659.25, d: 0.20, w: 0.04}
+        ],
+        2: [  // متوسط - 3 نغمات صاعدة
+          {f: 523.25, d: 0.12, w: 0.06},
+          {f: 659.25, d: 0.12, w: 0.06},
+          {f: 783.99, d: 0.20, w: 0.06}
+        ],
+        3: [  // كبير - لحن فاخر 5 نغمات
+          {f: 523.25, d: 0.10, w: 0.08},
+          {f: 659.25, d: 0.10, w: 0.08},
+          {f: 783.99, d: 0.10, w: 0.08},
+          {f: 1046.50, d: 0.15, w: 0.08},
+          {f: 1318.51, d: 0.30, w: 0.08}
+        ],
+        4: [  // ضخم - لحن + صوت رعد
+          {f: 392.00, d: 0.08, w: 0.10},
+          {f: 523.25, d: 0.08, w: 0.10},
+          {f: 659.25, d: 0.08, w: 0.10},
+          {f: 783.99, d: 0.08, w: 0.10},
+          {f: 1046.50, d: 0.12, w: 0.10},
+          {f: 1318.51, d: 0.12, w: 0.10},
+          {f: 1567.98, d: 0.40, w: 0.10}
+        ],
+        5: [  // أسطوري - لحن + رعد مزدوج
+          {f: 261.63, d: 0.08, w: 0.12},
+          {f: 329.63, d: 0.08, w: 0.12},
+          {f: 392.00, d: 0.08, w: 0.12},
+          {f: 523.25, d: 0.08, w: 0.12},
+          {f: 659.25, d: 0.08, w: 0.12},
+          {f: 783.99, d: 0.08, w: 0.12},
+          {f: 1046.50, d: 0.10, w: 0.12},
+          {f: 1318.51, d: 0.10, w: 0.12},
+          {f: 1567.98, d: 0.50, w: 0.15}
+        ]
       };
-      const notes = scales[level] || scales[1];
-      notes.forEach((f,i)=>{
-        const o=c.createOscillator();o.type='sawtooth';o.frequency.value=f;
-        const g=c.createGain();const t=c.currentTime+i*.07;
-        g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.1,t+.03);
-        g.gain.exponentialRampToValueAtTime(.001,t+.7);
-        const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2200;
-        o.connect(lp);lp.connect(g);send(g,1,.45);o.start(t);o.stop(t+.75);
+      const melody = melodies[level] || melodies[1];
+      const start = c.currentTime + 0.01;
+      let t = start;
+      melody.forEach(note => {
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.type = level >= 4 ? 'sawtooth' : 'sine';
+        o.frequency.value = note.f;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(note.w, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + note.d + 0.3);
+        const lp = c.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.value = level >= 4 ? 3200 : 2200;
+        o.connect(lp); lp.connect(g);
+        send(g, 1, level >= 4 ? 0.6 : 0.4);
+        o.start(t); o.stop(t + note.d + 0.35);
+        t += note.d;
       });
-      if(level>=4) thunder(1);
-      if(level>=5) thunder(1.5);
+      if (level >= 4) {
+        setTimeout(() => thunder(level >= 5 ? 1.4 : 0.9), 200);
+      }
+      if (level >= 5) {
+        setTimeout(() => thunder(1.2), 700);
+      }
     }catch(e){}
   }
+
   function tumble(){
     if(!on||!ready)return; resume();
     try{
@@ -1037,8 +1188,8 @@ const SYM = {
 };
 
 const BETS=[20,50,100,200,500,1000,2000,5000,10000];
-const PRICE_NORMAL_MULT=75;
-const PRICE_PREMIUM_MULT=300;
+const PRICE_NORMAL_MULT=50;
+const PRICE_PREMIUM_MULT=200;
 const ZEUS_MAIN=[2,3,5,10,15,25];
 const FS_COUNT=15;
 
@@ -1046,15 +1197,10 @@ const S={
   bal:0, bi: Prefs.data.betIndex || 2, bet:BETS[Prefs.data.betIndex || 2],
   grid:[], spin:false, fs:0, mc:0, lw:0,
   laps:0, best:0, wagered:0, won:0, fire:false,
-  /* Gamble */
   gambleActive:false, gambleAmount:0, gambleRound:0, gambleMaxRound:5,
-  /* Auto */
   autoSpins:0, autoActive:false,
-  /* Turbo */
   turbo:Prefs.data.turbo || false,
-  /* Bonus tracking */
-  bonusStart:0, bonusWins:0, bonusBestWin:0, bonusStartBalance:0,
-  /* Session stats */
+  bonusWins:0, bonusBestWin:0, bonusStartBalance:0,
   sessionSpins:0, sessionWins:0, sessionWagered:0, sessionWon:0
 };
 
@@ -1599,7 +1745,6 @@ async function spin(){
       const tier = getTier(chainWin, currentBet);
       const level = getTierLevel(tier);
       Aud.winLevel(level);
-      if(tier==='red'||tier==='gold') Aud.thunder(1);
 
       flash(180, .35 + Math.min(chainWin/2500, .4));
       shake(.9 + Math.min(chainWin/1200, 1.5), 300);
@@ -1667,20 +1812,17 @@ async function spin(){
     S.spin = false;
     wheel.classList.remove('spinning','disabled');
 
-    /* Gamble بعد الفوز الكبير */
-    const shouldGamble = !isFree && totalWin > 0 && totalWin >= currentBet * 5;
+    const shouldGamble = !isFree && totalWin > 0 && totalWin >= currentBet * 5 && !S.autoActive;
     if(shouldGamble){
       await handleGamble(totalWin, currentBet);
     }
 
-    /* إذا كانت جولة مجانية - أكمل */
     if(S.fs > 0){
       $('buyNormal').disabled=true;$('buyPremium').disabled=true;
       setTimeout(spin, S.turbo ? 300 : 700);
       return;
     }
 
-    /* نهاية البونص */
     if(isFree && S.fs === 0){
       $('fsProgress').classList.remove('on');
       fireOff();
@@ -1691,7 +1833,6 @@ async function spin(){
     $('buyPremium').disabled=false;
     if(S.fire) fireOff();
 
-    /* Auto-spin */
     if(S.autoActive && S.autoSpins > 0){
       S.autoSpins--;
       $('autoCounter').textContent = S.autoSpins;
@@ -1744,12 +1885,6 @@ async function handleGamble(initialAmount, bet){
     }
 
     $('gambleCashout').onclick = () => {
-      if(amount > initialAmount){
-        const profit = amount - initialAmount;
-        S.bal += amount;
-        api('/api/gamble', { method:'POST', body:JSON.stringify({ amount: 0, cashout:true }) }).catch(()=>{});
-        log('💰 سحب الضاعف: +' + Math.floor(amount));
-      }
       cleanup();
     };
 
@@ -1789,10 +1924,7 @@ async function handleGamble(initialAmount, bet){
 
       if(S.gambleRound >= 5){
         msgEl.textContent = '🏆 وصلت للحد الأقصى! سيتم السحب';
-        setTimeout(() => {
-          S.bal += 0;
-          cleanup();
-        }, 2000);
+        setTimeout(() => cleanup(), 2000);
         return;
       }
 
@@ -1810,7 +1942,7 @@ function showBonusSummary(bet){
   $('bonusSummaryBody').innerHTML = `
     <div class="bonus-summary-row"><span class="lbl">عدد اللفات المجانية</span><span class="val">${FS_COUNT}</span></div>
     <div class="bonus-summary-row"><span class="lbl">قيمة الرهان لكل لفة</span><span class="val">${bet}</span></div>
-    <div class="bonus-summary-row"><span class="lbl">إجمالي الرهان</span><span class="val">${totalBet}</span></div>
+    <div class="bonus-summary-row"><span class="lbl">إجمالي الرهان المستخدم</span><span class="val">${totalBet}</span></div>
     <div class="bonus-summary-row"><span class="lbl">إجمالي الأرباح</span><span class="val ${totalWin>0?'green':''}">${Math.floor(totalWin)}</span></div>
     <div class="bonus-summary-row"><span class="lbl">أفضل لفة</span><span class="val">${Math.floor(S.bonusBestWin)}</span></div>
     <div class="bonus-summary-total">
@@ -1857,7 +1989,6 @@ function drawWheel(highlight = -1){
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    /* النص */
     ctx.save();
     ctx.translate(cx,cy);
     ctx.rotate(start + slice/2);
@@ -1868,7 +1999,6 @@ function drawWheel(highlight = -1){
     ctx.restore();
   }
 
-  /* المركز */
   ctx.beginPath();
   ctx.arc(cx,cy,26,0,Math.PI*2);
   ctx.fillStyle = '#1a0230';
@@ -1976,7 +2106,7 @@ document.querySelectorAll('.auto-btn').forEach(btn => {
     S.autoActive = true;
     $('autoCounter').textContent = n;
     $('autoCounter').classList.add('on');
-    $('autoBtn').style.background = 'rgba(46,204,113,.95)';
+    $('autoBtn').classList.add('active');
     if(!S.spin) spin();
   };
 });
@@ -1985,23 +2115,24 @@ function stopAuto(){
   S.autoActive = false;
   S.autoSpins = 0;
   $('autoCounter').classList.remove('on');
-  $('autoBtn').style.background = 'rgba(60,20,120,.95)';
+  $('autoBtn').classList.remove('active');
 }
 
 /* ==================== TURBO ==================== */
 $('turboBtn').onclick = () => {
   S.turbo = !S.turbo;
   Prefs.data.turbo = S.turbo; Prefs.save();
-  $('turboBtn').style.background = S.turbo ? 'rgba(255,140,0,.95)' : 'rgba(60,20,120,.95)';
-  $('turboBtn').style.color = S.turbo ? '#000' : '#ff8c00';
-  toast(S.turbo ? '⚡ Turbo مفعّل' : 'Turbo معطّل');
+  if(S.turbo){
+    $('turboBtn').classList.add('active');
+    toast('⚡ Turbo مفعّل');
+  } else {
+    $('turboBtn').classList.remove('active');
+    toast('Turbo معطّل');
+  }
 };
-if(S.turbo){
-  $('turboBtn').style.background = 'rgba(255,140,0,.95)';
-  $('turboBtn').style.color = '#000';
-}
+if(S.turbo){ $('turboBtn').classList.add('active'); }
 
-/* ==================== FIRE MODE ==================== */
+/* ==================== FIRE ==================== */
 function fireOn(premium){
   S.fire=true;$('frame').classList.add('fire');
   $('fsBanner').classList.add('on');
@@ -2097,12 +2228,23 @@ $('betUp').onclick=()=>{
 $('spinWheel').onclick=spin;
 $('buyNormal').onclick=()=>buyBonus('normal');
 $('buyPremium').onclick=()=>buyBonus('premium');
+
 $('soundBtn').onclick=()=>{
   const newOn=Aud.toggle();
-  $('soundBtn').textContent=newOn?'🔊':'🔇';
-  if(newOn){Aud.resume();Aud.droneOn();}
+  const icon = $('soundIcon');
+  if(newOn){
+    icon.innerHTML = '<use href="#ic-sound-on"/>';
+    $('soundBtn').style.borderColor = '#6a4a9a';
+    Aud.resume();Aud.droneOn();
+  } else {
+    icon.innerHTML = '<use href="#ic-sound-off"/>';
+    $('soundBtn').style.borderColor = '#ff4a4a';
+  }
 };
-if(!Prefs.data.sound){ $('soundBtn').textContent='🔇'; }
+if(!Prefs.data.sound){
+  $('soundIcon').innerHTML = '<use href="#ic-sound-off"/>';
+  $('soundBtn').style.borderColor = '#ff4a4a';
+}
 
 async function buyBonus(type){
   if(S.spin||S.fs>0)return;
