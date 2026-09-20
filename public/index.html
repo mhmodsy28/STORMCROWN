@@ -12,11 +12,6 @@ html,body{height:100%;overflow:hidden;background:#05000f;color:#fff;
   font-family:'Amiri',serif;user-select:none;touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 canvas{display:block}
-
-/* ===== ICONS ===== */
-.svg-ico{width:100%;height:100%;display:block}
-
-/* ===== AUTH ===== */
 #auth{position:fixed;inset:0;z-index:2000;
   background:radial-gradient(ellipse at 50% 100%,#3a0505 0%,#0a0014 45%,#000 100%);
   overflow:hidden;display:flex;align-items:center;justify-content:center;padding:16px}
@@ -53,18 +48,15 @@ canvas{display:block}
   border:1px solid #6b0a0a;border-radius:6px;color:#ff8080;
   font-size:12px;text-align:center;display:none}
 .authErr.on{display:block}
-
-/* ===== GAME ===== */
 #game{position:fixed;inset:0;opacity:0;visibility:hidden;transition:opacity 1s;
   z-index:5;display:none;flex-direction:column;overflow:hidden;
   width:100vw;height:100vh;height:100dvh;
   background:
-    radial-gradient(ellipse at 50% 0%,#3a1568 0%,transparent 50%),
-    radial-gradient(ellipse at 50% 100%,#4a1550 0%,transparent 60%),
-    radial-gradient(ellipse at 50% 50%,#1a0533 0%,#0a0218 60%,#05000a 100%)}
+    radial-gradient(ellipse at 50% 0%,#4a1568 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 100%,#5a1550 0%,transparent 60%),
+    radial-gradient(ellipse at 50% 50%,#2a0533 0%,#0a0218 60%,#05000a 100%)}
 #game.on{opacity:1;visibility:visible;display:flex}
 #flash{position:fixed;inset:0;z-index:30;background:#fff;opacity:0;pointer-events:none}
-
 #topBtns{position:fixed;top:6px;left:0;right:0;z-index:60;height:100px;
   display:none;pointer-events:none}
 #topBtns.on{display:block}
@@ -94,7 +86,6 @@ canvas{display:block}
 #autoBtn svg{fill:#c89bff}
 #autoBtn.active{background:linear-gradient(180deg,rgba(46,204,113,.95),rgba(10,80,40,.95));border-color:#2ecc71}
 #autoBtn.active svg{fill:#000}
-
 #mainArea{display:flex;flex-direction:column;width:100%;height:100%;
   padding:52px 4px 4px 4px;gap:4px;overflow:hidden}
 #hud{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;
@@ -104,10 +95,8 @@ canvas{display:block}
   font-size:9px;color:#c8b0e8;white-space:nowrap}
 .hudBox b{color:#ffd24a;font-family:monospace;font-size:11px;margin-right:2px}
 .hudBox.hot{border-color:#ff8c00;box-shadow:0 0 15px #ff8c00}
-
 #playRow{display:flex;gap:4px;flex:1;min-height:0;width:100%;
   align-items:center;justify-content:center;overflow:hidden}
-
 #sideCol{display:flex;flex-direction:column;gap:4px;width:100px;
   height:100%;max-height:100%;overflow:hidden;flex-shrink:0}
 #paytable,#historyPanel,#statsPanel{
@@ -140,7 +129,6 @@ canvas{display:block}
 .statRow{display:flex;justify-content:space-between;padding:1px 3px;
   font-family:monospace;font-size:7px;color:#a090c0}
 .statRow b{color:#ffd24a}
-
 #frameWrap{flex:1;display:flex;align-items:center;justify-content:center;
   min-width:0;min-height:0;padding:0;overflow:hidden}
 #frame{position:relative;padding:4px;border-radius:10px;
@@ -155,7 +143,6 @@ canvas{display:block}
 #zeusBackdrop{position:absolute;top:4px;left:4px;border-radius:5px;
   pointer-events:none;z-index:1;
   max-width:100%;max-height:100%;width:auto;height:auto}
-
 #ctrl{display:flex;gap:3px;align-items:center;justify-content:center;
   flex-shrink:0;flex-wrap:wrap;width:100%;padding:2px 0}
 .cbtn{padding:5px 8px;font-family:'Amiri',serif;font-size:10px;font-weight:700;
@@ -184,7 +171,6 @@ canvas{display:block}
   display:none;align-items:center;justify-content:center;z-index:5;
   font-family:monospace;border:2px solid #fff}
 #autoCounter.on{display:flex}
-
 .bonusBtn{padding:5px 7px;font-family:'Amiri',serif;font-size:9px;font-weight:700;
   border-radius:6px;cursor:pointer;position:relative;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0}
@@ -194,32 +180,54 @@ canvas{display:block}
   border:2px solid #2ecc71;color:#d0ffe0}
 #buyPremium{background:linear-gradient(180deg,#6a1a5a,#3a0540);
   border:2px solid #ffd24a;color:#ffe8a0}
-
 #log{height:26px;overflow-y:auto;width:100%;font-size:8px;
   background:rgba(5,0,20,.85);padding:2px 6px;border-radius:4px;
   border:1px solid rgba(106,74,154,.35);color:#a090c0;flex-shrink:0}
 #log b{color:#ffd24a}
-
 .big{position:fixed;top:50%;left:50%;z-index:40;pointer-events:none;
   transform:translate(-50%,-50%) scale(.3);opacity:0;text-align:center;
   font-family:'Cinzel Decorative',serif;font-size:clamp(40px,9vw,90px);font-weight:900;
   background:linear-gradient(180deg,#fff,#ffd24a 40%,#ff8c00 70%,#b8860b);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   filter:drop-shadow(0 0 30px rgba(255,210,74,.7))}
-
 #fsBanner{position:fixed;top:0;left:0;right:0;z-index:25;padding:6px;
   text-align:center;font-family:'Amiri',serif;font-weight:700;font-size:12px;color:#fff;
   background:linear-gradient(180deg,rgba(255,140,0,.5),transparent);
   border-bottom:2px solid #ff8c00;opacity:0;transform:translateY(-100%);
   transition:all .7s;pointer-events:none}
 #fsBanner.on{opacity:1;transform:translateY(0)}
-
-#fsProgress{position:fixed;top:32px;left:50%;transform:translateX(-50%);
-  z-index:26;background:rgba(0,0,0,.8);padding:5px 14px;border-radius:20px;
-  border:2px solid #ffd24a;font-size:11px;font-weight:700;color:#ffd24a;
-  display:none;font-family:monospace;box-shadow:0 0 20px rgba(255,210,74,.5)}
-#fsProgress.on{display:block}
-
+/* شريط المضاعف التراكمي */
+#cumMultBar{position:fixed;top:32px;left:50%;transform:translateX(-50%);
+  z-index:27;background:linear-gradient(180deg,rgba(80,20,120,.95),rgba(30,5,60,.98));
+  padding:6px 18px;border-radius:24px;
+  border:2px solid #ffd24a;display:none;font-family:monospace;
+  box-shadow:0 0 30px rgba(255,210,74,.6),inset 0 0 20px rgba(255,210,74,.15);
+  align-items:center;gap:10px}
+#cumMultBar.on{display:flex;animation:cumPulse 1.5s ease-in-out infinite}
+@keyframes cumPulse{
+  0%,100%{box-shadow:0 0 30px rgba(255,210,74,.6),inset 0 0 20px rgba(255,210,74,.15)}
+  50%{box-shadow:0 0 50px rgba(255,210,74,.9),inset 0 0 30px rgba(255,210,74,.3)}
+}
+#cumMultBar .lbl{font-size:10px;color:#e0d0ff}
+#cumMultBar .val{font-size:20px;font-weight:900;color:#ffd24a;
+  text-shadow:0 0 15px #ff8c00,0 0 30px #ffd24a}
+#cumMultBar .spins{font-size:10px;color:#2ecc71;font-weight:700}
+/* قائمة المضاعفات المجمّعة */
+#multList{position:fixed;top:90px;right:8px;z-index:26;display:none;
+  background:linear-gradient(180deg,rgba(40,10,80,.95),rgba(10,2,25,.98));
+  border:2px solid #ffd24a;border-radius:10px;padding:6px 8px;
+  max-width:110px;max-height:200px;overflow-y:auto;
+  box-shadow:0 0 25px rgba(255,210,74,.5)}
+#multList.on{display:block}
+#multList .item{display:inline-block;background:linear-gradient(180deg,#8a4a00,#4a2000);
+  border:1px solid #ffd24a;border-radius:6px;padding:2px 6px;margin:2px;
+  font-family:monospace;font-weight:900;font-size:11px;color:#ffd24a;
+  text-shadow:0 0 8px #ff8c00;animation:multAppear .5s ease-out}
+@keyframes multAppear{
+  0%{transform:scale(0) rotate(-180deg);opacity:0}
+  60%{transform:scale(1.2) rotate(20deg);opacity:1}
+  100%{transform:scale(1) rotate(0);opacity:1}
+}
 .mpop{position:fixed;z-index:36;font-family:'Cinzel Decorative',serif;
   font-size:24px;font-weight:900;pointer-events:none;
   background:linear-gradient(180deg,#fff,#c89bff,#9b59ff);
@@ -230,7 +238,6 @@ canvas{display:block}
   20%{transform:translate(-50%,-50%) scale(1.3);opacity:1}
   40%{transform:translate(-50%,-50%) scale(1)}
   100%{transform:translate(-50%,-180%) scale(.9);opacity:0}}
-
 .modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.9);
   display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);
   padding:12px;overflow-y:auto}
@@ -242,7 +249,6 @@ canvas{display:block}
   text-shadow:0 0 15px #ff8c00}
 .closeX{position:absolute;top:6px;left:6px;background:none;border:none;
   color:#ff4a4a;font-size:20px;cursor:pointer;padding:4px 8px}
-
 .walletTabs{display:flex;gap:5px;margin-bottom:12px;justify-content:center;flex-wrap:wrap}
 .walletTab{padding:6px 12px;background:linear-gradient(180deg,#1a3a2a,#0a1a10);
   border:1px solid #2ecc71;border-radius:6px;color:#c8ffd8;
@@ -344,7 +350,6 @@ canvas{display:block}
   font-weight:700;color:#fff;background:linear-gradient(180deg,#ff8c00,#c94000);
   border:2px solid #ffd24a;border-radius:6px}
 .bw-tap{margin-top:10px;font-size:10px;color:#a090d0}
-
 #tierBadge{position:fixed;top:50%;left:50%;z-index:38;pointer-events:none;
   transform:translate(-50%,-50%);font-family:'Cinzel Decorative',serif;
   font-size:clamp(20px,5vw,38px);font-weight:900;opacity:0;text-align:center;
@@ -362,7 +367,6 @@ canvas{display:block}
 .tier-red{background:linear-gradient(180deg,#5a0a1a,#300005);border-color:#ff2a00;color:#ffb0b0;box-shadow:0 0 40px #ff2a00}
 .tier-gold{background:linear-gradient(180deg,#8a6a0a,#3a2010);border-color:#ffd24a;color:#fff0c0;box-shadow:0 0 60px #ffd24a;animation:tierShow 2.5s ease-out forwards,glow 0.6s ease-in-out infinite alternate}
 @keyframes glow{to{box-shadow:0 0 90px #ffd24a,0 0 120px #ff8c00}}
-
 #gambleOverlay{position:fixed;inset:0;z-index:210;display:none;
   align-items:center;justify-content:center;padding:12px}
 #gambleOverlay.show{display:flex;animation:iFade .3s ease}
@@ -386,7 +390,6 @@ canvas{display:block}
   border-color:#ff2a00;color:#ffb0b0}
 .gamble-btn.double:hover{background:linear-gradient(180deg,#ff2a00,#8b0000)}
 .gamble-rounds{font-size:10px;color:#a090d0;margin-top:10px}
-
 #wheelOverlay{position:fixed;inset:0;z-index:220;display:none;
   align-items:center;justify-content:center;padding:12px}
 #wheelOverlay.show{display:flex;animation:iFade .3s ease}
@@ -406,7 +409,6 @@ canvas{display:block}
   color:#fff;box-shadow:0 0 20px rgba(255,210,74,.5)}
 #wheelSpinBtn:disabled{opacity:.5;cursor:not-allowed}
 #wheelTimer{font-size:11px;color:#a090d0;margin-top:8px}
-
 #bonusSummaryOverlay{position:fixed;inset:0;z-index:215;display:none;
   align-items:center;justify-content:center;padding:12px}
 #bonusSummaryOverlay.show{display:flex;animation:iFade .3s ease}
@@ -437,7 +439,6 @@ canvas{display:block}
 .bonus-summary-close{margin-top:14px;padding:10px 24px;font-family:'Amiri',serif;
   font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;
   background:linear-gradient(180deg,#ff8c00,#c94000);border:2px solid #ffd24a;color:#fff}
-
 #autoMenu{position:fixed;inset:0;z-index:180;display:none;
   align-items:center;justify-content:center;padding:12px}
 #autoMenu.show{display:flex;animation:iFade .2s ease}
@@ -452,7 +453,6 @@ canvas{display:block}
   border:2px solid #9b59ff;color:#e0d0ff;cursor:pointer}
 .auto-btn:hover{background:linear-gradient(180deg,#9b59ff,#4a1a7a);color:#fff}
 .auto-btn.cancel{background:linear-gradient(180deg,#6a1a1a,#3a0505);border-color:#ff4a4a;color:#ffb0b0}
-
 @media (max-width:640px){
   #mainArea{padding:50px 3px 3px 3px;gap:3px}
   #sideCol{width:78px;gap:3px}
@@ -484,6 +484,9 @@ canvas{display:block}
   #turboBtn{top:44px;right:6px}
   #autoBtn{top:44px;right:48px}
   #frame{padding:3px}
+  #cumMultBar{padding:4px 12px;top:28px}
+  #cumMultBar .val{font-size:16px}
+  #multList{top:80px;right:4px;max-width:90px}
 }
 @media (max-width:430px){
   #sideCol{width:68px}
@@ -506,39 +509,31 @@ canvas{display:block}
 <!-- ==================== SVG ICON LIBRARY ==================== -->
 <svg width="0" height="0" style="position:absolute">
   <defs>
-    <!-- Sound -->
     <symbol id="ic-sound-on" viewBox="0 0 24 24">
       <path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
     </symbol>
     <symbol id="ic-sound-off" viewBox="0 0 24 24">
       <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
     </symbol>
-    <!-- Wheel -->
     <symbol id="ic-wheel" viewBox="0 0 24 24">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
     </symbol>
-    <!-- Profile -->
     <symbol id="ic-profile" viewBox="0 0 24 24">
       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
     </symbol>
-    <!-- Wallet -->
     <symbol id="ic-wallet" viewBox="0 0 24 24">
       <path d="M21 7.28V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-2.28c.59-.35 1-.98 1-1.72V9c0-.74-.41-1.37-1-1.72zM20 9v6h-7V9h7zM5 19V5h14v2h-6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h6v2H5z"/>
       <circle cx="16" cy="12" r="1.5"/>
     </symbol>
-    <!-- Agent -->
     <symbol id="ic-agent" viewBox="0 0 24 24">
       <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
     </symbol>
-    <!-- Logout -->
     <symbol id="ic-logout" viewBox="0 0 24 24">
       <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
     </symbol>
-    <!-- Turbo (lightning) -->
     <symbol id="ic-turbo" viewBox="0 0 24 24">
       <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
     </symbol>
-    <!-- Auto (circular arrows) -->
     <symbol id="ic-auto" viewBox="0 0 24 24">
       <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
     </symbol>
@@ -574,7 +569,12 @@ canvas{display:block}
 <div id="game">
   <div id="flash"></div>
   <div id="fsBanner">⚡ جولات مجانية ⚡</div>
-  <div id="fsProgress"></div>
+  <div id="cumMultBar">
+    <span class="lbl">المضاعف التراكمي</span>
+    <span class="val" id="cumMultVal">0×</span>
+    <span class="spins" id="cumMultSpins">15</span>
+  </div>
+  <div id="multList"></div>
   <div class="big" id="bigTxt"></div>
   <div id="tierBadge"></div>
   <div id="zeusBubble">مرحباً بك في العاصفة</div>
@@ -790,18 +790,10 @@ const $=id=>document.getElementById(id);
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
 const sl=ms=>new Promise(r=>setTimeout(r,ms));
 
-/* ==================== PREFERENCES ==================== */
 const Prefs = {
   data: { sound: true, turbo: false, betIndex: 2 },
-  load() {
-    try {
-      const s = localStorage.getItem('sc_prefs');
-      if (s) this.data = { ...this.data, ...JSON.parse(s) };
-    } catch(e){}
-  },
-  save() {
-    try { localStorage.setItem('sc_prefs', JSON.stringify(this.data)); } catch(e){}
-  }
+  load() { try { const s = localStorage.getItem('sc_prefs'); if (s) this.data = { ...this.data, ...JSON.parse(s) }; } catch(e){} },
+  save() { try { localStorage.setItem('sc_prefs', JSON.stringify(this.data)); } catch(e){} }
 };
 Prefs.load();
 
@@ -830,8 +822,6 @@ const Aud=(()=>{
     const d=c.createGain();d.gain.value=dry;node.connect(d);d.connect(mg);
     const w=c.createGain();w.gain.value=wet;node.connect(w);w.connect(rev);
   }
-
-  /* الرعد */
   function thunder(i=1){
     if(!on||!ready)return; resume();
     try{
@@ -854,7 +844,6 @@ const Aud=(()=>{
       s.connect(lp);lp.connect(g);send(g,1,.5);s.start();
     }catch(e){}
   }
-
   function reelStop(col){
     if(!on||!ready)return; resume();
     try{
@@ -890,48 +879,15 @@ const Aud=(()=>{
       o.connect(g);send(g,1,.4);o.start();o.stop(c.currentTime+.42);
     }catch(e){}
   }
-
-  /* صوت الفوز الاحترافي - لحن فاخر متدرج */
   function winLevel(level=1){
     if(!on||!ready)return; resume();
     try{
       const melodies = {
-        1: [  // صغير - نغمة واحدة ناعمة
-          {f: 523.25, d: 0.15, w: 0.04},
-          {f: 659.25, d: 0.20, w: 0.04}
-        ],
-        2: [  // متوسط - 3 نغمات صاعدة
-          {f: 523.25, d: 0.12, w: 0.06},
-          {f: 659.25, d: 0.12, w: 0.06},
-          {f: 783.99, d: 0.20, w: 0.06}
-        ],
-        3: [  // كبير - لحن فاخر 5 نغمات
-          {f: 523.25, d: 0.10, w: 0.08},
-          {f: 659.25, d: 0.10, w: 0.08},
-          {f: 783.99, d: 0.10, w: 0.08},
-          {f: 1046.50, d: 0.15, w: 0.08},
-          {f: 1318.51, d: 0.30, w: 0.08}
-        ],
-        4: [  // ضخم - لحن + صوت رعد
-          {f: 392.00, d: 0.08, w: 0.10},
-          {f: 523.25, d: 0.08, w: 0.10},
-          {f: 659.25, d: 0.08, w: 0.10},
-          {f: 783.99, d: 0.08, w: 0.10},
-          {f: 1046.50, d: 0.12, w: 0.10},
-          {f: 1318.51, d: 0.12, w: 0.10},
-          {f: 1567.98, d: 0.40, w: 0.10}
-        ],
-        5: [  // أسطوري - لحن + رعد مزدوج
-          {f: 261.63, d: 0.08, w: 0.12},
-          {f: 329.63, d: 0.08, w: 0.12},
-          {f: 392.00, d: 0.08, w: 0.12},
-          {f: 523.25, d: 0.08, w: 0.12},
-          {f: 659.25, d: 0.08, w: 0.12},
-          {f: 783.99, d: 0.08, w: 0.12},
-          {f: 1046.50, d: 0.10, w: 0.12},
-          {f: 1318.51, d: 0.10, w: 0.12},
-          {f: 1567.98, d: 0.50, w: 0.15}
-        ]
+        1: [{f:523.25,d:.15,w:.04},{f:659.25,d:.20,w:.04}],
+        2: [{f:523.25,d:.12,w:.06},{f:659.25,d:.12,w:.06},{f:783.99,d:.20,w:.06}],
+        3: [{f:523.25,d:.10,w:.08},{f:659.25,d:.10,w:.08},{f:783.99,d:.10,w:.08},{f:1046.50,d:.15,w:.08},{f:1318.51,d:.30,w:.08}],
+        4: [{f:392,d:.08,w:.10},{f:523.25,d:.08,w:.10},{f:659.25,d:.08,w:.10},{f:783.99,d:.08,w:.10},{f:1046.50,d:.12,w:.10},{f:1318.51,d:.12,w:.10},{f:1567.98,d:.40,w:.10}],
+        5: [{f:261.63,d:.08,w:.12},{f:329.63,d:.08,w:.12},{f:392,d:.08,w:.12},{f:523.25,d:.08,w:.12},{f:659.25,d:.08,w:.12},{f:783.99,d:.08,w:.12},{f:1046.50,d:.10,w:.12},{f:1318.51,d:.10,w:.12},{f:1567.98,d:.50,w:.15}]
       };
       const melody = melodies[level] || melodies[1];
       const start = c.currentTime + 0.01;
@@ -952,15 +908,10 @@ const Aud=(()=>{
         o.start(t); o.stop(t + note.d + 0.35);
         t += note.d;
       });
-      if (level >= 4) {
-        setTimeout(() => thunder(level >= 5 ? 1.4 : 0.9), 200);
-      }
-      if (level >= 5) {
-        setTimeout(() => thunder(1.2), 700);
-      }
+      if (level >= 4) setTimeout(() => thunder(level >= 5 ? 1.4 : 0.9), 200);
+      if (level >= 5) setTimeout(() => thunder(1.2), 700);
     }catch(e){}
   }
-
   function tumble(){
     if(!on||!ready)return; resume();
     try{
@@ -1155,6 +1106,13 @@ async function refreshMe(){
   try {
     const u = await api('/api/me');
     S.bal = u.balance; S.best = u.best; S.laps = u.laps;
+    if(u.activeBonus){
+      S.fs = u.activeBonus.spinsLeft;
+      S.cumMult = u.activeBonus.cumulativeMult;
+      S.bonusWins = u.activeBonus.totalWonInBonus;
+      showCumMultBar();
+      fireOn(false);
+    }
     upd();
     const stored = JSON.parse(localStorage.getItem('sc_user') || '{}');
     localStorage.setItem('sc_user', JSON.stringify({ ...stored, balance: u.balance }));
@@ -1175,16 +1133,11 @@ const rcv=$('reels');
 const rcx=rcv.getContext('2d');
 
 const SYM = {
-  zeusFist:  { pay: 2.0 },
-  crown:     { pay: 1.0 },
-  chalice:   { pay: 0.7 },
-  hourglass: { pay: 0.5 },
-  ring:      { pay: 0.35 },
-  flaming:   { pay: 0.24 },
-  gem_red:   { pay: 0.19 },
-  gem_blue:  { pay: 0.15 },
-  gem_green: { pay: 0.11 },
-  gem_purple:{ pay: 0.07 }
+  zeusFist:  { pay: 2.0 }, crown:     { pay: 1.0 },
+  chalice:   { pay: 0.7 }, hourglass: { pay: 0.5 },
+  ring:      { pay: 0.35 }, flaming:  { pay: 0.24 },
+  gem_red:   { pay: 0.19 }, gem_blue: { pay: 0.15 },
+  gem_green: { pay: 0.11 }, gem_purple:{ pay: 0.07 }
 };
 
 const BETS=[20,50,100,200,500,1000,2000,5000,10000];
@@ -1195,16 +1148,15 @@ const FS_COUNT=15;
 
 const S={
   bal:0, bi: Prefs.data.betIndex || 2, bet:BETS[Prefs.data.betIndex || 2],
-  grid:[], spin:false, fs:0, mc:0, lw:0,
+  grid:[], spin:false, fs:0, mc:0, lw:0, cumMult:0,
   laps:0, best:0, wagered:0, won:0, fire:false,
-  gambleActive:false, gambleAmount:0, gambleRound:0, gambleMaxRound:5,
   autoSpins:0, autoActive:false,
   turbo:Prefs.data.turbo || false,
   bonusWins:0, bonusBestWin:0, bonusStartBalance:0,
-  sessionSpins:0, sessionWins:0, sessionWagered:0, sessionWon:0
+  sessionSpins:0, sessionWins:0, sessionWagered:0, sessionWon:0,
+  multipliersCollected:[]
 };
 
-/* ==================== ExplosionFX ==================== */
 const ExplosionFX = (() => {
   const cvs = document.createElement('canvas');
   cvs.style.cssText = 'position:fixed;inset:0;z-index:50;pointer-events:none';
@@ -1244,7 +1196,6 @@ const ExplosionFX = (() => {
   return { boom };
 })();
 
-/* ==================== ZEUS ==================== */
 const ZeusChar=(()=>{
   const back=$('zeusBackdrop');
   const bc=back.getContext('2d');
@@ -1335,7 +1286,6 @@ const ZeusChar=(()=>{
   return {setState,say};
 })();
 
-/* ==================== REELS ==================== */
 const RS={
   off:new Array(COLS).fill(0),spd:new Array(COLS).fill(0),
   stop:new Array(COLS).fill(true),str:[],
@@ -1663,6 +1613,32 @@ function showTier(tier){
   badge.classList.add('show');
 }
 
+/* شريط المضاعف التراكمي */
+function showCumMultBar(){
+  const bar = $('cumMultBar');
+  bar.classList.add('on');
+  $('cumMultVal').textContent = S.cumMult + '×';
+  $('cumMultSpins').textContent = S.fs + ' لفة';
+}
+function hideCumMultBar(){
+  $('cumMultBar').classList.remove('on');
+  $('multList').classList.remove('on');
+}
+function addMultToList(val){
+  S.multipliersCollected.push(val);
+  const list = $('multList');
+  list.classList.add('on');
+  const item = document.createElement('span');
+  item.className = 'item';
+  item.textContent = val + '×';
+  list.appendChild(item);
+}
+function clearMultList(){
+  S.multipliersCollected = [];
+  $('multList').innerHTML = '';
+  $('multList').classList.remove('on');
+}
+
 /* ==================== SPIN ==================== */
 function getTier(win, bet){
   if(win === 0) return null;
@@ -1691,31 +1667,39 @@ async function spin(){
   try {
     const res = await api('/api/spin', {
       method:'POST',
-      body: JSON.stringify({ bet: currentBet, freeSpin: isFree })
+      body: JSON.stringify({ bet: currentBet })
     });
 
-    if(isFree) S.fs--;
-
+    const isFreeNow = res.isFree;
     const chains = res.chains || [];
     const finalGrid = res.finalGrid;
     const totalWin = res.totalWin || 0;
     const scatterCount = res.scatterCount || 0;
 
     S.bal = res.balance;
+
+    /* تحديث حالة البونص من السيرفر */
+    if(res.activeBonus){
+      S.fs = res.activeBonus.spinsLeft;
+      S.cumMult = res.activeBonus.cumulativeMult;
+      S.bonusWins = res.activeBonus.totalWonInBonus;
+    } else if(isFreeNow){
+      S.fs = Math.max(0, S.fs - 1);
+    }
+
     upd();
 
-    if(isFree){
-      S.bonusWins += totalWin;
-      if(totalWin > S.bonusBestWin) S.bonusBestWin = totalWin;
-      $('fsProgress').textContent = '⚡ مجاني: ' + S.fs + ' متبقية | ربحت ' + Math.floor(S.bonusWins);
-      $('fsProgress').classList.add('on');
+    if(isFreeNow){
+      showCumMultBar();
+      $('cumMultVal').textContent = S.cumMult + '×';
+      $('cumMultSpins').textContent = S.fs + ' لفة';
     }
 
     const firstGrid = chains.length > 0 ? chains[0].grid : finalGrid;
     await animSpinToGrid(firstGrid);
     S.grid = firstGrid;
 
-    let cumulativeMult = 0;
+    let cumulativeMult = S.cumMult;
 
     for(let i=0;i<chains.length;i++){
       const chain = chains[i];
@@ -1730,6 +1714,7 @@ async function spin(){
             const px=rect.left+PADX+x*CELL+CELL/2;
             const py=rect.top+PADY+y*CELL+CELL/2;
             multPop(s.v+'×',px,py);
+            if(isFreeNow) addMultToList(s.v);
           }
         }
         await delay(400);
@@ -1739,8 +1724,12 @@ async function spin(){
       const chainWin = chain.winAmount;
       cumulativeMult = chain.cumulativeMult || 0;
       S.mc = cumulativeMult;
+      S.cumMult = cumulativeMult;
 
-      if(isFree && cumulativeMult > 0) $('multHud').classList.add('hot');
+      if(isFreeNow){
+        $('cumMultVal').textContent = cumulativeMult + '×';
+        $('multHud').classList.add('hot');
+      }
 
       const tier = getTier(chainWin, currentBet);
       const level = getTierLevel(tier);
@@ -1778,9 +1767,14 @@ async function spin(){
     S.sessionWon += totalWin;
     if(totalWin > 0) S.sessionWins++;
 
+    if(isFreeNow){
+      S.bonusWins += totalWin;
+      if(totalWin > S.bonusBestWin) S.bonusBestWin = totalWin;
+    }
+
     upd();
     updateStats();
-    addHistory(currentBet, totalWin, cumulativeMult, isFree);
+    addHistory(currentBet, totalWin, cumulativeMult, isFreeNow);
 
     const tier = getTier(totalWin, currentBet);
     if(tier && tier !== 'green') {
@@ -1795,12 +1789,13 @@ async function spin(){
       log('✅ إجمالي: '+Math.floor(totalWin)+' ل.س');
     }
 
-    if(scatterCount >= 4 && S.fs === 0 && !isFree){
+    if(res.freeSpinsTriggered){
       S.fs = FS_COUNT;
       S.mc = 0;
+      S.cumMult = 0;
       S.bonusWins = 0;
       S.bonusBestWin = 0;
-      S.bonusStartBalance = S.bal;
+      clearMultList();
       log('⚡ '+scatterCount+' موزعة — '+FS_COUNT+' جولة مجانية');
       flash(700,1); shake(2.5,700);
       fireOn(false);
@@ -1812,9 +1807,26 @@ async function spin(){
     S.spin = false;
     wheel.classList.remove('spinning','disabled');
 
-    const shouldGamble = !isFree && totalWin > 0 && totalWin >= currentBet * 5 && !S.autoActive;
-    if(shouldGamble){
-      await handleGamble(totalWin, currentBet);
+    /* نهاية البونص — ملخص */
+    if(res.bonusEnded && res.bonusSummary){
+      const bs = res.bonusSummary;
+      $('bonusSummaryBody').innerHTML = `
+        <div class="bonus-summary-row"><span class="lbl">عدد اللفات المجانية</span><span class="val">${bs.spins}</span></div>
+        <div class="bonus-summary-row"><span class="lbl">قيمة الرهان لكل لفة</span><span class="val">${bs.initialBet}</span></div>
+        <div class="bonus-summary-row"><span class="lbl">إجمالي الرهان</span><span class="val">${bs.initialBet * bs.spins}</span></div>
+        <div class="bonus-summary-row"><span class="lbl">إجمالي الأرباح</span><span class="val green">${Math.floor(bs.totalWon)}</span></div>
+        <div class="bonus-summary-row"><span class="lbl">أفضل لفة</span><span class="val">${Math.floor(bs.bestWin)}</span></div>
+        <div class="bonus-summary-row"><span class="lbl">المضاعف النهائي</span><span class="val">${bs.finalMultiplier}×</span></div>
+        <div class="bonus-summary-total">
+          <div class="lbl">صافي الربح من البونص</div>
+          <div class="val pos">+${Math.floor(bs.totalWon)} ل.س</div>
+        </div>
+      `;
+      $('bonusSummaryOverlay').classList.add('show');
+      S.fs = 0;
+      S.cumMult = 0;
+      hideCumMultBar();
+      fireOff();
     }
 
     if(S.fs > 0){
@@ -1823,15 +1835,8 @@ async function spin(){
       return;
     }
 
-    if(isFree && S.fs === 0){
-      $('fsProgress').classList.remove('on');
-      fireOff();
-      setTimeout(() => showBonusSummary(currentBet), 500);
-    }
-
     $('buyNormal').disabled=false;
     $('buyPremium').disabled=false;
-    if(S.fire) fireOff();
 
     if(S.autoActive && S.autoSpins > 0){
       S.autoSpins--;
@@ -1855,108 +1860,13 @@ async function spin(){
   }
 }
 
-/* ==================== GAMBLE ==================== */
-async function handleGamble(initialAmount, bet){
-  return new Promise(resolve => {
-    let amount = initialAmount;
-    S.gambleRound = 0;
-    S.gambleActive = true;
-    const overlay = $('gambleOverlay');
-    const amountEl = $('gambleAmount');
-    const msgEl = $('gambleMsg');
-    const roundsEl = $('gambleRounds');
-    amountEl.textContent = Math.floor(amount);
-    msgEl.textContent = '50% فرصة × 2';
-    roundsEl.textContent = 'الجولة 1 من 5';
-
-    function show(){
-      amountEl.textContent = Math.floor(amount);
-      roundsEl.textContent = 'الجولة ' + (S.gambleRound + 1) + ' من 5';
-      overlay.classList.add('show');
-    }
-    show();
-
-    function cleanup(){
-      overlay.classList.remove('show');
-      $('gambleCashout').onclick = null;
-      $('gambleDouble').onclick = null;
-      S.gambleActive = false;
-      resolve();
-    }
-
-    $('gambleCashout').onclick = () => {
-      cleanup();
-    };
-
-    $('gambleDouble').onclick = async () => {
-      S.gambleRound++;
-      if(S.gambleRound > 5){ S.gambleRound = 5; }
-      $('gambleDouble').disabled = true;
-      msgEl.textContent = '🎲 جاري الدوران...';
-
-      try {
-        const res = await api('/api/gamble', {
-          method:'POST',
-          body: JSON.stringify({ amount: Math.floor(amount) })
-        });
-
-        if(res.won){
-          amount = amount * 2;
-          S.bal = res.newBalance;
-          Aud.winLevel(4);
-          amountEl.textContent = Math.floor(amount);
-          msgEl.textContent = '🎉 ربحت! ضاعفت المبلغ';
-          upd();
-        } else {
-          Aud.winLevel(1);
-          msgEl.textContent = '😢 خسرت';
-          amount = 0;
-          setTimeout(cleanup, 1800);
-          return;
-        }
-      } catch(e){
-        toast(e.message, true);
-        cleanup();
-        return;
-      } finally {
-        $('gambleDouble').disabled = false;
-      }
-
-      if(S.gambleRound >= 5){
-        msgEl.textContent = '🏆 وصلت للحد الأقصى! سيتم السحب';
-        setTimeout(() => cleanup(), 2000);
-        return;
-      }
-
-      roundsEl.textContent = 'الجولة ' + (S.gambleRound + 1) + ' من 5';
-    };
-  });
-}
-
 /* ==================== BONUS SUMMARY ==================== */
-function showBonusSummary(bet){
-  const totalBet = bet * FS_COUNT;
-  const totalWin = S.bonusWins;
-  const net = totalWin;
-
-  $('bonusSummaryBody').innerHTML = `
-    <div class="bonus-summary-row"><span class="lbl">عدد اللفات المجانية</span><span class="val">${FS_COUNT}</span></div>
-    <div class="bonus-summary-row"><span class="lbl">قيمة الرهان لكل لفة</span><span class="val">${bet}</span></div>
-    <div class="bonus-summary-row"><span class="lbl">إجمالي الرهان المستخدم</span><span class="val">${totalBet}</span></div>
-    <div class="bonus-summary-row"><span class="lbl">إجمالي الأرباح</span><span class="val ${totalWin>0?'green':''}">${Math.floor(totalWin)}</span></div>
-    <div class="bonus-summary-row"><span class="lbl">أفضل لفة</span><span class="val">${Math.floor(S.bonusBestWin)}</span></div>
-    <div class="bonus-summary-total">
-      <div class="lbl">صافي الربح من البونص</div>
-      <div class="val ${net>=0?'pos':'neg'}">${net>=0?'+':''}${Math.floor(net)} ل.س</div>
-    </div>
-  `;
-  $('bonusSummaryOverlay').classList.add('show');
-}
-
 $('bonusSummaryClose').onclick = () => {
   $('bonusSummaryOverlay').classList.remove('show');
   S.bonusWins = 0;
   S.bonusBestWin = 0;
+  hideCumMultBar();
+  clearMultList();
 };
 
 /* ==================== WHEEL ==================== */
@@ -1971,11 +1881,8 @@ function drawWheel(highlight = -1){
   const values = [0, 100, 500, 1000, 2000, 5000, 10000, 25000];
   const N = values.length;
   const slice = (Math.PI * 2) / N;
-
   ctx.clearRect(0,0,W,H);
-
   const colors = ['#3a1a6a','#4a1a7a','#5a1a8a','#6a2a9a','#7a3aaa','#8a4aba','#9a5aca','#aa6ada'];
-
   for(let i=0;i<N;i++){
     const start = -Math.PI/2 + i*slice;
     const end = start + slice;
@@ -1988,7 +1895,6 @@ function drawWheel(highlight = -1){
     ctx.strokeStyle = '#ffd24a';
     ctx.lineWidth = 2;
     ctx.stroke();
-
     ctx.save();
     ctx.translate(cx,cy);
     ctx.rotate(start + slice/2);
@@ -1998,7 +1904,6 @@ function drawWheel(highlight = -1){
     ctx.fillText(values[i].toLocaleString(), R - 14, 5);
     ctx.restore();
   }
-
   ctx.beginPath();
   ctx.arc(cx,cy,26,0,Math.PI*2);
   ctx.fillStyle = '#1a0230';
@@ -2041,7 +1946,6 @@ $('wheelSpinBtn').onclick = async () => {
   wheelSpinning = true;
   $('wheelSpinBtn').disabled = true;
   $('wheelResult').textContent = '...';
-
   try {
     const res = await api('/api/wheel/spin', { method: 'POST' });
     const idx = res.index;
@@ -2051,13 +1955,11 @@ $('wheelSpinBtn').onclick = async () => {
     const startRot = wheelRot % 360;
     const duration = 4000;
     const startTime = performance.now();
-
     const animate = (now) => {
       const elapsed = now - startTime;
       const p = Math.min(1, elapsed / duration);
       const ease = 1 - Math.pow(1 - p, 3);
       wheelRot = startRot + (targetAngle - startRot) * ease;
-
       const canvas = $('wheelCanvas');
       const ctx = canvas.getContext('2d');
       const W = canvas.width, H = canvas.height;
@@ -2067,7 +1969,6 @@ $('wheelSpinBtn').onclick = async () => {
       ctx.translate(-W/2, -H/2);
       drawWheel();
       ctx.restore();
-
       if(p < 1){
         requestAnimationFrame(animate);
       } else {
@@ -2082,7 +1983,6 @@ $('wheelSpinBtn').onclick = async () => {
       }
     };
     requestAnimationFrame(animate);
-
   } catch(e){
     toast(e.message, true);
     wheelSpinning = false;
@@ -2132,7 +2032,6 @@ $('turboBtn').onclick = () => {
 };
 if(S.turbo){ $('turboBtn').classList.add('active'); }
 
-/* ==================== FIRE ==================== */
 function fireOn(premium){
   S.fire=true;$('frame').classList.add('fire');
   $('fsBanner').classList.add('on');
@@ -2143,7 +2042,6 @@ function fireOff(){
   S.mc=0;
 }
 
-/* ==================== OVERLAYS ==================== */
 function showBigWinOverlay(amount, fsCount, tier){
   const overlay=$('bwOverlay');
   const titles={
@@ -2161,7 +2059,6 @@ function showBigWinOverlay(amount, fsCount, tier){
   setTimeout(hide,5000);
 }
 
-/* ==================== LOG & HISTORY ==================== */
 function log(m){
   const e=$('log');e.innerHTML=m+'<br>'+e.innerHTML;
   while(e.children.length>30)e.removeChild(e.lastChild);
@@ -2186,7 +2083,6 @@ function addHistory(bet, won, mult, isFree){
   while(list.children.length>20)list.removeChild(list.lastChild);
 }
 
-/* ==================== STATS ==================== */
 function updateStats(){
   $('sSpins').textContent = S.sessionSpins;
   $('sBest').textContent = Math.floor(S.best);
@@ -2204,7 +2100,6 @@ function updateStats(){
   }
 }
 
-/* ==================== HUD ==================== */
 function upd(){
   $('bal').textContent=Math.floor(S.bal);
   $('lastWin').textContent=Math.floor(S.lw);
@@ -2216,7 +2111,6 @@ function upd(){
   Prefs.data.betIndex = S.bi; Prefs.save();
 }
 
-/* ==================== CONTROLS ==================== */
 $('betDown').onclick=()=>{
   if(S.spin||S.fs>0)return;
   if(S.bi>0){S.bi--;S.bet=BETS[S.bi];upd();Aud.reelStop(0)}
@@ -2253,23 +2147,22 @@ async function buyBonus(type){
   try {
     const r=await api('/api/buy-bonus',{method:'POST',body:JSON.stringify({price,type})});
     S.bal=r.balance;
+    S.fs = FS_COUNT;
+    S.mc = 0;
+    S.cumMult = 0;
+    S.bonusWins = 0;
+    S.bonusBestWin = 0;
+    clearMultList();
   } catch(e){ toast(e.message,true); return; }
-  S.fs=FS_COUNT;
-  S.mc=0;
-  S.bonusWins=0;
-  S.bonusBestWin=0;
-  S.bonusStartBalance=S.bal;
   upd();
   Aud.buy(type==='premium');
   bigShow(type==='premium'?'بونص مميز':'بونص عادي',1500);
   fireOn(type==='premium');
   ZeusChar.setState('angry',3000);
-  $('fsProgress').textContent = '⚡ مجاني: ' + S.fs + ' متبقية | ربحت 0';
-  $('fsProgress').classList.add('on');
+  showCumMultBar();
   setTimeout(spin,800);
 }
 
-/* ==================== PAYTABLE ==================== */
 (function buildPaytable(){
   const box=$('ptRows');
   const order=['zeusFist','crown','chalice','hourglass','ring','flaming',
@@ -2458,7 +2351,6 @@ $('saveAddrBtn').onclick=async()=>{
   }catch(e){toast(e.message,true);}
 };
 
-/* ==================== PROFILE ==================== */
 $('profileBtn').onclick=async()=>{
   const u=JSON.parse(localStorage.getItem('sc_user')||'{}');
   $('profileContent').innerHTML=
@@ -2481,7 +2373,6 @@ $('profileBtn').onclick=async()=>{
   };
 };
 
-/* ==================== AGENT ==================== */
 $('agentBadge').onclick=async()=>{
   $('agentModal').classList.add('on');
   try{
@@ -2518,7 +2409,6 @@ window.becomeAgent=async()=>{
   }catch(e){toast(e.message,true);}
 };
 
-/* ==================== INIT ==================== */
 S.grid=[];
 for(let x=0;x<COLS;x++){
   S.grid[x]=[];
