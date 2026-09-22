@@ -54,25 +54,26 @@ canvas{display:block}
 #hubDailyBtn.available{animation:dailyPulse 1.5s infinite}
 @keyframes dailyPulse{0%,100%{box-shadow:0 0 15px rgba(255,107,157,.6)}50%{box-shadow:0 0 35px rgba(255,107,157,1)}}
 
-.hubContent{flex:1;padding:8px 14px 24px;max-width:900px;margin:0 auto;width:100%}
+.hubContent{flex:1;padding:8px 14px 24px;max-width:1000px;margin:0 auto;width:100%}
 
 .section-title{font-family:'Cinzel Decorative',serif;font-size:14px;color:#ffd24a;margin:14px 4px 10px;display:flex;align-items:center;gap:8px;text-shadow:0 0 12px rgba(255,210,74,.6)}
 .section-title::before,.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,210,74,.5),transparent)}
 
-.gamesGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.gamesGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}
 
 .gameCard{position:relative;border-radius:16px;padding:16px 14px 14px;cursor:pointer;overflow:hidden;border:2px solid #b8860b;background:linear-gradient(180deg,rgba(60,20,50,.95),rgba(20,5,30,.98));box-shadow:0 8px 25px rgba(0,0,0,.6),0 0 25px rgba(255,140,0,.2);transition:transform .2s}
 .gameCard:active{transform:scale(.97)}
 .gameCard.locked{opacity:.55;cursor:not-allowed}
 .gameCard.locked:active{transform:none}
-.gameCard::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,210,74,.15) 60deg,transparent 120deg);animation:cardRotate 6s linear infinite;pointer-events:none}
+.gameCard::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,210,74,.15) 60deg,transparent 120deg);animation:cardRotate 8s linear infinite;pointer-events:none}
 @keyframes cardRotate{to{transform:rotate(360deg)}}
 .gameCard-emoji{font-size:44px;text-align:center;margin-bottom:8px;filter:drop-shadow(0 0 15px rgba(255,210,74,.8));position:relative;z-index:1}
-.gameCard-name{font-family:'Cinzel Decorative',serif;font-size:15px;font-weight:900;text-align:center;color:#ffd24a;margin-bottom:3px;position:relative;z-index:1;text-shadow:0 0 12px rgba(255,210,74,.7)}
-.gameCard-name-en{font-size:10px;letter-spacing:.15em;text-align:center;color:#c89bff;margin-bottom:10px;position:relative;z-index:1;font-family:'Cinzel Decorative',serif}
-.gameCard-btn{width:100%;padding:9px;border-radius:9px;border:2px solid #ffd24a;background:linear-gradient(180deg,#8b4000,#4a1a00);color:#fff;font-family:'Cinzel Decorative',serif;font-weight:900;font-size:12px;cursor:pointer;position:relative;z-index:1;letter-spacing:.05em}
+.gameCard-name{font-family:'Cinzel Decorative',serif;font-size:14px;font-weight:900;text-align:center;color:#ffd24a;margin-bottom:3px;position:relative;z-index:1;text-shadow:0 0 12px rgba(255,210,74,.7)}
+.gameCard-name-en{font-size:9px;letter-spacing:.15em;text-align:center;color:#c89bff;margin-bottom:10px;position:relative;z-index:1;font-family:'Cinzel Decorative',serif}
+.gameCard-btn{width:100%;padding:9px;border-radius:9px;border:2px solid #ffd24a;background:linear-gradient(180deg,#8b4000,#4a1a00);color:#fff;font-family:'Cinzel Decorative',serif;font-weight:900;font-size:11px;cursor:pointer;position:relative;z-index:1;letter-spacing:.05em}
 .gameCard.locked .gameCard-btn{background:linear-gradient(180deg,#2a2a2a,#0a0a0a);border-color:#666;color:#888}
 
+/* ألوان الألعاب */
 .gameCard.c-slot{background:linear-gradient(180deg,rgba(80,20,60,.95),rgba(20,5,30,.98));border-color:#ff8c00}
 .gameCard.c-slot .gameCard-emoji{filter:drop-shadow(0 0 20px #ff8c00)}
 
@@ -84,9 +85,29 @@ canvas{display:block}
 .gameCard.c-mines .gameCard-emoji{filter:drop-shadow(0 0 20px #2ecc71)}
 .gameCard.c-mines .gameCard-name{color:#7effb0}
 
-.gameCard.c-dice{background:linear-gradient(180deg,rgba(90,60,20,.95),rgba(30,15,5,.98));border-color:#ffd24a}
-.gameCard.c-dice .gameCard-emoji{filter:drop-shadow(0 0 20px #ffd24a)}
-.gameCard.c-dice .gameCard-name{color:#ffe8a0}
+.gameCard.c-chicken{background:linear-gradient(180deg,rgba(90,60,10,.95),rgba(30,15,5,.98));border-color:#ffcc00}
+.gameCard.c-chicken .gameCard-emoji{filter:drop-shadow(0 0 20px #ffcc00)}
+.gameCard.c-chicken .gameCard-name{color:#ffe8a0}
+
+.gameCard.c-plinko{background:linear-gradient(180deg,rgba(60,20,120,.95),rgba(20,5,40,.98));border-color:#c89bff}
+.gameCard.c-plinko .gameCard-emoji{filter:drop-shadow(0 0 20px #c89bff)}
+.gameCard.c-plinko .gameCard-name{color:#e0d0ff}
+
+.gameCard.c-dice{background:linear-gradient(180deg,rgba(90,40,10,.95),rgba(30,10,5,.98));border-color:#ff8c00}
+.gameCard.c-dice .gameCard-emoji{filter:drop-shadow(0 0 20px #ff8c00)}
+.gameCard.c-dice .gameCard-name{color:#ffd0a0}
+
+.gameCard.c-limbo{background:linear-gradient(180deg,rgba(10,40,90,.95),rgba(5,10,30,.98));border-color:#4a9eff}
+.gameCard.c-limbo .gameCard-emoji{filter:drop-shadow(0 0 20px #4a9eff)}
+.gameCard.c-limbo .gameCard-name{color:#8ec8ff}
+
+.gameCard.c-coinflip{background:linear-gradient(180deg,rgba(80,60,10,.95),rgba(30,20,5,.98));border-color:#ffd24a}
+.gameCard.c-coinflip .gameCard-emoji{filter:drop-shadow(0 0 20px #ffd24a)}
+.gameCard.c-coinflip .gameCard-name{color:#ffe8a0}
+
+.gameCard.c-tower{background:linear-gradient(180deg,rgba(60,20,120,.95),rgba(20,5,40,.98));border-color:#c89bff}
+.gameCard.c-tower .gameCard-emoji{filter:drop-shadow(0 0 20px #c89bff)}
+.gameCard.c-tower .gameCard-name{color:#e0d0ff}
 
 .comingSoon{position:absolute;top:8px;left:8px;background:linear-gradient(180deg,#ff6b9d,#8b0030);color:#fff;font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;letter-spacing:.05em;z-index:2;font-family:'Cinzel Decorative',serif;box-shadow:0 0 15px rgba(255,107,157,.6)}
 
@@ -106,15 +127,15 @@ canvas{display:block}
 .gamesGrid{grid-template-columns:repeat(2,1fr);gap:10px}
 .gameCard{padding:14px 10px 10px}
 .gameCard-emoji{font-size:38px}
-.gameCard-name{font-size:13px}
-.gameCard-name-en{font-size:9px}
-.gameCard-btn{padding:8px;font-size:11px}
+.gameCard-name{font-size:12px}
+.gameCard-name-en{font-size:8px}
+.gameCard-btn{padding:8px;font-size:10px}
 }
 
 @media (max-width:400px){
 .gamesGrid{grid-template-columns:1fr 1fr;gap:8px}
 .gameCard-emoji{font-size:34px}
-.gameCard-name{font-size:12px}
+.gameCard-name{font-size:11px}
 }
 
 /* ===== MODALS ===== */
@@ -229,7 +250,7 @@ canvas{display:block}
 <div class="bw-scroll"><span class="bw-scroll-inner" id="marqueeText">جاري التحميل...</span></div>
 </div>
 
-<div class="section-title">اختر لعبتك</div>
+<div class="section-title">🎮 الألعاب</div>
 
 <div class="gamesGrid">
 <div class="gameCard c-slot" data-game="slot">
@@ -253,16 +274,50 @@ canvas{display:block}
 <button class="gameCard-btn">العب الآن</button>
 </div>
 
-<div class="gameCard c-dice locked" data-game="dice">
-<div class="comingSoon">قريباً</div>
+<div class="gameCard c-chicken" data-game="chicken">
+<div class="gameCard-emoji">🐔</div>
+<div class="gameCard-name">طريق الدجاجة</div>
+<div class="gameCard-name-en">STORMCHICKEN</div>
+<button class="gameCard-btn">العب الآن</button>
+</div>
+
+<div class="gameCard c-plinko" data-game="plinko">
+<div class="gameCard-emoji">🎯</div>
+<div class="gameCard-name">بلينكو العاصفة</div>
+<div class="gameCard-name-en">STORMPLINKO</div>
+<button class="gameCard-btn">العب الآن</button>
+</div>
+
+<div class="gameCard c-dice" data-game="dice">
 <div class="gameCard-emoji">🎲</div>
 <div class="gameCard-name">نرد العاصفة</div>
 <div class="gameCard-name-en">STORMDICE</div>
-<button class="gameCard-btn">قريباً</button>
+<button class="gameCard-btn">العب الآن</button>
+</div>
+
+<div class="gameCard c-limbo" data-game="limbo">
+<div class="gameCard-emoji">📈</div>
+<div class="gameCard-name">ليمبو العاصفة</div>
+<div class="gameCard-name-en">STORMLIMBO</div>
+<button class="gameCard-btn">العب الآن</button>
+</div>
+
+<div class="gameCard c-coinflip" data-game="coinflip">
+<div class="gameCard-emoji">🪙</div>
+<div class="gameCard-name">عملة العاصفة</div>
+<div class="gameCard-name-en">STORMCOIN</div>
+<button class="gameCard-btn">العب الآن</button>
+</div>
+
+<div class="gameCard c-tower" data-game="tower">
+<div class="gameCard-emoji">🏗️</div>
+<div class="gameCard-name">برج العاصفة</div>
+<div class="gameCard-name-en">STORMTOWER</div>
+<button class="gameCard-btn">العب الآن</button>
 </div>
 </div>
 
-<div class="section-title" style="margin-top:22px">المتصدرون اليوم</div>
+<div class="section-title" style="margin-top:22px">🥇 المتصدرون اليوم</div>
 <div id="leaderboardBox" style="background:linear-gradient(180deg,rgba(40,15,80,.85),rgba(10,3,25,.95));border:2px solid #8b4000;border-radius:12px;padding:10px;min-height:60px">
 <div style="text-align:center;color:#a090d0;font-size:11px;padding:14px">جاري التحميل...</div>
 </div>
@@ -427,7 +482,6 @@ async function loadLeaderboard(){try{
 const res=await api('/api/leaderboard');
 if(!res.leaderboard.length){$('leaderboardBox').innerHTML='<div style="text-align:center;color:#a090d0;font-size:11px;padding:14px">لا يوجد متصدرون اليوم بعد</div>';return}
 $('leaderboardBox').innerHTML=res.leaderboard.map((x,i)=>{
-const cls=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
 const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
 return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,210,74,.06);border-radius:7px;margin-bottom:4px;border-right:3px solid #ffd24a"><span style="font-size:15px;min-width:26px">'+medal+'</span><span style="flex:1;font-size:12px;color:#e0d0ff">'+x.mask+'</span><span style="font-family:monospace;font-weight:900;color:#2ecc71;font-size:13px">'+x.won.toLocaleString()+' ل.س</span></div>';
 }).join('');
@@ -486,13 +540,23 @@ window.becomeAgent=async()=>{try{const r=await api('/api/agent/become',{method:'
 $('hubLogoutBtn').onclick=()=>{if(confirm('هل تريد تسجيل الخروج؟')){localStorage.removeItem('sc_token');localStorage.removeItem('sc_user');location.reload()}};
 
 /* GAME NAVIGATION */
+const GAME_URLS={
+  slot:'/slot.html',
+  aviator:'/aviator.html',
+  mines:'/mines.html',
+  chicken:'/chicken-road.html',
+  plinko:'/plinko.html',
+  dice:'/dice.html',
+  limbo:'/limbo.html',
+  coinflip:'/coinflip.html',
+  tower:'/tower.html'
+};
 document.querySelectorAll('.gameCard').forEach(card=>{
 card.onclick=()=>{
 if(card.classList.contains('locked'))return;
 const game=card.dataset.game;
-if(game==='slot')location.href='/slot.html';
-else if(game==='aviator')location.href='/aviator.html';
-else if(game==='mines')location.href='/mines.html';
+const url=GAME_URLS[game];
+if(url)location.href=url;
 };
 });
 
