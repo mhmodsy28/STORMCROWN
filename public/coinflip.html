@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#0a0805">
+<title>🪙 عملة العاصفة — STORMCOIN</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Amiri:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#0a0805;color:#fff;font-family:'Amiri',serif;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+
+#topBtns{position:fixed;top:6px;left:0;right:0;z-index:60;height:48px;pointer-events:none}
+#topBtns button{pointer-events:auto;position:absolute;width:40px;height:40px;border-radius:50%;border:2px solid #ffd24a;background:linear-gradient(180deg,rgba(80,60,10,.95),rgba(30,20,5,.95));cursor:pointer;display:flex;align-items:center;justify-content:center;padding:7px;box-shadow:0 0 15px rgba(255,210,74,.4)}
+#topBtns button:active{transform:scale(.9)}
+#topBtns button svg{width:100%;height:100%;fill:#ffd24a}
+#homeBtn{top:0;left:6px}
+#soundBtn{top:0;right:6px}
+
+#balBox{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:60;background:linear-gradient(180deg,rgba(80,60,10,.95),rgba(30,20,5,.98));border:2px solid #ffd24a;border-radius:10px;padding:4px 16px;text-align:center;box-shadow:0 0 20px rgba(255,210,74,.5)}
+#balBox small{display:block;font-size:9px;color:#ffe8a0;font-family:'Cinzel Decorative',serif}
+#balBox b{color:#fff;font-family:monospace;font-size:16px;text-shadow:0 0 10px #ffd24a}
+
+#game{position:fixed;inset:0;display:flex;flex-direction:column;padding:52px 0 0 0;background:radial-gradient(ellipse at 50% 0%,#3a2a05 0%,transparent 50%),radial-gradient(ellipse at 50% 100%,#2a1a05 0%,transparent 50%),linear-gradient(180deg,#0a0805 0%,#151008 50%,#0a0805 100%)}
+
+#stats{display:flex;gap:6px;justify-content:center;padding:8px 10px;flex-shrink:0;flex-wrap:wrap}
+.statBox{background:linear-gradient(180deg,rgba(80,60,10,.5),rgba(30,20,5,.85));border:2px solid #ffd24a;border-radius:9px;padding:5px 12px;text-align:center;min-width:78px}
+.statBox small{display:block;font-size:8px;color:#ffe8a0;font-family:'Cinzel Decorative',serif;letter-spacing:.05em}
+.statBox b{color:#fff;font-family:monospace;font-size:14px;text-shadow:0 0 10px #ffd24a}
+.statBox.hot{border-color:#2ecc71;box-shadow:0 0 15px rgba(46,204,113,.5)}
+.statBox.hot b{color:#7effb0;text-shadow:0 0 10px #2ecc71}
+
+#stageWrap{flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;perspective:1400px}
+#coinScene{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative}
+
+#coin{width:min(56vw,280px);height:min(56vw,280px);position:relative;transform-style:preserve-3d;transition:transform .15s;will-change:transform}
+.coinSide{position:absolute;inset:0;border-radius:50%;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;font-family:'Cinzel Decorative',serif;font-weight:900;font-size:min(18vw,90px);box-shadow:0 0 40px rgba(255,210,74,.6),inset 0 0 30px rgba(0,0,0,.5);border:6px solid}
+.coinFront{background:radial-gradient(circle at 30% 30%,#fff8e0,#ffd24a 40%,#ff8c00 70%,#8a4000);border-color:#8a4000;color:#3a1a00;transform:rotateY(0deg) translateZ(15px)}
+.coinBack{background:radial-gradient(circle at 30% 30%,#e8d0ff,#c89bff 40%,#7a3aff 70%,#3a1080);border-color:#4a1080;color:#fff;transform:rotateY(180deg) translateZ(15px)}
+.coinSide::after{content:'';position:absolute;inset:8px;border-radius:50%;border:2px dashed rgba(0,0,0,.25);pointer-events:none}
+.coinBack::after{border-color:rgba(255,255,255,.25)}
+
+#coinShadow{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:min(50vw,240px);height:24px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.7),transparent 70%);filter:blur(6px);opacity:.6;transition:all .2s}
+
+#resultLabel{position:absolute;top:10%;left:50%;transform:translateX(-50%);font-family:'Cinzel Decorative',serif;font-size:12px;color:#8ec8ff;letter-spacing:.3em;text-transform:uppercase;text-shadow:0 0 15px rgba(74,158,255,.8);opacity:0;transition:opacity .3s}
+#resultLabel.on{opacity:1}
+
+#resultText{position:absolute;bottom:16%;left:50%;transform:translateX(-50%);font-family:'Cinzel Decorative',serif;font-weight:900;font-size:clamp(24px,7vw,44px);letter-spacing:.05em;text-align:center;opacity:0;transition:all .4s;white-space:nowrap}
+#resultText.on{opacity:1;animation:resPop .5s cubic-bezier(.19,1.6,.3,1)}
+#resultText.win{color:#7effb0;text-shadow:0 0 30px #2ecc71,0 0 60px #2ecc71}
+#resultText.lose{color:#ff8080;text-shadow:0 0 30px #ff3a3a,0 0 60px #ff3a3a}
+@keyframes resPop{0%{transform:translateX(-50%) scale(.3)}60%{transform:translateX(-50%) scale(1.15)}100%{transform:translateX(-50%) scale(1)}}
+
+#ctrlBar{flex-shrink:0;background:linear-gradient(180deg,rgba(20,15,5,.98),rgba(10,8,3,.99));border-top:2px solid #ffd24a;padding:10px 12px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:0 -10px 40px rgba(255,210,74,.2)}
+
+.pickRow{display:flex;gap:8px;justify-content:center}
+.pickBtn{flex:1;max-width:200px;padding:14px 10px;font-family:'Amiri',serif;font-weight:700;font-size:14px;border-radius:12px;cursor:pointer;border:3px solid;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px}
+.pickBtn .ico{font-size:26px;line-height:1}
+.pickBtn .lbl{font-size:12px}
+.pickBtn.heads{background:linear-gradient(180deg,rgba(255,210,74,.3),rgba(80,60,10,.7));border-color:#ffd24a;color:#ffe8a0}
+.pickBtn.tails{background:linear-gradient(180deg,rgba(155,89,255,.3),rgba(50,20,90,.7));border-color:#9b59ff;color:#e0d0ff}
+.pickBtn.active.heads{background:linear-gradient(180deg,#ffd24a,#8a4000);color:#1a0a00;box-shadow:0 0 25px rgba(255,210,74,.8);border-color:#fff}
+.pickBtn.active.tails{background:linear-gradient(180deg,#c89bff,#4a1080);color:#fff;box-shadow:0 0 25px rgba(155,89,255,.8);border-color:#fff}
+.pickBtn:active{transform:scale(.96)}
+.pickBtn:disabled{opacity:.5;cursor:not-allowed}
+
+.betRow{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.betBtn{padding:8px 14px;font-family:'Amiri',serif;font-weight:700;font-size:14px;border-radius:9px;cursor:pointer;border:2px solid #ffd24a;background:linear-gradient(180deg,rgba(80,60,10,.95),rgba(30,20,5,.98));color:#ffe8a0;min-width:44px}
+.betBtn:active{transform:scale(.94)}
+.betBtn:disabled{opacity:.4;cursor:not-allowed}
+.betDisplay{background:rgba(10,8,3,.9);border:2px solid #ffd24a;padding:6px 16px;border-radius:10px;text-align:center;min-width:120px}
+.betDisplay small{display:block;font-size:9px;color:#ffe8a0;font-family:'Cinzel Decorative',serif}
+.betDisplay b{color:#fff;font-family:monospace;font-size:16px;text-shadow:0 0 10px #ffd24a}
+
+#flipBtn{width:100%;max-width:360px;margin:0 auto;padding:16px;font-family:'Cinzel Decorative',serif;font-size:17px;font-weight:900;border-radius:12px;cursor:pointer;border:3px solid #fff;background:linear-gradient(180deg,#ffd24a,#8a4000);color:#1a0a00;letter-spacing:.05em;box-shadow:0 0 30px rgba(255,210,74,.6);transition:all .15s}
+#flipBtn:active{transform:scale(.97)}
+#flipBtn:disabled{opacity:.5;cursor:not-allowed}
+
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;padding:10px 18px;border-radius:8px;font-weight:bold;z-index:9999;transition:transform .3s;font-size:12px;max-width:90vw;text-align:center}
+#toast.on{transform:translateX(-50%) translateY(0)}
+#toast.err{background:linear-gradient(180deg,#ff4a4a,#8b0000)}
+
+/* particles */
+.particle{position:fixed;pointer-events:none;font-size:22px;z-index:80;animation:partFloat 1.5s ease-out forwards}
+@keyframes partFloat{0%{transform:translate(0,0) scale(.3);opacity:0}20%{transform:translate(var(--dx),var(--dy)) scale(1.3);opacity:1}100%{transform:translate(calc(var(--dx)*3),calc(var(--dy)*3)) scale(.6);opacity:0}}
+
+@media (max-width:640px){
+.statBox{min-width:66px;padding:4px 8px}
+.statBox b{font-size:12px}
+.betDisplay{min-width:100px}
+#flipBtn{font-size:15px;padding:14px}
+.pickBtn{padding:12px 8px;font-size:12px}
+.pickBtn .ico{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
+<symbol id="ic-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></symbol>
+<symbol id="ic-sound-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
+</defs></svg>
+
+<div id="topBtns">
+<button id="homeBtn"><svg><use href="#ic-home"/></svg></button>
+<button id="soundBtn"><svg id="soundIcon"><use href="#ic-sound-on"/></svg></button>
+</div>
+<div id="balBox"><small>الرصيد</small><b id="bal">0</b></div>
+
+<div id="game">
+<div id="stats">
+<div class="statBox"><small>الرهان</small><b id="sBet">100</b></div>
+<div class="statBox hot"><small>الربح المحتمل</small><b id="sPayout">0</b></div>
+<div class="statBox"><small>اختيارك</small><b id="sPick">👑</b></div>
+<div class="statBox"><small>آخر نتيجة</small><b id="sLast">—</b></div>
+</div>
+
+<div id="stageWrap">
+<div id="coinScene">
+  <div id="resultLabel">النتيجة</div>
+  <div id="coin">
+    <div class="coinSide coinFront">👑</div>
+    <div class="coinSide coinBack">⚡</div>
+  </div>
+  <div id="coinShadow"></div>
+  <div id="resultText">—</div>
+</div>
+</div>
+
+<div id="ctrlBar">
+<div class="pickRow">
+<div class="pickBtn heads active" data-p="heads">
+  <span class="ico">👑</span>
+  <span class="lbl">وجه (Heads)</span>
+</div>
+<div class="pickBtn tails" data-p="tails">
+  <span class="ico">⚡</span>
+  <span class="lbl">كتابة (Tails)</span>
+</div>
+</div>
+<div class="betRow">
+<button class="betBtn" id="betDown">−</button>
+<div class="betDisplay"><small>الرهان</small><b id="betVal">100</b></div>
+<button class="betBtn" id="betUp">+</button>
+</div>
+<button id="flipBtn">🪙 ارمِ العملة</button>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const sl=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ============ AUDIO ============ */
+const Aud=(()=>{
+let c=null,mg=null,on=true,ready=false;
+function init(){if(c)return;try{c=new(window.AudioContext||window.webkitAudioContext)();mg=c.createGain();mg.gain.value=.4;mg.connect(c.destination);ready=true}catch(e){}}
+function resume(){if(!c)return;if(c.state==='suspended')c.resume().catch(()=>{})}
+function tone(f,dur=.1,type='sine',vol=.2){if(!on||!ready)return;resume();try{const o=c.createOscillator();o.type=type;o.frequency.value=f;const g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(vol,c.currentTime+.01);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+dur+.02)}catch(e){}}
+function flip(){if(!on||!ready)return;resume();try{const o=c.createOscillator();o.type='triangle';o.frequency.setValueAtTime(400,c.currentTime);o.frequency.exponentialRampToValueAtTime(1400,c.currentTime+.2);const g=c.createGain();g.gain.setValueAtTime(.15,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.25);o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+.27)}catch(e){}}
+function tick(f){if(!on||!ready)return;tone(f||1400,.03,'square',.05)}
+function land(){if(!on||!ready)return;resume();tone(300,.15,'sine',.2);setTimeout(()=>tone(500,.12,'sine',.15),60)}
+function win(){if(!on||!ready)return;resume();[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>{setTimeout(()=>tone(f,.3,'sine',.18),i*70)})}
+function bigWin(){if(!on||!ready)return;resume();[261.63,329.63,392,523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>{setTimeout(()=>tone(f,.5,'sawtooth',.14),i*80)})}
+function lose(){if(!on||!ready)return;resume();tone(220,.3,'sawtooth',.18);setTimeout(()=>tone(150,.4,'sawtooth',.15),120)}
+function toggle(){on=!on;return on}
+return{init,resume,tone,flip,tick,land,win,bigWin,lose,toggle,get on(){return on},get ready(){return ready}};
+})();
+
+async function api(path,opts={}){const token=localStorage.getItem('sc_token');const headers={'Content-Type':'application/json',...(opts.headers||{})};if(token)headers['Authorization']='Bearer '+token;const res=await fetch(path,{...opts,headers});const data=await res.json();if(!res.ok)throw new Error(data.error||'خطأ');return data}
+function toast(msg,isErr){const t=$('toast');t.textContent=msg;t.className=isErr?'err on':'on';setTimeout(()=>t.classList.remove('on'),2500)}
+
+const BETS=[20,50,100,200,500,1000,2000,5000,10000];
+const S={bal:0,bi:2,bet:100,pick:'heads',flipping:false,rotation:0};
+
+function updStats(){
+  $('sBet').textContent=S.bet;
+  $('betVal').textContent=S.bet;
+  $('sPayout').textContent=Math.floor(S.bet*1.92).toLocaleString();
+  $('sPick').textContent=S.pick==='heads'?'👑 وجه':'⚡ كتابة';
+}
+function updBal(){$('bal').textContent=Math.floor(S.bal).toLocaleString();const st=JSON.parse(localStorage.getItem('sc_user')||'{}');localStorage.setItem('sc_user',JSON.stringify({...st,balance:S.bal}))}
+
+/* particles on win */
+function burst(x,y,color,count=14){
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div');
+    el.className='particle';
+    el.textContent=Math.random()<.5?'🪙':'✨';
+    el.style.left=x+'px';
+    el.style.top=y+'px';
+    el.style.color=color;
+    const a=Math.random()*Math.PI*2;
+    const d=80+Math.random()*140;
+    el.style.setProperty('--dx',Math.cos(a)*d+'px');
+    el.style.setProperty('--dy',Math.sin(a)*d+'px');
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1600);
+  }
+}
+
+/* coin flip animation */
+async function animateFlip(finalSide){
+  const coin=$('coin');
+  const shadow=$('coinShadow');
+  const startRot=S.rotation;
+  // target: end at multiple of 360 with correct side facing
+  // front (heads) visible at rotation 0 mod 360
+  // back (tails) visible at rotation 180 mod 360
+  const baseExtra=1440+Math.random()*720; // 4-6 turns
+  let targetRot=startRot+baseExtra;
+  const wantMod=(finalSide==='heads')?0:180;
+  const curMod=((targetRot%360)+360)%360;
+  let diff=wantMod-curMod;
+  if(diff<0) diff+=360;
+  targetRot+=diff;
+
+  const start=performance.now();
+  const dur=1800;
+  let lastTick=0;
+  let lastY=0;
+
+  return new Promise(res=>{
+    function step(now){
+      const p=Math.min(1,(now-start)/dur);
+      // ease out
+      const e=1-Math.pow(1-p,3);
+      const rot=startRot+(targetRot-startRot)*e;
+      // fake hop
+      const hop=Math.abs(Math.sin(p*Math.PI*4))*(1-p)*90;
+      coin.style.transform='rotateY('+rot+'deg) translateY(-'+hop+'px)';
+      shadow.style.transform='translateX(-50%) scale('+(1-hop/400)+')';
+      shadow.style.opacity=(0.6-hop/300);
+
+      if(now-lastTick>40){
+        Aud.tick(900+Math.random()*600);
+        lastTick=now;
+      }
+      if(p<1) requestAnimationFrame(step);
+      else {
+        coin.style.transform='rotateY('+targetRot+'deg)';
+        shadow.style.transform='translateX(-50%) scale(1)';
+        shadow.style.opacity=.6;
+        S.rotation=targetRot%360;
+        res();
+      }
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+async function doFlip(){
+  if(S.flipping) return;
+  if(S.bal<S.bet){toast('رصيد غير كافٍ',true);return}
+  S.flipping=true;
+  $('flipBtn').disabled=true;
+  $('flipBtn').textContent='⏳ جاري الرمي...';
+  $('resultText').classList.remove('on');
+  $('resultLabel').classList.remove('on');
+  Aud.init();Aud.resume();Aud.flip();
+
+  try{
+    const res=await api('/api/coinflip/play',{method:'POST',body:JSON.stringify({bet:S.bet,pick:S.pick})});
+    S.bal=res.balance;
+    updBal();
+    $('sLast').textContent=res.result==='heads'?'👑':'⚡';
+
+    await animateFlip(res.result);
+    Aud.land();
+
+    // show result
+    $('resultLabel').classList.add('on');
+    const txt=$('resultText');
+    txt.classList.remove('win','lose');
+    void txt.offsetWidth;
+
+    if(res.won){
+      txt.textContent='🎉 ربحت '+res.payout.toLocaleString();
+      txt.classList.add('win','on');
+      if(res.payout>=S.bet*1.9) Aud.bigWin(); else Aud.win();
+      toast('🎉 فوز! +'+res.net.toLocaleString()+' ل.س');
+      // burst particles from coin
+      const rect=$('coin').getBoundingClientRect();
+      burst(rect.left+rect.width/2,rect.top+rect.height/2,'#ffd24a',20);
+    } else {
+      txt.textContent='💥 خسرت '+S.bet.toLocaleString();
+      txt.classList.add('lose','on');
+      Aud.lose();
+      toast('😢 حظ أوفر',true);
+    }
+  }catch(e){
+    toast(e.message,true);
+  }
+
+  S.flipping=false;
+  $('flipBtn').disabled=false;
+  $('flipBtn').textContent='🪙 ارمِ العملة';
+}
+
+$('flipBtn').onclick=doFlip;
+$('betDown').onclick=()=>{if(S.flipping)return;if(S.bi>0){S.bi--;S.bet=BETS[S.bi];updStats()}};
+$('betUp').onclick=()=>{if(S.flipping)return;if(S.bi<BETS.length-1){S.bi++;S.bet=BETS[S.bi];updStats()}};
+
+document.querySelectorAll('.pickBtn').forEach(b=>{
+  b.onclick=()=>{
+    if(S.flipping)return;
+    document.querySelectorAll('.pickBtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    S.pick=b.dataset.p;
+    updStats();
+    Aud.tick(1400);
+  };
+});
+
+$('homeBtn').onclick=()=>{if(S.flipping&&!confirm('العملة في الهواء!'))return;location.href='/'};
+$('soundBtn').onclick=()=>{const on=Aud.toggle();$('soundIcon').innerHTML='<use href="'+(on?'#ic-sound-on':'#ic-sound-off')+'"/>';if(on){Aud.init();Aud.resume()}};
+
+async function refreshMe(){try{const u=await api('/api/me');S.bal=u.balance;updBal()}catch(e){if(e.message.includes('جلسة')||e.message.includes('مصرح'))location.href='/'}}
+
+['click','touchstart','keydown'].forEach(ev=>{
+  document.addEventListener(ev,()=>{Aud.init();Aud.resume()},{once:true});
+});
+
+(async()=>{
+  const token=localStorage.getItem('sc_token');
+  if(!token){location.href='/';return}
+  try{
+    const u=await api('/api/me');
+    S.bal=u.balance;updBal();
+    updStats();
+  }catch(e){location.href='/'}
+})();
+</script>
+</body>
+</html>
