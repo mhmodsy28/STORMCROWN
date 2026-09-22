@@ -8,780 +8,384 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Amiri:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden;background:#05000f;color:#fff;
-  font-family:'Amiri',serif;user-select:none;touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+html,body{height:100%;overflow:hidden;background:#05000f;color:#fff;font-family:'Amiri',serif;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 canvas{display:block}
-#auth{position:fixed;inset:0;z-index:2000;
-  background:radial-gradient(ellipse at 50% 100%,#3a0505 0%,#0a0014 45%,#000 100%);
-  overflow:hidden;display:flex;align-items:center;justify-content:center;padding:16px}
+#auth{position:fixed;inset:0;z-index:2000;background:radial-gradient(ellipse at 50% 100%,#5a2a0a 0%,#0a0014 50%,#000 100%);overflow:hidden;display:flex;align-items:center;justify-content:center;padding:16px}
 #auth.fade{animation:iFade 1s ease forwards}
 @keyframes iFade{to{opacity:0;visibility:hidden}}
-.authWrap{position:relative;z-index:10;width:100%;max-width:440px;
-  max-height:92vh;overflow-y:auto;padding:24px 24px 20px;
-  background:linear-gradient(180deg,rgba(20,0,10,.96),rgba(5,0,15,.98));
-  border:2px solid #6b0a0a;border-radius:14px;
-  box-shadow:0 0 60px rgba(139,0,0,.7),0 20px 60px rgba(0,0,0,.95)}
-.authTitle{text-align:center;margin-bottom:6px;font-family:'Cinzel Decorative',serif;
-  font-size:clamp(24px,6vw,36px);font-weight:900;
-  background:linear-gradient(180deg,#ff2a00,#8b0000,#4a0000);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 20px rgba(255,42,0,.8))}
-.authSub{text-align:center;font-size:12px;color:#8a5050;letter-spacing:.25em;margin-bottom:18px}
-.authField{margin-bottom:10px}
-.authField label{display:block;font-size:11px;color:#a07070;margin-bottom:4px}
-.authField input{width:100%;padding:10px 12px;background:rgba(10,0,5,.9);
-  border:1px solid #4a0a0a;border-radius:6px;color:#ffd0d0;
-  font-family:'Amiri',serif;font-size:14px}
-.authField input:focus{outline:none;border-color:#ff2a00;box-shadow:0 0 20px rgba(255,42,0,.5)}
-.authBtn{width:100%;padding:12px;margin-top:6px;font-family:'Cinzel Decorative',serif;
-  font-size:14px;font-weight:700;letter-spacing:.1em;border:2px solid #ff2a00;
-  border-radius:8px;background:linear-gradient(180deg,#6b0a0a,#1a0000);
-  color:#ffd0d0;cursor:pointer;transition:all .2s}
-.authBtn:hover{background:linear-gradient(180deg,#a01010,#3a0000);color:#fff}
-.authBtn.secondary{background:linear-gradient(180deg,#1a0a2a,#0a0215);
-  border-color:#6a0dad;color:#d0b0ff}
-.authSwitch{text-align:center;margin-top:10px;font-size:12px;color:#a07070}
-.authSwitch span{color:#ff2a00;cursor:pointer;font-weight:700;
-  text-decoration:underline;margin-right:4px}
-.authErr{margin-top:10px;padding:8px 10px;background:rgba(139,0,0,.2);
-  border:1px solid #6b0a0a;border-radius:6px;color:#ff8080;
-  font-size:12px;text-align:center;display:none}
+.authWrap{position:relative;z-index:10;width:100%;max-width:440px;max-height:92vh;overflow-y:auto;padding:26px 24px 22px;background:linear-gradient(180deg,rgba(40,20,10,.97),rgba(10,3,15,.99));border:3px solid #b8860b;border-radius:16px;box-shadow:0 0 80px rgba(255,140,0,.5),inset 0 0 30px rgba(255,180,0,.1),0 20px 60px rgba(0,0,0,.95)}
+.authTitle{text-align:center;margin-bottom:8px;font-family:'Cinzel Decorative',serif;font-size:clamp(28px,7vw,42px);font-weight:900;letter-spacing:.05em;background:linear-gradient(180deg,#fff8e0,#ffd24a 40%,#b8860b 70%,#8b4000);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 30px rgba(255,210,74,.9))}
+.authSub{text-align:center;font-size:12px;color:#c89bff;letter-spacing:.35em;margin-bottom:22px;font-family:'Cinzel Decorative',serif}
+.authField{margin-bottom:12px}
+.authField label{display:block;font-size:11px;color:#a0d0b0;margin-bottom:5px;font-weight:700}
+.authField input{width:100%;padding:11px 13px;background:rgba(15,5,20,.9);border:2px solid rgba(184,134,11,.5);border-radius:8px;color:#ffe8a0;font-family:'Amiri',serif;font-size:14px;transition:all .2s}
+.authField input:focus{outline:none;border-color:#ffd24a;box-shadow:0 0 25px rgba(255,210,74,.5);background:rgba(20,8,30,.95)}
+.authBtn{width:100%;padding:13px;margin-top:8px;font-family:'Cinzel Decorative',serif;font-size:15px;font-weight:900;letter-spacing:.12em;border:2px solid #ffd24a;border-radius:9px;background:linear-gradient(180deg,#8b4000,#4a1a00);color:#fff;cursor:pointer;transition:all .2s;text-shadow:0 0 10px rgba(255,210,74,.8);box-shadow:0 0 20px rgba(255,140,0,.4)}
+.authBtn:hover{background:linear-gradient(180deg,#b8860b,#8b4000);transform:translateY(-1px);box-shadow:0 0 30px rgba(255,210,74,.6)}
+.authBtn.secondary{background:linear-gradient(180deg,#3a1a6a,#1a0230);border-color:#9b59ff;color:#d0b0ff;text-shadow:0 0 10px rgba(155,89,255,.8)}
+.authSwitch{text-align:center;margin-top:12px;font-size:12px;color:#a07070}
+.authSwitch span{color:#ffd24a;cursor:pointer;font-weight:700;text-decoration:underline;margin-right:4px}
+.authErr{margin-top:10px;padding:8px 10px;background:rgba(139,0,0,.3);border:1px solid #6b0a0a;border-radius:6px;color:#ff8080;font-size:12px;text-align:center;display:none}
 .authErr.on{display:block}
-#game{position:fixed;inset:0;opacity:0;visibility:hidden;transition:opacity 1s;
-  z-index:5;display:none;flex-direction:column;overflow:hidden;
-  width:100vw;height:100vh;height:100dvh;
-  background:
-    radial-gradient(ellipse at 50% 0%,#4a1568 0%,transparent 50%),
-    radial-gradient(ellipse at 50% 100%,#5a1550 0%,transparent 60%),
-    radial-gradient(ellipse at 50% 50%,#2a0533 0%,#0a0218 60%,#05000a 100%)}
+#game{position:fixed;inset:0;opacity:0;visibility:hidden;transition:opacity 1s;z-index:5;display:none;flex-direction:column;overflow:hidden;width:100vw;height:100vh;height:100dvh;background:radial-gradient(ellipse at 50% 0%,#6a2a9a 0%,transparent 40%),radial-gradient(ellipse at 50% 100%,#3a1060 0%,transparent 50%),radial-gradient(circle at 20% 30%,rgba(255,210,74,.15),transparent 25%),radial-gradient(circle at 80% 60%,rgba(155,89,255,.15),transparent 25%),linear-gradient(180deg,#1a0533 0%,#0a0218 40%,#05000a 100%)}
 #game.on{opacity:1;visibility:visible;display:flex}
 #flash{position:fixed;inset:0;z-index:30;background:#fff;opacity:0;pointer-events:none}
-#topBtns{position:fixed;top:6px;left:0;right:0;z-index:60;height:100px;
-  display:none;pointer-events:none}
+#topBtns{position:fixed;top:6px;left:0;right:0;z-index:60;height:100px;display:none;pointer-events:none}
 #topBtns.on{display:block}
-#topBtns button{pointer-events:auto;position:absolute;border-radius:50%;
-  width:38px;height:38px;border:2px solid;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .15s;padding:6px;line-height:1;overflow:hidden}
+#topBtns button{pointer-events:auto;position:absolute;border-radius:50%;width:40px;height:40px;border:2px solid #b8860b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;padding:7px;line-height:1;overflow:hidden;box-shadow:0 0 15px rgba(255,140,0,.3)}
 #topBtns button:active{transform:scale(.9)}
 #topBtns button svg{width:100%;height:100%;display:block}
-#soundBtn{top:0;right:6px;background:linear-gradient(180deg,rgba(50,20,90,.95),rgba(20,5,40,.95));border-color:#6a4a9a}
-#soundBtn svg{fill:#ffd24a}
-#wheelBtn{top:0;right:52px;background:linear-gradient(180deg,rgba(150,80,20,.95),rgba(60,20,5,.95));border-color:#ffd24a}
-#wheelBtn svg{fill:#ffd24a}
-#profileBtn{top:0;left:6px;background:linear-gradient(180deg,rgba(80,30,150,.95),rgba(30,5,60,.95));border-color:#ffd24a}
-#profileBtn svg{fill:#ffd24a}
-#walletBtn{top:0;left:52px;background:linear-gradient(180deg,rgba(30,110,70,.95),rgba(5,40,20,.95));border-color:#2ecc71}
-#walletBtn svg{fill:#2ecc71}
-#agentBadge{top:46px;left:6px;background:linear-gradient(180deg,rgba(80,40,150,.95),rgba(25,5,60,.95));border-color:#9b59ff}
-#agentBadge svg{fill:#c89bff}
-#logoutTopBtn{top:46px;left:52px;background:linear-gradient(180deg,rgba(150,20,20,.95),rgba(60,5,5,.95));border-color:#ff2a00}
-#logoutTopBtn svg{fill:#ff8080}
-#turboBtn{top:46px;right:6px;background:linear-gradient(180deg,rgba(80,30,150,.95),rgba(30,5,60,.95));border-color:#ff8c00}
-#turboBtn svg{fill:#ff8c00}
-#turboBtn.active{background:linear-gradient(180deg,rgba(255,140,0,.95),rgba(150,60,0,.95));border-color:#ffd24a}
-#turboBtn.active svg{fill:#1a0230}
-#autoBtn{top:46px;right:52px;background:linear-gradient(180deg,rgba(80,30,150,.95),rgba(30,5,60,.95));border-color:#9b59ff}
-#autoBtn svg{fill:#c89bff}
-#autoBtn.active{background:linear-gradient(180deg,rgba(46,204,113,.95),rgba(10,80,40,.95));border-color:#2ecc71}
-#autoBtn.active svg{fill:#000}
-#mainArea{display:flex;flex-direction:column;width:100%;height:100%;
-  padding:52px 4px 4px 4px;gap:4px;overflow:hidden}
-#hud{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;
-  width:100%;flex-shrink:0}
-.hudBox{background:linear-gradient(180deg,rgba(60,30,110,.85),rgba(15,5,40,.9));
-  border:1px solid rgba(155,89,255,.6);padding:3px 8px;border-radius:5px;
-  font-size:9px;color:#c8b0e8;white-space:nowrap}
-.hudBox b{color:#ffd24a;font-family:monospace;font-size:11px;margin-right:2px}
-.hudBox.hot{border-color:#ff8c00;box-shadow:0 0 15px #ff8c00}
-#playRow{display:flex;gap:4px;flex:1;min-height:0;width:100%;
-  align-items:center;justify-content:center;overflow:hidden}
-#sideCol{display:flex;flex-direction:column;gap:4px;width:100px;
-  height:100%;max-height:100%;overflow:hidden;flex-shrink:0}
-#paytable,#historyPanel,#statsPanel{
-  background:linear-gradient(180deg,rgba(40,15,80,.9),rgba(10,3,25,.95));
-  border:1px solid rgba(106,74,154,.6);border-radius:6px;padding:4px;
-  overflow:hidden;display:flex;flex-direction:column;min-height:0}
-#paytable{flex-shrink:0}
-#historyPanel{flex:1;min-height:0}
-#statsPanel{flex-shrink:0}
-#paytable h3,#historyPanel h3,#statsPanel h3{font-size:8px;color:#ffd24a;text-align:center;
-  border-bottom:1px solid rgba(106,74,154,.4);padding-bottom:2px;margin-bottom:3px;flex-shrink:0}
-.ptRow{display:flex;justify-content:space-between;align-items:center;
-  padding:1px 2px;font-family:monospace;font-size:8px}
-.ptRow .ico{width:14px;height:14px}
-.ptRow .ico canvas{width:100%;height:100%}
+#soundBtn{top:0;right:6px;background:linear-gradient(180deg,rgba(50,20,90,.95),rgba(20,5,40,.95))}#soundBtn svg{fill:#ffd24a}
+#wheelBtn{top:0;right:54px;background:linear-gradient(180deg,rgba(150,80,20,.95),rgba(60,20,5,.95))}#wheelBtn svg{fill:#ffd24a}
+#profileBtn{top:0;left:6px;background:linear-gradient(180deg,rgba(80,30,150,.95),rgba(30,5,60,.95))}#profileBtn svg{fill:#ffd24a}
+#walletBtn{top:0;left:54px;background:linear-gradient(180deg,rgba(30,110,70,.95),rgba(5,40,20,.95));border-color:#2ecc71}#walletBtn svg{fill:#2ecc71}
+#agentBadge{top:48px;left:6px;background:linear-gradient(180deg,rgba(80,40,150,.95),rgba(25,5,60,.95));border-color:#9b59ff}#agentBadge svg{fill:#c89bff}
+#logoutTopBtn{top:48px;left:54px;background:linear-gradient(180deg,rgba(150,20,20,.95),rgba(60,5,5,.95));border-color:#ff2a00}#logoutTopBtn svg{fill:#ff8080}
+#turboBtn{top:48px;right:6px;background:linear-gradient(180deg,rgba(80,30,150,.95),rgba(30,5,60,.95));border-color:#ff8c00}#turboBtn svg{fill:#ff8c00}
+#turboBtn.active{background:linear-gradient(180deg,rgba(255,140,0,.95),rgba(150,60,0,.95));border-color:#ffd24a;box-shadow:0 0 25px #ff8c00}#turboBtn.active svg{fill:#1a0230}
+#autoBtn{top:48px;right:54px;background:linear-gradient(180deg,rgba(80,30,150,.95),rgba(30,5,60,.95));border-color:#9b59ff}#autoBtn svg{fill:#c89bff}
+#autoBtn.active{background:linear-gradient(180deg,rgba(46,204,113,.95),rgba(10,80,40,.95));border-color:#2ecc71;box-shadow:0 0 25px #2ecc71}#autoBtn.active svg{fill:#000}
+#mainArea{display:flex;flex-direction:column;width:100%;height:100%;padding:54px 4px 4px 4px;gap:5px;overflow:hidden;position:relative;z-index:2}
+#hud{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;width:100%;flex-shrink:0}
+.hudBox{background:linear-gradient(180deg,rgba(80,30,20,.9),rgba(30,10,5,.95));border:2px solid #b8860b;padding:4px 10px;border-radius:7px;font-size:9px;color:#f5d490;white-space:nowrap;box-shadow:0 0 12px rgba(184,134,11,.3)}
+.hudBox b{color:#ffd24a;font-family:monospace;font-size:12px;margin-right:3px;text-shadow:0 0 8px rgba(255,210,74,.8)}
+.hudBox.hot{border-color:#ff8c00;box-shadow:0 0 20px #ff8c00}
+#playRow{display:flex;gap:5px;flex:1;min-height:0;width:100%;align-items:center;justify-content:center;overflow:hidden}
+#sideCol{display:flex;flex-direction:column;gap:5px;width:100px;height:100%;max-height:100%;overflow:hidden;flex-shrink:0}
+#paytable,#historyPanel,#statsPanel{background:linear-gradient(180deg,rgba(60,25,15,.9),rgba(15,5,10,.95));border:2px solid #8b4000;border-radius:8px;padding:5px;overflow:hidden;display:flex;flex-direction:column;min-height:0;box-shadow:0 0 15px rgba(139,64,0,.3)}
+#paytable{flex-shrink:0}#historyPanel{flex:1;min-height:0}#statsPanel{flex-shrink:0}
+#paytable h3,#historyPanel h3,#statsPanel h3{font-size:9px;color:#ffd24a;text-align:center;font-family:'Cinzel Decorative',serif;border-bottom:1px solid rgba(184,134,11,.5);padding-bottom:3px;margin-bottom:4px;flex-shrink:0;text-shadow:0 0 8px rgba(255,210,74,.5)}
+.ptRow{display:flex;justify-content:space-between;align-items:center;padding:2px 3px;font-family:monospace;font-size:8px}
+.ptRow .ico{width:15px;height:15px}.ptRow .ico canvas{width:100%;height:100%}
 .ptRow .val{color:#ffd24a;font-size:8px;font-weight:bold}
 #historyList{flex:1;overflow-y:auto;font-family:monospace;font-size:8px;min-height:0}
-.histRow{display:grid;grid-template-columns:24px 1fr auto;gap:2px;padding:2px 3px;
-  border-radius:3px;margin-bottom:2px;background:rgba(255,255,255,.03);
-  border-right:2px solid transparent;font-size:8px;align-items:center}
-.histRow.win{background:rgba(46,204,113,.12);border-right-color:#2ecc71}
+.histRow{display:grid;grid-template-columns:24px 1fr auto;gap:2px;padding:2px 3px;border-radius:4px;margin-bottom:2px;background:rgba(255,210,74,.04);border-right:2px solid transparent;font-size:8px;align-items:center}
+.histRow.win{background:rgba(46,204,113,.15);border-right-color:#2ecc71}
 .histRow.loss{background:rgba(255,42,42,.08);border-right-color:#ff4a4a}
 .histRow.zero{opacity:.6;border-right-color:#666}
-.histRow .hs{color:#888;font-size:7px}
-.histRow .hb{color:#ffd24a;font-size:7px}
-.histRow .hn{font-weight:bold;font-size:8px}
-.histRow.win .hn{color:#2ecc71}
-.histRow.loss .hn{color:#ff6a6a}
-.histRow .icon{font-size:10px}
-.statRow{display:flex;justify-content:space-between;padding:1px 3px;
-  font-family:monospace;font-size:7px;color:#a090c0}
+.histRow .hb{color:#ffd24a;font-size:7px}.histRow .hn{font-weight:bold;font-size:8px}
+.histRow.win .hn{color:#2ecc71}.histRow.loss .hn{color:#ff6a6a}
+.statRow{display:flex;justify-content:space-between;padding:2px 3px;font-family:monospace;font-size:8px;color:#c89bff}
 .statRow b{color:#ffd24a}
-#frameWrap{flex:1;display:flex;align-items:center;justify-content:center;
-  min-width:0;min-height:0;padding:0;overflow:hidden}
-#frame{position:relative;padding:4px;border-radius:10px;
-  background:linear-gradient(135deg,#3a1568,#1a0533,#4a1a7a,#1a0533,#3a1568);
-  box-shadow:0 0 30px rgba(106,74,154,.5),inset 0 0 20px rgba(0,0,0,.6);
-  display:flex;align-items:center;justify-content:center;
-  max-width:100%;max-height:100%}
-#frame.fire{box-shadow:0 0 50px #ff8c00,inset 0 0 25px rgba(255,140,0,.3)}
-#reels{border-radius:5px;display:block;
-  max-width:100%;max-height:100%;
-  width:auto;height:auto;object-fit:contain}
-#zeusBackdrop{position:absolute;top:4px;left:4px;border-radius:5px;
-  pointer-events:none;z-index:1;
-  max-width:100%;max-height:100%;width:auto;height:auto}
-#ctrl{display:flex;gap:3px;align-items:center;justify-content:center;
-  flex-shrink:0;flex-wrap:wrap;width:100%;padding:2px 0}
-.cbtn{padding:5px 8px;font-family:'Amiri',serif;font-size:10px;font-weight:700;
-  border:1px solid rgba(155,89,255,.6);border-radius:5px;
-  background:linear-gradient(180deg,rgba(60,30,110,.9),rgba(15,5,40,.9));
-  color:#e0d0ff;cursor:pointer;white-space:nowrap}
+#frameWrap{flex:1;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;padding:0;overflow:hidden}
+#frame{position:relative;padding:6px;border-radius:14px;background:linear-gradient(135deg,#8b6914,#ffd24a 15%,#8b4000 25%,#4a2000 50%,#8b4000 75%,#ffd24a 85%,#8b6914);box-shadow:0 0 40px rgba(255,140,0,.5),0 0 80px rgba(255,210,74,.25),inset 0 0 30px rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;max-width:100%;max-height:100%}
+#frame.fire{box-shadow:0 0 60px #ff8c00,0 0 120px #ff2a00,inset 0 0 40px rgba(255,80,0,.5)}
+#reels{border-radius:8px;display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;box-shadow:inset 0 0 40px rgba(0,0,0,.7)}
+#zeusBackdrop{position:absolute;top:6px;left:6px;border-radius:8px;pointer-events:none;z-index:1;max-width:100%;max-height:100%;width:auto;height:auto}
+#ctrl{display:flex;gap:4px;align-items:center;justify-content:center;flex-shrink:0;flex-wrap:wrap;width:100%;padding:3px 0}
+.cbtn{padding:6px 10px;font-family:'Amiri',serif;font-size:11px;font-weight:700;border:2px solid #8b6914;border-radius:7px;background:linear-gradient(180deg,rgba(80,30,20,.95),rgba(20,5,10,.95));color:#f5d490;cursor:pointer;white-space:nowrap;transition:all .15s}
+.cbtn:hover{background:linear-gradient(180deg,rgba(184,134,11,.9),rgba(80,40,10,.95));color:#fff}
 .cbtn:disabled{opacity:.4}
-#betBox{background:rgba(15,5,40,.95);border:1px solid rgba(155,89,255,.6);
-  padding:3px 8px;border-radius:5px;min-width:70px;text-align:center}
-#betBox small{display:block;font-size:8px;color:#a090d0}
-#betBox b{color:#ffd24a;font-family:monospace;font-size:11px}
-#spinWrap{width:60px;height:60px;flex-shrink:0;position:relative}
-#spinWheel{width:60px;height:60px;border-radius:50%;cursor:pointer;
-  background:radial-gradient(circle at 50% 30%,#fff8e0,#ffd24a 30%,#ff8c00 55%,#8b4000 80%,#4a0a0a);
-  border:2px solid #ffd24a;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 20px rgba(255,140,0,.6),inset 0 -4px 12px rgba(0,0,0,.5),
-    inset 0 4px 12px rgba(255,255,255,.3);transition:transform .15s}
+#betBox{background:linear-gradient(180deg,rgba(60,20,10,.95),rgba(20,5,10,.98));border:2px solid #b8860b;padding:4px 10px;border-radius:7px;min-width:78px;text-align:center}
+#betBox small{display:block;font-size:8px;color:#f5d490;font-family:'Cinzel Decorative',serif}
+#betBox b{color:#ffd24a;font-family:monospace;font-size:12px;text-shadow:0 0 8px rgba(255,210,74,.8)}
+#spinWrap{width:66px;height:66px;flex-shrink:0;position:relative}
+#spinWheel{width:66px;height:66px;border-radius:50%;cursor:pointer;background:radial-gradient(circle at 50% 30%,#fff8e0,#ffd24a 25%,#ff8c00 50%,#8b4000 75%,#4a0a0a 100%);border:3px solid #ffd24a;display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(255,140,0,.7),inset 0 -6px 16px rgba(0,0,0,.5);transition:transform .15s}
 #spinWheel:active:not(.disabled){transform:scale(.94)}
 #spinWheel.disabled{filter:grayscale(.7) brightness(.5);opacity:.6}
-#spinWheel.spinning{animation:wheelSpin .4s linear infinite}
+#spinWheel.spinning{animation:wheelSpin .5s linear infinite}
 @keyframes wheelSpin{to{transform:rotate(360deg)}}
-#spinLabel{font-family:'Cinzel Decorative',serif;font-weight:900;font-size:11px;
-  color:#3a0500;text-shadow:0 0 6px rgba(255,255,255,.8);position:relative;z-index:2}
-#autoCounter{position:absolute;top:-4px;right:-4px;background:#2ecc71;color:#000;
-  border-radius:50%;width:22px;height:22px;font-size:9px;font-weight:900;
-  display:none;align-items:center;justify-content:center;z-index:5;
-  font-family:monospace;border:2px solid #fff}
+#spinLabel{font-family:'Cinzel Decorative',serif;font-weight:900;font-size:12px;color:#3a0500;position:relative;z-index:2}
+#autoCounter{position:absolute;top:-6px;right:-6px;background:#2ecc71;color:#000;border-radius:50%;width:24px;height:24px;font-size:10px;font-weight:900;display:none;align-items:center;justify-content:center;z-index:5;font-family:monospace;border:2px solid #fff}
 #autoCounter.on{display:flex}
-.bonusBtn{padding:5px 7px;font-family:'Amiri',serif;font-size:9px;font-weight:700;
-  border-radius:6px;cursor:pointer;position:relative;overflow:hidden;
-  display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0}
-.bonusBtn small{font-size:7px;font-family:monospace;opacity:.85}
-.bonusBtn .price{font-family:monospace;font-size:9px;font-weight:bold}
-#buyNormal{background:linear-gradient(180deg,#1a5a2a,#0a3015);
-  border:2px solid #2ecc71;color:#d0ffe0}
-#buyPremium{background:linear-gradient(180deg,#6a1a5a,#3a0540);
-  border:2px solid #ffd24a;color:#ffe8a0}
-#log{height:26px;overflow-y:auto;width:100%;font-size:8px;
-  background:rgba(5,0,20,.85);padding:2px 6px;border-radius:4px;
-  border:1px solid rgba(106,74,154,.35);color:#a090c0;flex-shrink:0}
-#log b{color:#ffd24a}
-.big{position:fixed;top:50%;left:50%;z-index:40;pointer-events:none;
-  transform:translate(-50%,-50%) scale(.3);opacity:0;text-align:center;
-  font-family:'Cinzel Decorative',serif;font-size:clamp(40px,9vw,90px);font-weight:900;
-  background:linear-gradient(180deg,#fff,#ffd24a 40%,#ff8c00 70%,#b8860b);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 30px rgba(255,210,74,.7))}
-#fsBanner{position:fixed;top:0;left:0;right:0;z-index:25;padding:6px;
-  text-align:center;font-family:'Amiri',serif;font-weight:700;font-size:12px;color:#fff;
-  background:linear-gradient(180deg,rgba(255,140,0,.5),transparent);
-  border-bottom:2px solid #ff8c00;opacity:0;transform:translateY(-100%);
-  transition:all .7s;pointer-events:none}
+.bonusBtn{padding:7px 9px;font-family:'Amiri',serif;font-size:10px;font-weight:700;border-radius:8px;cursor:pointer;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;border:2px solid}
+.bonusBtn small{font-size:8px;font-family:monospace;opacity:.9}
+.bonusBtn .price{font-family:monospace;font-size:10px;font-weight:900}
+#buyNormal{background:linear-gradient(180deg,#1a5a2a,#0a3015);border-color:#2ecc71;color:#d0ffe0}
+#buyPremium{background:linear-gradient(180deg,#6a1a5a,#3a0540);border-color:#ffd24a;color:#ffe8a0}
+#log{height:28px;overflow-y:auto;width:100%;font-size:8px;background:linear-gradient(180deg,rgba(20,5,15,.9),rgba(5,0,10,.95));padding:3px 8px;border-radius:6px;border:1px solid rgba(184,134,11,.4);color:#c89bff;flex-shrink:0;font-family:monospace}
+.big{position:fixed;top:50%;left:50%;z-index:40;pointer-events:none;transform:translate(-50%,-50%) scale(.3);opacity:0;text-align:center;font-family:'Cinzel Decorative',serif;font-size:clamp(40px,9vw,90px);font-weight:900;background:linear-gradient(180deg,#fff,#ffd24a 40%,#ff8c00 70%,#b8860b);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 40px rgba(255,210,74,.9))}
+#fsBanner{position:fixed;top:0;left:0;right:0;z-index:25;padding:8px;text-align:center;font-family:'Cinzel Decorative',serif;font-weight:700;font-size:13px;color:#fff;background:linear-gradient(180deg,rgba(255,140,0,.7),transparent);border-bottom:2px solid #ff8c00;opacity:0;transform:translateY(-100%);transition:all .7s;pointer-events:none}
 #fsBanner.on{opacity:1;transform:translateY(0)}
-/* شريط المضاعف التراكمي */
-#cumMultBar{position:fixed;top:32px;left:50%;transform:translateX(-50%);
-  z-index:27;background:linear-gradient(180deg,rgba(80,20,120,.95),rgba(30,5,60,.98));
-  padding:6px 18px;border-radius:24px;
-  border:2px solid #ffd24a;display:none;font-family:monospace;
-  box-shadow:0 0 30px rgba(255,210,74,.6),inset 0 0 20px rgba(255,210,74,.15);
-  align-items:center;gap:10px}
+#cumMultBar{position:fixed;top:32px;left:50%;transform:translateX(-50%);z-index:27;background:linear-gradient(180deg,rgba(80,20,120,.95),rgba(30,5,60,.98));padding:7px 20px;border-radius:26px;border:2px solid #ffd24a;display:none;font-family:monospace;box-shadow:0 0 35px rgba(255,210,74,.6);align-items:center;gap:12px}
 #cumMultBar.on{display:flex;animation:cumPulse 1.5s ease-in-out infinite}
-@keyframes cumPulse{
-  0%,100%{box-shadow:0 0 30px rgba(255,210,74,.6),inset 0 0 20px rgba(255,210,74,.15)}
-  50%{box-shadow:0 0 50px rgba(255,210,74,.9),inset 0 0 30px rgba(255,210,74,.3)}
-}
-#cumMultBar .lbl{font-size:10px;color:#e0d0ff}
-#cumMultBar .val{font-size:20px;font-weight:900;color:#ffd24a;
-  text-shadow:0 0 15px #ff8c00,0 0 30px #ffd24a}
-#cumMultBar .spins{font-size:10px;color:#2ecc71;font-weight:700}
-/* قائمة المضاعفات المجمّعة */
-#multList{position:fixed;top:90px;right:8px;z-index:26;display:none;
-  background:linear-gradient(180deg,rgba(40,10,80,.95),rgba(10,2,25,.98));
-  border:2px solid #ffd24a;border-radius:10px;padding:6px 8px;
-  max-width:110px;max-height:200px;overflow-y:auto;
-  box-shadow:0 0 25px rgba(255,210,74,.5)}
+@keyframes cumPulse{0%,100%{box-shadow:0 0 35px rgba(255,210,74,.6)}50%{box-shadow:0 0 55px rgba(255,210,74,.9)}}
+#cumMultBar .lbl{font-size:10px;color:#e0d0ff;font-family:'Cinzel Decorative',serif}
+#cumMultBar .val{font-size:22px;font-weight:900;color:#ffd24a;text-shadow:0 0 20px #ff8c00,0 0 40px #ffd24a}
+#cumMultBar .spins{font-size:11px;color:#2ecc71;font-weight:700}
+#multList{position:fixed;top:95px;right:8px;z-index:26;display:none;background:linear-gradient(180deg,rgba(40,10,80,.95),rgba(10,2,25,.98));border:2px solid #ffd24a;border-radius:10px;padding:6px 8px;max-width:110px;max-height:220px;overflow-y:auto}
 #multList.on{display:block}
-#multList .item{display:inline-block;background:linear-gradient(180deg,#8a4a00,#4a2000);
-  border:1px solid #ffd24a;border-radius:6px;padding:2px 6px;margin:2px;
-  font-family:monospace;font-weight:900;font-size:11px;color:#ffd24a;
-  text-shadow:0 0 8px #ff8c00;animation:multAppear .5s ease-out}
-@keyframes multAppear{
-  0%{transform:scale(0) rotate(-180deg);opacity:0}
-  60%{transform:scale(1.2) rotate(20deg);opacity:1}
-  100%{transform:scale(1) rotate(0);opacity:1}
-}
-.mpop{position:fixed;z-index:36;font-family:'Cinzel Decorative',serif;
-  font-size:24px;font-weight:900;pointer-events:none;
-  background:linear-gradient(180deg,#fff,#c89bff,#9b59ff);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 15px #9b59ff);animation:mpop 1.3s ease-out forwards}
-@keyframes mpop{
-  0%{transform:translate(-50%,-50%) scale(.2);opacity:0}
-  20%{transform:translate(-50%,-50%) scale(1.3);opacity:1}
-  40%{transform:translate(-50%,-50%) scale(1)}
-  100%{transform:translate(-50%,-180%) scale(.9);opacity:0}}
-.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.9);
-  display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);
-  padding:12px;overflow-y:auto}
+#multList .item{display:inline-block;background:linear-gradient(180deg,#8a4a00,#4a2000);border:1px solid #ffd24a;border-radius:6px;padding:3px 7px;margin:2px;font-family:monospace;font-weight:900;font-size:11px;color:#ffd24a;animation:multAppear .5s ease-out}
+@keyframes multAppear{0%{transform:scale(0) rotate(-180deg);opacity:0}60%{transform:scale(1.3) rotate(20deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+.mpop{position:fixed;z-index:36;font-family:'Cinzel Decorative',serif;font-size:26px;font-weight:900;pointer-events:none;background:linear-gradient(180deg,#fff,#ffd24a,#ff8c00);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 20px #ff8c00);animation:mpop 1.5s ease-out forwards}
+@keyframes mpop{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}20%{transform:translate(-50%,-50%) scale(1.4);opacity:1}40%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-200%) scale(.9);opacity:0}}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);padding:12px;overflow-y:auto}
 .modal.on{display:flex}
-.modalCard{background:linear-gradient(180deg,rgba(40,15,80,.96),rgba(10,3,25,.98));
-  border:2px solid #ffd24a;border-radius:14px;padding:16px;
-  max-width:min(95vw,560px);width:100%;max-height:92vh;overflow-y:auto;position:relative}
-.modalCard h2{color:#ffd24a;font-size:18px;text-align:center;margin-bottom:12px;
-  text-shadow:0 0 15px #ff8c00}
-.closeX{position:absolute;top:6px;left:6px;background:none;border:none;
-  color:#ff4a4a;font-size:20px;cursor:pointer;padding:4px 8px}
+.modalCard{background:linear-gradient(180deg,rgba(60,25,15,.97),rgba(10,3,15,.99));border:3px solid #b8860b;border-radius:16px;padding:18px;max-width:min(95vw,560px);width:100%;max-height:92vh;overflow-y:auto;position:relative}
+.modalCard h2{color:#ffd24a;font-size:19px;text-align:center;margin-bottom:14px;font-family:'Cinzel Decorative',serif}
+.closeX{position:absolute;top:6px;left:6px;background:none;border:none;color:#ff4a4a;font-size:22px;cursor:pointer;padding:4px 8px}
 .walletTabs{display:flex;gap:5px;margin-bottom:12px;justify-content:center;flex-wrap:wrap}
-.walletTab{padding:6px 12px;background:linear-gradient(180deg,#1a3a2a,#0a1a10);
-  border:1px solid #2ecc71;border-radius:6px;color:#c8ffd8;
-  cursor:pointer;font-size:11px;font-weight:bold}
+.walletTab{padding:6px 12px;background:linear-gradient(180deg,#1a3a2a,#0a1a10);border:1px solid #2ecc71;border-radius:6px;color:#c8ffd8;cursor:pointer;font-size:11px;font-weight:bold}
 .walletTab.active{background:linear-gradient(180deg,#2ecc71,#1a5a2a);color:#fff}
-.walletPanel{display:none}
-.walletPanel.active{display:block}
+.walletPanel{display:none}.walletPanel.active{display:block}
 .walletField{margin-bottom:10px;text-align:right}
 .walletField label{display:block;font-size:11px;color:#a0d0b0;margin-bottom:4px}
-.walletField input,.walletField select{width:100%;padding:9px 11px;
-  background:rgba(5,30,15,.9);border:1px solid #2ecc71;border-radius:6px;
-  color:#c8ffd8;font-family:'Amiri',serif;font-size:13px;direction:ltr}
-.walletField input:focus{outline:none;box-shadow:0 0 15px rgba(46,204,113,.6)}
+.walletField input,.walletField select{width:100%;padding:9px 11px;background:rgba(5,30,15,.9);border:1px solid #2ecc71;border-radius:6px;color:#c8ffd8;font-family:'Amiri',serif;font-size:13px;direction:ltr}
 .walletField .hint{font-size:10px;color:#5a8a6a;margin-top:3px;direction:rtl}
-.walletBtn{width:100%;padding:10px;margin-top:8px;font-family:'Amiri',serif;
-  font-size:13px;font-weight:700;border:2px solid #2ecc71;border-radius:6px;
-  background:linear-gradient(180deg,#1a5a2a,#0a3015);color:#fff;cursor:pointer}
-.walletBtn:hover{background:linear-gradient(180deg,#2ecc71,#1a5a2a)}
-.walletBtn.secondary{background:linear-gradient(180deg,#2a2a4a,#1a1a30);
-  border-color:#6a6a9a;color:#c8c8e8}
-.walletInfo{background:rgba(46,204,113,.1);border:1px solid #2ecc71;border-radius:6px;
-  padding:7px;margin-bottom:10px;font-size:11px;color:#c8ffd8;line-height:1.5}
-.walletInfo b{color:#2ecc71;font-family:monospace;direction:ltr;display:inline-block}
-.companyWallet{background:linear-gradient(180deg,#1a3a2a,#0a1a10);
-  border:2px dashed #2ecc71;border-radius:8px;padding:12px 10px;margin:8px 0;
-  cursor:pointer;text-align:center;transition:all .2s;user-select:none}
-.companyWallet:active{background:#2ecc71;transform:scale(.98)}
-.companyWallet .cw-label{font-size:11px;color:#a0d0b0;margin-bottom:6px;
-  font-family:'Amiri',serif;direction:rtl;font-weight:bold}
-.companyWallet .cw-address{font-family:monospace;font-size:12px;color:#fff;
-  direction:ltr;word-break:break-all;font-weight:bold;line-height:1.4}
-.companyWallet .cw-hint{font-size:10px;color:#7aab8a;margin-top:6px;
-  direction:rtl;font-family:'Amiri',serif}
-.historyItem{display:flex;justify-content:space-between;padding:6px 8px;
-  background:rgba(46,204,113,.08);border-radius:5px;margin-bottom:3px;
-  font-size:10px;font-family:monospace;color:#c8ffd8;direction:ltr;
-  border-left:3px solid #2ecc71}
-.historyItem.pending{border-left-color:#ffd24a}
-.historyItem.rejected{border-left-color:#ff4a4a;opacity:.6}
-.profileRow{display:flex;justify-content:space-between;padding:6px 9px;
-  margin-bottom:5px;border-radius:5px;background:rgba(106,74,154,.15);
-  border-right:3px solid #ffd24a;font-size:11px}
-.profileRow .lbl{color:#a090d0}
-.profileRow .val{color:#ffd24a;font-family:monospace;font-weight:bold;
-  direction:ltr;text-align:left}
-.profileUID{background:linear-gradient(180deg,#ffd24a,#ff8c00);color:#1a0033;
-  padding:9px;border-radius:6px;text-align:center;font-family:monospace;
-  font-size:14px;font-weight:900;letter-spacing:.06em;margin:9px 0;
-  cursor:pointer;direction:ltr;word-break:break-all}
-.profileUID small{display:block;font-size:10px;color:#4a2000;margin-bottom:3px;
-  font-weight:normal;direction:rtl}
-.agentBox{background:rgba(155,89,255,.1);border:1px solid #9b59ff;border-radius:6px;
-  padding:9px;margin-bottom:10px;font-size:11px;color:#e0d0ff;line-height:1.6;text-align:right}
+.walletBtn{width:100%;padding:10px;margin-top:8px;font-family:'Amiri',serif;font-size:13px;font-weight:700;border:2px solid #2ecc71;border-radius:6px;background:linear-gradient(180deg,#1a5a2a,#0a3015);color:#fff;cursor:pointer}
+.walletInfo{background:rgba(46,204,113,.1);border:1px solid #2ecc71;border-radius:6px;padding:7px;margin-bottom:10px;font-size:11px;color:#c8ffd8}
+.walletInfo b{color:#2ecc71;font-family:monospace}
+.companyWallet{background:linear-gradient(180deg,#1a3a2a,#0a1a10);border:2px dashed #2ecc71;border-radius:8px;padding:12px 10px;margin:8px 0;cursor:pointer;text-align:center}
+.companyWallet .cw-label{font-size:11px;color:#a0d0b0;margin-bottom:6px;font-weight:bold}
+.companyWallet .cw-address{font-family:monospace;font-size:12px;color:#fff;direction:ltr;word-break:break-all;font-weight:bold}
+.companyWallet .cw-hint{font-size:10px;color:#7aab8a;margin-top:6px}
+.historyItem{display:flex;justify-content:space-between;padding:6px 8px;background:rgba(46,204,113,.08);border-radius:5px;margin-bottom:3px;font-size:10px;font-family:monospace;color:#c8ffd8;direction:ltr;border-left:3px solid #2ecc71}
+.historyItem.pending{border-left-color:#ffd24a}.historyItem.rejected{border-left-color:#ff4a4a;opacity:.6}
+.profileRow{display:flex;justify-content:space-between;padding:7px 10px;margin-bottom:5px;border-radius:6px;background:rgba(184,134,11,.1);border-right:3px solid #ffd24a;font-size:11px}
+.profileRow .lbl{color:#c89bff}.profileRow .val{color:#ffd24a;font-family:monospace;font-weight:bold;direction:ltr}
+.profileUID{background:linear-gradient(180deg,#ffd24a,#ff8c00);color:#1a0033;padding:10px;border-radius:7px;text-align:center;font-family:monospace;font-size:14px;font-weight:900;margin:10px 0;cursor:pointer;direction:ltr;word-break:break-all}
+.profileUID small{display:block;font-size:10px;color:#4a2000;margin-bottom:3px;font-weight:normal;direction:rtl}
+.agentBox{background:rgba(155,89,255,.1);border:1px solid #9b59ff;border-radius:6px;padding:9px;margin-bottom:10px;font-size:11px;color:#e0d0ff;line-height:1.6}
 .agentBox b{color:#c89bff}
-.agentLink{background:#0a0515;border-radius:5px;padding:7px;font-family:monospace;
-  font-size:10px;word-break:break-all;color:#c89bff;cursor:pointer;margin:5px 0;
-  direction:ltr;text-align:center}
+.agentLink{background:#0a0515;border-radius:5px;padding:7px;font-family:monospace;font-size:10px;word-break:break-all;color:#c89bff;cursor:pointer;margin:5px 0;direction:ltr;text-align:center}
 .agentStats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
-.agentStat{background:rgba(155,89,255,.1);border:1px solid #9b59ff;border-radius:6px;
-  padding:7px;text-align:center;font-size:10px}
-.agentStat .lbl{color:#888;margin-bottom:3px}
-.agentStat .val{color:#c89bff;font-weight:bold;font-size:12px}
-#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);
-  background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;padding:10px 18px;
-  border-radius:8px;font-weight:bold;z-index:9999;transition:transform .3s;
-  font-size:12px;max-width:90vw;text-align:center}
+.agentStat{background:rgba(155,89,255,.1);border:1px solid #9b59ff;border-radius:6px;padding:7px;text-align:center;font-size:10px}
+.agentStat .lbl{color:#888;margin-bottom:3px}.agentStat .val{color:#c89bff;font-weight:bold;font-size:12px}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;padding:10px 18px;border-radius:8px;font-weight:bold;z-index:9999;transition:transform .3s;font-size:12px;max-width:90vw;text-align:center}
 #toast.on{transform:translateX(-50%) translateY(0)}
 #toast.err{background:linear-gradient(180deg,#ff4a4a,#8b0000)}
-#zeusBubble{position:fixed;bottom:130px;left:50%;
-  transform:translate(-50%,30px) scale(.8);opacity:0;
-  background:linear-gradient(180deg,rgba(40,15,80,.95),rgba(15,3,35,.98));
-  border:2px solid #ffd24a;border-radius:12px;padding:8px 16px;
-  font-family:'Amiri',serif;font-size:13px;color:#fff;
-  box-shadow:0 0 30px #ff8c00;transition:all .4s;
-  pointer-events:none;z-index:35;font-weight:700;max-width:85vw;text-align:center}
-#bwOverlay{position:fixed;inset:0;z-index:200;display:none;
-  align-items:center;justify-content:center;padding:12px;pointer-events:none}
+#zeusBubble{position:fixed;bottom:130px;left:50%;transform:translate(-50%,30px) scale(.8);opacity:0;background:linear-gradient(180deg,rgba(40,15,80,.95),rgba(15,3,35,.98));border:2px solid #ffd24a;border-radius:12px;padding:8px 16px;font-family:'Amiri',serif;font-size:13px;color:#fff;box-shadow:0 0 30px #ff8c00;transition:all .4s;pointer-events:none;z-index:35;font-weight:700;max-width:85vw;text-align:center}
+#bwOverlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:12px;pointer-events:none}
 #bwOverlay.show{display:flex;pointer-events:auto;animation:iFade .3s ease}
 .bw-scrim{position:absolute;inset:0;background:rgba(0,0,0,.88)}
-.bw-frame{position:relative;width:100%;max-width:480px;padding:16px;border-radius:14px;
-  background:linear-gradient(180deg,#2a0a4a,#1a0230 40%,#3a1060 70%,#1a0230);
-  box-shadow:0 0 60px rgba(255,210,74,.6);
-  animation:bwIn .6s cubic-bezier(.19,1.6,.3,1)}
-@keyframes bwIn{0%{transform:scale(.3) rotate(-8deg);opacity:0}
-  100%{transform:scale(1) rotate(0);opacity:1}}
+.bw-frame{position:relative;width:100%;max-width:480px;padding:18px;border-radius:16px;background:linear-gradient(180deg,#4a1a00,#1a0230 40%,#6a2a0a 70%,#1a0230);border:3px solid #ffd24a;box-shadow:0 0 80px rgba(255,210,74,.7);animation:bwIn .6s cubic-bezier(.19,1.6,.3,1)}
+@keyframes bwIn{0%{transform:scale(.3) rotate(-8deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
 .bw-content{text-align:center;padding:12px}
-.bw-title{font-family:'Cinzel Decorative',serif;font-size:clamp(24px,7vw,44px);
-  font-weight:900;background:linear-gradient(180deg,#fff,#ffd24a,#ff8c00,#8b4000);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 20px rgba(255,210,74,.8))}
+.bw-title{font-family:'Cinzel Decorative',serif;font-size:clamp(24px,7vw,44px);font-weight:900;background:linear-gradient(180deg,#fff,#ffd24a,#ff8c00,#8b4000);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 25px rgba(255,210,74,.9))}
 .bw-sub{font-size:12px;color:#e0d0ff;margin:4px 0 8px}
-.bw-amount-wrap{display:inline-block;padding:10px 22px;margin:6px 0;border-radius:8px;
-  background:linear-gradient(180deg,#1a3a8a,#0a1a4a,#1a3a8a);border:2px solid #ffd24a;
-  box-shadow:0 0 25px rgba(255,210,74,.6)}
-.bw-amount{font-family:monospace;font-size:clamp(24px,6vw,38px);font-weight:900;color:#fff;
-  text-shadow:0 0 12px #ffd24a,0 0 24px #ff8c00}
-.bw-currency{font-size:10px;color:#c8b0e8;letter-spacing:.1em}
-.bw-fs{margin-top:10px;padding:5px 14px;display:inline-block;font-size:12px;
-  font-weight:700;color:#fff;background:linear-gradient(180deg,#ff8c00,#c94000);
-  border:2px solid #ffd24a;border-radius:6px}
+.bw-amount-wrap{display:inline-block;padding:12px 24px;margin:6px 0;border-radius:10px;background:linear-gradient(180deg,#1a3a8a,#0a1a4a,#1a3a8a);border:2px solid #ffd24a}
+.bw-amount{font-family:monospace;font-size:clamp(24px,6vw,38px);font-weight:900;color:#fff;text-shadow:0 0 15px #ffd24a}
+.bw-currency{font-size:10px;color:#c8b0e8}
+.bw-fs{margin-top:10px;padding:6px 16px;display:inline-block;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(180deg,#ff8c00,#c94000);border:2px solid #ffd24a;border-radius:8px}
 .bw-tap{margin-top:10px;font-size:10px;color:#a090d0}
-#tierBadge{position:fixed;top:50%;left:50%;z-index:38;pointer-events:none;
-  transform:translate(-50%,-50%);font-family:'Cinzel Decorative',serif;
-  font-size:clamp(20px,5vw,38px);font-weight:900;opacity:0;text-align:center;
-  padding:14px 28px;border-radius:16px;border:3px solid;white-space:nowrap}
+#tierBadge{position:fixed;top:50%;left:50%;z-index:38;pointer-events:none;transform:translate(-50%,-50%);font-family:'Cinzel Decorative',serif;font-size:clamp(20px,5vw,38px);font-weight:900;opacity:0;text-align:center;padding:16px 32px;border-radius:18px;border:3px solid;white-space:nowrap}
 #tierBadge.show{animation:tierShow 2s ease-out forwards}
-@keyframes tierShow{
-  0%{transform:translate(-50%,-50%) scale(.3);opacity:0}
-  15%{transform:translate(-50%,-50%) scale(1.15);opacity:1}
-  30%{transform:translate(-50%,-50%) scale(1);opacity:1}
-  80%{transform:translate(-50%,-50%) scale(1);opacity:1}
-  100%{transform:translate(-50%,-50%) scale(1.2);opacity:0}}
-.tier-green{background:linear-gradient(180deg,#1a5a2a,#0a3015);border-color:#2ecc71;color:#d0ffe0;box-shadow:0 0 40px #2ecc71}
-.tier-yellow{background:linear-gradient(180deg,#5a4a1a,#301a0a);border-color:#ffd24a;color:#ffe8a0;box-shadow:0 0 40px #ffd24a}
-.tier-orange{background:linear-gradient(180deg,#5a2a1a,#30100a);border-color:#ff8c00;color:#ffd0a0;box-shadow:0 0 40px #ff8c00}
-.tier-red{background:linear-gradient(180deg,#5a0a1a,#300005);border-color:#ff2a00;color:#ffb0b0;box-shadow:0 0 40px #ff2a00}
-.tier-gold{background:linear-gradient(180deg,#8a6a0a,#3a2010);border-color:#ffd24a;color:#fff0c0;box-shadow:0 0 60px #ffd24a;animation:tierShow 2.5s ease-out forwards,glow 0.6s ease-in-out infinite alternate}
-@keyframes glow{to{box-shadow:0 0 90px #ffd24a,0 0 120px #ff8c00}}
-#gambleOverlay{position:fixed;inset:0;z-index:210;display:none;
-  align-items:center;justify-content:center;padding:12px}
-#gambleOverlay.show{display:flex;animation:iFade .3s ease}
-.gamble-scrim{position:absolute;inset:0;background:rgba(0,0,0,.9)}
-.gamble-card{position:relative;width:100%;max-width:420px;padding:20px;border-radius:16px;
-  background:linear-gradient(180deg,#2a0a4a,#1a0230);
-  border:3px solid #ffd24a;box-shadow:0 0 60px rgba(255,210,74,.7);
-  text-align:center;animation:bwIn .5s cubic-bezier(.19,1.6,.3,1)}
-.gamble-title{font-family:'Cinzel Decorative',serif;font-size:22px;font-weight:900;
-  color:#ffd24a;margin-bottom:8px;text-shadow:0 0 20px #ff8c00}
-.gamble-amount{font-family:monospace;font-size:32px;font-weight:900;color:#fff;
-  margin:12px 0;text-shadow:0 0 20px #ffd24a}
+@keyframes tierShow{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}15%{transform:translate(-50%,-50%) scale(1.15);opacity:1}30%{transform:translate(-50%,-50%) scale(1);opacity:1}80%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1.2);opacity:0}}
+.tier-green{background:linear-gradient(180deg,#1a5a2a,#0a3015);border-color:#2ecc71;color:#d0ffe0;box-shadow:0 0 50px #2ecc71}
+.tier-yellow{background:linear-gradient(180deg,#5a4a1a,#301a0a);border-color:#ffd24a;color:#ffe8a0;box-shadow:0 0 50px #ffd24a}
+.tier-orange{background:linear-gradient(180deg,#5a2a1a,#30100a);border-color:#ff8c00;color:#ffd0a0;box-shadow:0 0 50px #ff8c00}
+.tier-red{background:linear-gradient(180deg,#5a0a1a,#300005);border-color:#ff2a00;color:#ffb0b0;box-shadow:0 0 50px #ff2a00}
+.tier-gold{background:linear-gradient(180deg,#8a6a0a,#3a2010);border-color:#ffd24a;color:#fff0c0;box-shadow:0 0 70px #ffd24a}
+#gambleOverlay,#wheelOverlay,#bonusSummaryOverlay,#autoMenu{position:fixed;inset:0;z-index:210;display:none;align-items:center;justify-content:center;padding:12px}
+#gambleOverlay.show,#wheelOverlay.show,#bonusSummaryOverlay.show,#autoMenu.show{display:flex;animation:iFade .3s ease}
+.gamble-scrim,.wheel-scrim,.auto-scrim{position:absolute;inset:0;background:rgba(0,0,0,.9)}
+.gamble-card,.wheel-card,.bonus-summary-card,.auto-card{position:relative;width:100%;padding:22px;border-radius:16px;background:linear-gradient(180deg,#3a0a0a,#1a0230);border:3px solid #ffd24a;text-align:center;animation:bwIn .5s cubic-bezier(.19,1.6,.3,1);max-width:460px}
+.gamble-title,.wheel-title,.bonus-summary-title{font-family:'Cinzel Decorative',serif;font-size:22px;font-weight:900;color:#ffd24a;margin-bottom:8px;text-shadow:0 0 20px #ff8c00}
+.gamble-amount{font-family:monospace;font-size:34px;font-weight:900;color:#fff;margin:14px 0;text-shadow:0 0 25px #ffd24a}
 .gamble-msg{font-size:12px;color:#c8b0e8;margin-bottom:14px}
-.gamble-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.gamble-btn{flex:1;padding:12px;font-family:'Amiri',serif;font-size:13px;font-weight:700;
-  border-radius:8px;cursor:pointer;border:2px solid;min-width:100px;transition:all .2s}
-.gamble-btn.cashout{background:linear-gradient(180deg,#1a5a2a,#0a3015);
-  border-color:#2ecc71;color:#d0ffe0}
-.gamble-btn.cashout:hover{background:linear-gradient(180deg,#2ecc71,#1a5a2a)}
-.gamble-btn.double{background:linear-gradient(180deg,#6a1a1a,#3a0505);
-  border-color:#ff2a00;color:#ffb0b0}
-.gamble-btn.double:hover{background:linear-gradient(180deg,#ff2a00,#8b0000)}
+.gamble-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.gamble-btn{flex:1;padding:13px;font-family:'Amiri',serif;font-size:14px;font-weight:700;border-radius:9px;cursor:pointer;border:2px solid;min-width:110px}
+.gamble-btn.cashout{background:linear-gradient(180deg,#1a5a2a,#0a3015);border-color:#2ecc71;color:#d0ffe0}
+.gamble-btn.double{background:linear-gradient(180deg,#8b0000,#3a0505);border-color:#ff2a00;color:#ffb0b0}
 .gamble-rounds{font-size:10px;color:#a090d0;margin-top:10px}
-#wheelOverlay{position:fixed;inset:0;z-index:220;display:none;
-  align-items:center;justify-content:center;padding:12px}
-#wheelOverlay.show{display:flex;animation:iFade .3s ease}
-.wheel-scrim{position:absolute;inset:0;background:rgba(0,0,0,.92)}
-.wheel-card{position:relative;width:100%;max-width:480px;padding:20px;border-radius:16px;
-  background:linear-gradient(180deg,#2a0a4a,#1a0230);
-  border:3px solid #ffd24a;box-shadow:0 0 80px rgba(255,210,74,.8);
-  text-align:center;animation:bwIn .5s cubic-bezier(.19,1.6,.3,1)}
-.wheel-title{font-family:'Cinzel Decorative',serif;font-size:24px;font-weight:900;
-  color:#ffd24a;margin-bottom:12px;text-shadow:0 0 20px #ff8c00}
 #wheelCanvas{display:block;margin:0 auto;max-width:100%}
-.wheel-result{font-family:monospace;font-size:22px;font-weight:900;color:#fff;
-  margin-top:14px;min-height:32px;text-shadow:0 0 20px #ffd24a}
-#wheelSpinBtn{margin-top:12px;padding:12px 28px;font-family:'Amiri',serif;
-  font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;
-  background:linear-gradient(180deg,#ff8c00,#c94000);border:2px solid #ffd24a;
-  color:#fff;box-shadow:0 0 20px rgba(255,210,74,.5)}
+.wheel-result{font-family:monospace;font-size:22px;font-weight:900;color:#fff;margin-top:14px;min-height:32px;text-shadow:0 0 20px #ffd24a}
+#wheelSpinBtn{margin-top:14px;padding:13px 30px;font-family:'Cinzel Decorative',serif;font-size:14px;font-weight:900;border-radius:10px;cursor:pointer;background:linear-gradient(180deg,#ff8c00,#c94000);border:2px solid #ffd24a;color:#fff}
 #wheelSpinBtn:disabled{opacity:.5;cursor:not-allowed}
-#wheelTimer{font-size:11px;color:#a090d0;margin-top:8px}
-#bonusSummaryOverlay{position:fixed;inset:0;z-index:215;display:none;
-  align-items:center;justify-content:center;padding:12px}
-#bonusSummaryOverlay.show{display:flex;animation:iFade .3s ease}
-.bonus-summary-card{position:relative;width:100%;max-width:440px;padding:24px;border-radius:16px;
-  background:linear-gradient(180deg,#4a0a2a,#1a0215);
-  border:3px solid #ffd24a;box-shadow:0 0 80px rgba(255,210,74,.8);
-  text-align:center;animation:bwIn .5s cubic-bezier(.19,1.6,.3,1)}
-.bonus-summary-title{font-family:'Cinzel Decorative',serif;font-size:26px;font-weight:900;
-  background:linear-gradient(180deg,#fff,#ffd24a,#ff8c00);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 20px rgba(255,210,74,.9));margin-bottom:6px}
-.bonus-summary-sub{font-size:12px;color:#e0d0ff;margin-bottom:16px}
-.bonus-summary-row{display:flex;justify-content:space-between;padding:8px 12px;
-  background:rgba(255,210,74,.08);border-radius:6px;margin-bottom:6px;
-  font-size:12px;border-right:3px solid #ffd24a}
-.bonus-summary-row .lbl{color:#c8b0e8}
-.bonus-summary-row .val{color:#ffd24a;font-family:monospace;font-weight:bold}
+#wheelTimer{font-size:11px;color:#a090d0;margin-top:10px}
+.bonus-summary-sub{font-size:12px;color:#e0d0ff;margin-bottom:18px}
+.bonus-summary-row{display:flex;justify-content:space-between;padding:9px 14px;background:rgba(255,210,74,.08);border-radius:7px;margin-bottom:7px;font-size:12px;border-right:3px solid #ffd24a}
+.bonus-summary-row .lbl{color:#c8b0e8}.bonus-summary-row .val{color:#ffd24a;font-family:monospace;font-weight:bold}
 .bonus-summary-row .val.green{color:#2ecc71}
-.bonus-summary-row .val.red{color:#ff6a6a}
-.bonus-summary-total{margin-top:14px;padding:14px;border-radius:10px;
-  background:linear-gradient(180deg,#1a3a8a,#0a1a4a);border:2px solid #ffd24a;
-  box-shadow:0 0 25px rgba(255,210,74,.6)}
-.bonus-summary-total .lbl{font-size:11px;color:#c8b0e8;margin-bottom:4px}
-.bonus-summary-total .val{font-family:monospace;font-size:26px;font-weight:900;
-  color:#fff;text-shadow:0 0 12px #ffd24a}
-.bonus-summary-total .val.pos{color:#2ecc71;text-shadow:0 0 12px #2ecc71}
-.bonus-summary-total .val.neg{color:#ff6a6a;text-shadow:0 0 12px #ff4a4a}
-.bonus-summary-close{margin-top:14px;padding:10px 24px;font-family:'Amiri',serif;
-  font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;
-  background:linear-gradient(180deg,#ff8c00,#c94000);border:2px solid #ffd24a;color:#fff}
-#autoMenu{position:fixed;inset:0;z-index:180;display:none;
-  align-items:center;justify-content:center;padding:12px}
-#autoMenu.show{display:flex;animation:iFade .2s ease}
-.auto-scrim{position:absolute;inset:0;background:rgba(0,0,0,.85)}
-.auto-card{position:relative;padding:18px;border-radius:14px;
-  background:linear-gradient(180deg,#2a0a4a,#1a0230);
-  border:2px solid #9b59ff;text-align:center}
-.auto-card h3{color:#c89bff;font-size:14px;margin-bottom:10px}
+.bonus-summary-total{margin-top:16px;padding:16px;border-radius:12px;background:linear-gradient(180deg,#1a3a8a,#0a1a4a);border:2px solid #ffd24a}
+.bonus-summary-total .lbl{font-size:11px;color:#c8b0e8;margin-bottom:5px}
+.bonus-summary-total .val{font-family:monospace;font-size:28px;font-weight:900;color:#2ecc71}
+.bonus-summary-close{margin-top:16px;padding:12px 28px;font-family:'Cinzel Decorative',serif;font-size:14px;font-weight:900;border-radius:10px;cursor:pointer;background:linear-gradient(180deg,#ff8c00,#c94000);border:2px solid #ffd24a;color:#fff}
+.auto-card h3{color:#c89bff;font-size:14px;margin-bottom:12px;font-family:'Cinzel Decorative',serif}
 .auto-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-.auto-btn{padding:8px 16px;font-family:monospace;font-size:13px;font-weight:700;
-  border-radius:6px;background:linear-gradient(180deg,#3a1a6a,#1a0230);
-  border:2px solid #9b59ff;color:#e0d0ff;cursor:pointer}
-.auto-btn:hover{background:linear-gradient(180deg,#9b59ff,#4a1a7a);color:#fff}
+.auto-btn{padding:10px 18px;font-family:monospace;font-size:14px;font-weight:700;border-radius:7px;background:linear-gradient(180deg,#3a1a6a,#1a0230);border:2px solid #9b59ff;color:#e0d0ff;cursor:pointer}
 .auto-btn.cancel{background:linear-gradient(180deg,#6a1a1a,#3a0505);border-color:#ff4a4a;color:#ffb0b0}
-@media (max-width:640px){
-  #mainArea{padding:50px 3px 3px 3px;gap:3px}
-  #sideCol{width:78px;gap:3px}
-  #paytable,#historyPanel,#statsPanel{padding:3px}
-  #paytable h3,#historyPanel h3,#statsPanel h3{font-size:7px;padding-bottom:1px;margin-bottom:2px}
-  .ptRow{font-size:7px;padding:0}
-  .ptRow .ico{width:12px;height:12px}
-  #historyList{font-size:7px}
-  .histRow{grid-template-columns:22px 1fr auto;font-size:7px;padding:2px}
-  #hud{gap:2px}
-  .hudBox{padding:2px 6px;font-size:8px}
-  .hudBox b{font-size:10px}
-  #ctrl{gap:3px;padding:1px 0}
-  .cbtn{padding:4px 6px;font-size:9px}
-  #betBox{padding:2px 6px;min-width:60px}
-  #betBox small{font-size:7px}
-  #betBox b{font-size:10px}
-  #spinWrap,#spinWheel{width:54px;height:54px}
-  #spinLabel{font-size:10px}
-  .bonusBtn{padding:4px 5px;font-size:8px;min-width:50px}
-  .bonusBtn small{font-size:6px}
-  .bonusBtn .price{font-size:8px}
-  #log{height:22px;font-size:8px}
-  #topBtns button{width:34px;height:34px;padding:5px}
-  #wheelBtn{right:48px}
-  #walletBtn{left:48px}
-  #agentBadge{top:44px;left:6px}
-  #logoutTopBtn{top:44px;left:48px}
-  #turboBtn{top:44px;right:6px}
-  #autoBtn{top:44px;right:48px}
-  #frame{padding:3px}
-  #cumMultBar{padding:4px 12px;top:28px}
-  #cumMultBar .val{font-size:16px}
-  #multList{top:80px;right:4px;max-width:90px}
-}
-@media (max-width:430px){
-  #sideCol{width:68px}
-  #hud{gap:2px}
-  .hudBox{padding:2px 5px;font-size:7px}
-  .hudBox b{font-size:9px}
-  .cbtn{padding:3px 5px;font-size:8px}
-  #betBox{min-width:50px}
-  #spinWrap,#spinWheel{width:48px;height:48px}
-  #spinLabel{font-size:9px}
-  .bonusBtn{padding:3px 4px;font-size:7px}
-  #log{height:18px;font-size:7px}
-  #mainArea{padding:46px 2px 2px 2px}
-  #topBtns button{width:32px;height:32px;padding:5px}
-}
+@media (max-width:640px){#mainArea{padding:52px 3px 3px 3px;gap:4px}#sideCol{width:80px;gap:4px}#spinWrap,#spinWheel{width:56px;height:56px}#topBtns button{width:36px;height:36px;padding:6px}#wheelBtn{right:50px}#walletBtn{left:50px}#agentBadge{top:46px;left:6px}#logoutTopBtn{top:46px;left:50px}#turboBtn{top:46px;right:6px}#autoBtn{top:46px;right:50px}}
+@media (max-width:430px){#sideCol{width:70px}#spinWrap,#spinWheel{width:50px;height:50px}#mainArea{padding:48px 2px 2px 2px}}
 </style>
 </head>
 <body>
 
-<!-- ==================== SVG ICON LIBRARY ==================== -->
 <svg width="0" height="0" style="position:absolute">
-  <defs>
-    <symbol id="ic-sound-on" viewBox="0 0 24 24">
-      <path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-    </symbol>
-    <symbol id="ic-sound-off" viewBox="0 0 24 24">
-      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-    </symbol>
-    <symbol id="ic-wheel" viewBox="0 0 24 24">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-    </symbol>
-    <symbol id="ic-profile" viewBox="0 0 24 24">
-      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-    </symbol>
-    <symbol id="ic-wallet" viewBox="0 0 24 24">
-      <path d="M21 7.28V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-2.28c.59-.35 1-.98 1-1.72V9c0-.74-.41-1.37-1-1.72zM20 9v6h-7V9h7zM5 19V5h14v2h-6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h6v2H5z"/>
-      <circle cx="16" cy="12" r="1.5"/>
-    </symbol>
-    <symbol id="ic-agent" viewBox="0 0 24 24">
-      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-    </symbol>
-    <symbol id="ic-logout" viewBox="0 0 24 24">
-      <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-    </symbol>
-    <symbol id="ic-turbo" viewBox="0 0 24 24">
-      <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
-    </symbol>
-    <symbol id="ic-auto" viewBox="0 0 24 24">
-      <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-    </symbol>
-  </defs>
+<defs>
+<symbol id="ic-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></symbol>
+<symbol id="ic-sound-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
+<symbol id="ic-wheel" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></symbol>
+<symbol id="ic-profile" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></symbol>
+<symbol id="ic-wallet" viewBox="0 0 24 24"><path d="M21 7.28V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-2.28c.59-.35 1-.98 1-1.72V9c0-.74-.41-1.37-1-1.72zM20 9v6h-7V9h7zM5 19V5h14v2h-6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h6v2H5z"/><circle cx="16" cy="12" r="1.5"/></symbol>
+<symbol id="ic-agent" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></symbol>
+<symbol id="ic-logout" viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></symbol>
+<symbol id="ic-turbo" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></symbol>
+<symbol id="ic-auto" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></symbol>
+</defs>
 </svg>
 
 <div id="auth">
-  <div class="authWrap">
-    <div class="authTitle" id="authTitle">STORMCROWN</div>
-    <div class="authSub" id="authSub">— بوابة العاصفة —</div>
-    <div id="loginForm">
-      <div class="authField"><label>رقم الهاتف أو البريد أو UID</label>
-        <input type="text" id="loginId" placeholder="09xxxxxxxx" autocomplete="off"></div>
-      <div class="authField"><label>كلمة المرور</label>
-        <input type="password" id="loginPass" placeholder="••••••••"></div>
-      <button class="authBtn" id="loginBtn">دخول</button>
-      <div class="authSwitch"><span id="goSignup">إنشاء حساب جديد</span></div>
-    </div>
-    <div id="signupForm" style="display:none">
-      <div class="authField"><label>الاسم</label><input type="text" id="suFirst" placeholder="أحمد"></div>
-      <div class="authField"><label>الكنية</label><input type="text" id="suLast" placeholder="الحلبي"></div>
-      <div class="authField"><label>رقم الهاتف</label><input type="tel" id="suPhone" placeholder="09xxxxxxxx"></div>
-      <div class="authField"><label>البريد الإلكتروني</label><input type="email" id="suEmail" placeholder="you@example.com"></div>
-      <div class="authField"><label>كلمة المرور</label><input type="password" id="suPass" placeholder="••••••••"></div>
-      <div class="authField"><label>كود الدعوة (اختياري)</label><input type="text" id="suInvite" placeholder="SCXXXXXXXX"></div>
-      <button class="authBtn" id="signupBtn">إنشاء الحساب</button>
-      <button class="authBtn secondary" id="goLogin">عودة للدخول</button>
-    </div>
-    <div class="authErr" id="authErr"></div>
-  </div>
+<div class="authWrap">
+<div class="authTitle" id="authTitle">STORMCROWN</div>
+<div class="authSub" id="authSub">— بوابة العاصفة —</div>
+<div id="loginForm">
+<div class="authField"><label>رقم الهاتف أو البريد أو UID</label><input type="text" id="loginId" placeholder="09xxxxxxxx" autocomplete="off"></div>
+<div class="authField"><label>كلمة المرور</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+<button class="authBtn" id="loginBtn">دخول</button>
+<div class="authSwitch"><span id="goSignup">إنشاء حساب جديد</span></div>
+</div>
+<div id="signupForm" style="display:none">
+<div class="authField"><label>الاسم</label><input type="text" id="suFirst" placeholder="أحمد"></div>
+<div class="authField"><label>الكنية</label><input type="text" id="suLast" placeholder="الحلبي"></div>
+<div class="authField"><label>رقم الهاتف</label><input type="tel" id="suPhone" placeholder="09xxxxxxxx"></div>
+<div class="authField"><label>البريد الإلكتروني</label><input type="email" id="suEmail" placeholder="you@example.com"></div>
+<div class="authField"><label>كلمة المرور</label><input type="password" id="suPass" placeholder="••••••••"></div>
+<div class="authField"><label>كود الدعوة (اختياري)</label><input type="text" id="suInvite" placeholder="SCXXXXXXXX"></div>
+<button class="authBtn" id="signupBtn">إنشاء الحساب</button>
+<button class="authBtn secondary" id="goLogin">عودة للدخول</button>
+</div>
+<div class="authErr" id="authErr"></div>
+</div>
 </div>
 
 <div id="game">
-  <div id="flash"></div>
-  <div id="fsBanner">⚡ جولات مجانية ⚡</div>
-  <div id="cumMultBar">
-    <span class="lbl">المضاعف التراكمي</span>
-    <span class="val" id="cumMultVal">0×</span>
-    <span class="spins" id="cumMultSpins">15</span>
-  </div>
-  <div id="multList"></div>
-  <div class="big" id="bigTxt"></div>
-  <div id="tierBadge"></div>
-  <div id="zeusBubble">مرحباً بك في العاصفة</div>
+<div id="flash"></div>
+<div id="fsBanner">⚡ جولات مجانية ⚡</div>
+<div id="cumMultBar"><span class="lbl">المضاعف التراكمي</span><span class="val" id="cumMultVal">0×</span><span class="spins" id="cumMultSpins">15</span></div>
+<div id="multList"></div>
+<div class="big" id="bigTxt"></div>
+<div id="tierBadge"></div>
+<div id="zeusBubble">مرحباً بك في العاصفة</div>
 
-  <div id="topBtns">
-    <button id="profileBtn" title="الملف الشخصي">
-      <svg><use href="#ic-profile"/></svg>
-    </button>
-    <button id="walletBtn" title="المحفظة">
-      <svg><use href="#ic-wallet"/></svg>
-    </button>
-    <button id="agentBadge" title="الوكالة">
-      <svg><use href="#ic-agent"/></svg>
-    </button>
-    <button id="logoutTopBtn" title="خروج">
-      <svg><use href="#ic-logout"/></svg>
-    </button>
-    <button id="soundBtn" title="الصوت">
-      <svg id="soundIcon"><use href="#ic-sound-on"/></svg>
-    </button>
-    <button id="wheelBtn" title="عجلة الحظ">
-      <svg><use href="#ic-wheel"/></svg>
-    </button>
-    <button id="turboBtn" title="Turbo">
-      <svg><use href="#ic-turbo"/></svg>
-    </button>
-    <button id="autoBtn" title="Auto">
-      <svg><use href="#ic-auto"/></svg>
-    </button>
-  </div>
-
-  <div id="mainArea">
-    <div id="hud">
-      <div class="hudBox">الرصيد <b id="bal">0</b></div>
-      <div class="hudBox">آخر فوز <b id="lastWin">0</b></div>
-      <div class="hudBox" id="fsHud">مجاني <b id="fs">0</b></div>
-      <div class="hudBox" id="multHud">مضاعف <b id="mult">0×</b></div>
-    </div>
-    <div id="playRow">
-      <div id="sideCol">
-        <div id="paytable"><h3>الأرباح</h3><div id="ptRows"></div></div>
-        <div id="historyPanel"><h3>السجل</h3><div id="historyList"></div></div>
-        <div id="statsPanel"><h3>إحصائيات</h3>
-          <div class="statRow"><span>RTP</span><b id="sRTP">—</b></div>
-          <div class="statRow"><span>فوز %</span><b id="sWR">—</b></div>
-          <div class="statRow"><span>لفات</span><b id="sSpins">0</b></div>
-          <div class="statRow"><span>أفضل</span><b id="sBest">0</b></div>
-        </div>
-      </div>
-      <div id="frameWrap">
-        <div id="frame">
-          <canvas id="zeusBackdrop" width="750" height="620"></canvas>
-          <canvas id="reels" width="750" height="620"></canvas>
-        </div>
-      </div>
-    </div>
-    <div id="ctrl">
-      <button class="cbtn" id="betDown">− رهان</button>
-      <div id="betBox"><small>الرهان</small><b id="betVal">100</b></div>
-      <button class="cbtn" id="betUp">رهان +</button>
-      <div id="spinWrap">
-        <div id="spinWheel"><span id="spinLabel">دور</span></div>
-        <div id="autoCounter">0</div>
-      </div>
-      <button class="bonusBtn" id="buyNormal">بونص عادي<small>50×</small><span class="price" id="priceNormal">5000</span></button>
-      <button class="bonusBtn" id="buyPremium">بونص مميز<small>200×</small><span class="price" id="pricePremium">20000</span></button>
-    </div>
-    <div id="log"></div>
-  </div>
+<div id="topBtns">
+<button id="profileBtn" title="الملف الشخصي"><svg><use href="#ic-profile"/></svg></button>
+<button id="walletBtn" title="المحفظة"><svg><use href="#ic-wallet"/></svg></button>
+<button id="agentBadge" title="الوكالة"><svg><use href="#ic-agent"/></svg></button>
+<button id="logoutTopBtn" title="خروج"><svg><use href="#ic-logout"/></svg></button>
+<button id="soundBtn" title="الصوت"><svg id="soundIcon"><use href="#ic-sound-on"/></svg></button>
+<button id="wheelBtn" title="عجلة الحظ"><svg><use href="#ic-wheel"/></svg></button>
+<button id="turboBtn" title="Turbo"><svg><use href="#ic-turbo"/></svg></button>
+<button id="autoBtn" title="Auto"><svg><use href="#ic-auto"/></svg></button>
 </div>
 
-<div class="modal" id="walletModal">
-  <div class="modalCard">
-    <button class="closeX" onclick="document.getElementById('walletModal').classList.remove('on')">✕</button>
-    <h2>💰 المحفظة</h2>
-    <div class="walletTabs">
-      <div class="walletTab active" data-wt="deposit">📥 إيداع</div>
-      <div class="walletTab" data-wt="withdraw">📤 سحب</div>
-      <div class="walletTab" data-wt="history">📜 السجل</div>
-      <div class="walletTab" data-wt="addresses">📍 عناويني</div>
-    </div>
-    <div class="walletPanel active" id="wp-deposit">
-      <div class="walletField"><label>اختر الوسيلة</label>
-        <select id="depMethod">
-          <option value="sham_syp">شام كاش - ليرة سورية</option>
-          <option value="sham_usd">شام كاش - دولار</option>
-          <option value="usdt_bep20">USDT (BEP20)</option>
-          <option value="usdt_trc20">USDT (TRC20)</option>
-        </select></div>
-      <div class="walletInfo" id="depInfo"></div>
-      <div class="companyWallet" id="companyWallet" onclick="copyCompanyWallet()"></div>
-      <div class="walletField"><label>المبلغ المرسل</label>
-        <input type="number" id="depAmount" placeholder="مثال: 200" step="0.01"></div>
-      <div class="walletField"><label>رقم العملية (اختياري)</label>
-        <input type="text" id="depTx" placeholder="TX Hash"></div>
-      <button class="walletBtn" id="depBtn">📤 إرسال طلب الإيداع</button>
-    </div>
-    <div class="walletPanel" id="wp-withdraw">
-      <div class="walletField"><label>اختر الوسيلة</label>
-        <select id="wdMethod">
-          <option value="sham_syp">شام كاش - ليرة سورية</option>
-          <option value="sham_usd">شام كاش - دولار</option>
-          <option value="usdt_bep20">USDT (BEP20)</option>
-          <option value="usdt_trc20">USDT (TRC20)</option>
-        </select></div>
-      <div class="walletInfo" id="wdInfo"></div>
-      <div class="walletField"><label>المبلغ</label>
-        <input type="number" id="wdAmount" placeholder="مثال: 100" step="0.01"></div>
-      <div class="walletField"><label>عنوان الاستلام</label>
-        <input type="text" id="wdAddress" placeholder="أدخل عنوان محفظتك">
-        <div class="hint">تأكد من صحة العنوان</div></div>
-      <button class="walletBtn" id="wdBtn">📤 إرسال طلب السحب</button>
-    </div>
-    <div class="walletPanel" id="wp-history">
-      <div id="walletHistoryList" style="max-height:400px;overflow-y:auto"></div>
-    </div>
-    <div class="walletPanel" id="wp-addresses">
-      <div class="walletField"><label>شام كاش SYP</label><input type="text" id="addrShamSyp" placeholder="SYR-..."></div>
-      <div class="walletField"><label>شام كاش USD</label><input type="text" id="addrShamUsd" placeholder="SYR-USD-..."></div>
-      <div class="walletField"><label>USDT BEP20</label><input type="text" id="addrUsdtBep" placeholder="0x..."></div>
-      <div class="walletField"><label>USDT TRC20</label><input type="text" id="addrUsdtTrc" placeholder="T..."></div>
-      <button class="walletBtn" id="saveAddrBtn">💾 حفظ العناوين</button>
-    </div>
-  </div>
+<div id="mainArea">
+<div id="hud">
+<div class="hudBox">الرصيد <b id="bal">0</b></div>
+<div class="hudBox">آخر فوز <b id="lastWin">0</b></div>
+<div class="hudBox" id="fsHud">مجاني <b id="fs">0</b></div>
+<div class="hudBox" id="multHud">مضاعف <b id="mult">0×</b></div>
+</div>
+<div id="playRow">
+<div id="sideCol">
+<div id="paytable"><h3>الأرباح</h3><div id="ptRows"></div></div>
+<div id="historyPanel"><h3>السجل</h3><div id="historyList"></div></div>
+<div id="statsPanel"><h3>إحصائيات</h3>
+<div class="statRow"><span>RTP</span><b id="sRTP">—</b></div>
+<div class="statRow"><span>فوز %</span><b id="sWR">—</b></div>
+<div class="statRow"><span>لفات</span><b id="sSpins">0</b></div>
+<div class="statRow"><span>أفضل</span><b id="sBest">0</b></div>
+</div>
+</div>
+<div id="frameWrap">
+<div id="frame">
+<canvas id="zeusBackdrop" width="750" height="620"></canvas>
+<canvas id="reels" width="750" height="620"></canvas>
+</div>
+</div>
+</div>
+<div id="ctrl">
+<button class="cbtn" id="betDown">− رهان</button>
+<div id="betBox"><small>الرهان</small><b id="betVal">100</b></div>
+<button class="cbtn" id="betUp">رهان +</button>
+<div id="spinWrap"><div id="spinWheel"><span id="spinLabel">دور</span></div><div id="autoCounter">0</div></div>
+<button class="bonusBtn" id="buyNormal">بونص عادي<small>50×</small><span class="price" id="priceNormal">5000</span></button>
+<button class="bonusBtn" id="buyPremium">بونص مميز<small>200×</small><span class="price" id="pricePremium">20000</span></button>
+</div>
+<div id="log"></div>
+</div>
 </div>
 
-<div class="modal" id="profileModal">
-  <div class="modalCard">
-    <button class="closeX" onclick="document.getElementById('profileModal').classList.remove('on')">✕</button>
-    <h2>👤 الملف الشخصي</h2>
-    <div id="profileContent"></div>
-  </div>
+<div class="modal" id="walletModal"><div class="modalCard">
+<button class="closeX" onclick="document.getElementById('walletModal').classList.remove('on')">✕</button>
+<h2>💰 المحفظة</h2>
+<div class="walletTabs">
+<div class="walletTab active" data-wt="deposit">📥 إيداع</div>
+<div class="walletTab" data-wt="withdraw">📤 سحب</div>
+<div class="walletTab" data-wt="history">📜 السجل</div>
+<div class="walletTab" data-wt="addresses">📍 عناويني</div>
 </div>
+<div class="walletPanel active" id="wp-deposit">
+<div class="walletField"><label>اختر الوسيلة</label>
+<select id="depMethod"><option value="sham_syp">شام كاش - ليرة سورية</option><option value="sham_usd">شام كاش - دولار</option><option value="usdt_bep20">USDT (BEP20)</option><option value="usdt_trc20">USDT (TRC20)</option></select></div>
+<div class="walletInfo" id="depInfo"></div>
+<div class="companyWallet" id="companyWallet" onclick="copyCompanyWallet()"></div>
+<div class="walletField"><label>المبلغ المرسل</label><input type="number" id="depAmount" placeholder="مثال: 200" step="0.01"></div>
+<div class="walletField"><label>رقم العملية (اختياري)</label><input type="text" id="depTx" placeholder="TX Hash"></div>
+<button class="walletBtn" id="depBtn">📤 إرسال طلب الإيداع</button>
+</div>
+<div class="walletPanel" id="wp-withdraw">
+<div class="walletField"><label>اختر الوسيلة</label>
+<select id="wdMethod"><option value="sham_syp">شام كاش - ليرة سورية</option><option value="sham_usd">شام كاش - دولار</option><option value="usdt_bep20">USDT (BEP20)</option><option value="usdt_trc20">USDT (TRC20)</option></select></div>
+<div class="walletInfo" id="wdInfo"></div>
+<div class="walletField"><label>المبلغ</label><input type="number" id="wdAmount" placeholder="مثال: 100" step="0.01"></div>
+<div class="walletField"><label>عنوان الاستلام</label><input type="text" id="wdAddress" placeholder="أدخل عنوان محفظتك"><div class="hint">تأكد من صحة العنوان</div></div>
+<button class="walletBtn" id="wdBtn">📤 إرسال طلب السحب</button>
+</div>
+<div class="walletPanel" id="wp-history"><div id="walletHistoryList" style="max-height:400px;overflow-y:auto"></div></div>
+<div class="walletPanel" id="wp-addresses">
+<div class="walletField"><label>شام كاش SYP</label><input type="text" id="addrShamSyp" placeholder="SYR-..."></div>
+<div class="walletField"><label>شام كاش USD</label><input type="text" id="addrShamUsd" placeholder="SYR-USD-..."></div>
+<div class="walletField"><label>USDT BEP20</label><input type="text" id="addrUsdtBep" placeholder="0x..."></div>
+<div class="walletField"><label>USDT TRC20</label><input type="text" id="addrUsdtTrc" placeholder="T..."></div>
+<button class="walletBtn" id="saveAddrBtn">💾 حفظ العناوين</button>
+</div>
+</div></div>
 
-<div class="modal" id="agentModal">
-  <div class="modalCard">
-    <button class="closeX" onclick="document.getElementById('agentModal').classList.remove('on')">✕</button>
-    <h2>👥 نظام الوكالة</h2>
-    <div id="agentContent"></div>
-  </div>
-</div>
+<div class="modal" id="profileModal"><div class="modalCard">
+<button class="closeX" onclick="document.getElementById('profileModal').classList.remove('on')">✕</button>
+<h2>👤 الملف الشخصي</h2>
+<div id="profileContent"></div>
+</div></div>
 
-<div id="bwOverlay">
-  <div class="bw-scrim"></div>
-  <div class="bw-frame">
-    <div class="bw-content">
-      <div class="bw-title" id="bwTitle">تهانينا!</div>
-      <div class="bw-sub">لقد ربحت</div>
-      <div class="bw-amount-wrap">
-        <div class="bw-amount" id="bwAmount">0</div>
-        <div class="bw-currency">ليرة سورية</div>
-      </div>
-      <div class="bw-fs" id="bwFs" style="display:none"></div>
-      <div class="bw-tap">اضغط للمتابعة</div>
-    </div>
-  </div>
-</div>
+<div class="modal" id="agentModal"><div class="modalCard">
+<button class="closeX" onclick="document.getElementById('agentModal').classList.remove('on')">✕</button>
+<h2>👥 نظام الوكالة</h2>
+<div id="agentContent"></div>
+</div></div>
 
-<div id="gambleOverlay">
-  <div class="gamble-scrim"></div>
-  <div class="gamble-card">
-    <div class="gamble-title">⚡ ضاعف أو اسحب</div>
-    <div class="gamble-msg">هل تريد المخاطرة بمضاعفة أرباحك؟</div>
-    <div class="gamble-amount" id="gambleAmount">0</div>
-    <div class="gamble-msg" id="gambleMsg">50% فرصة × 2</div>
-    <div class="gamble-btns">
-      <button class="gamble-btn cashout" id="gambleCashout">💰 اسحب</button>
-      <button class="gamble-btn double" id="gambleDouble">🎲 ضاعف</button>
-    </div>
-    <div class="gamble-rounds" id="gambleRounds">الجولة 1 من 5</div>
-  </div>
-</div>
+<div id="bwOverlay"><div class="bw-scrim"></div><div class="bw-frame"><div class="bw-content">
+<div class="bw-title" id="bwTitle">تهانينا!</div>
+<div class="bw-sub">لقد ربحت</div>
+<div class="bw-amount-wrap"><div class="bw-amount" id="bwAmount">0</div><div class="bw-currency">ليرة سورية</div></div>
+<div class="bw-fs" id="bwFs" style="display:none"></div>
+<div class="bw-tap">اضغط للمتابعة</div>
+</div></div></div>
 
-<div id="wheelOverlay">
-  <div class="wheel-scrim"></div>
-  <div class="wheel-card">
-    <div class="wheel-title">🎡 عجلة الحظ</div>
-    <canvas id="wheelCanvas" width="360" height="360"></canvas>
-    <div class="wheel-result" id="wheelResult">اضغط للدوران</div>
-    <button id="wheelSpinBtn">🎯 دوّر العجلة</button>
-    <div id="wheelTimer"></div>
-  </div>
-</div>
+<div id="gambleOverlay"><div class="gamble-scrim"></div><div class="gamble-card">
+<div class="gamble-title">⚡ ضاعف أو اسحب</div>
+<div class="gamble-msg">هل تريد المخاطرة بمضاعفة أرباحك؟</div>
+<div class="gamble-amount" id="gambleAmount">0</div>
+<div class="gamble-msg" id="gambleMsg">50% فرصة × 2</div>
+<div class="gamble-btns"><button class="gamble-btn cashout" id="gambleCashout">💰 اسحب</button><button class="gamble-btn double" id="gambleDouble">🎲 ضاعف</button></div>
+<div class="gamble-rounds" id="gambleRounds">الجولة 1 من 5</div>
+</div></div>
 
-<div id="bonusSummaryOverlay">
-  <div class="gamble-scrim"></div>
-  <div class="bonus-summary-card">
-    <div class="bonus-summary-title">🎁 انتهى البونص</div>
-    <div class="bonus-summary-sub">إليك ملخص جولاتك المجانية</div>
-    <div id="bonusSummaryBody"></div>
-    <button class="bonus-summary-close" id="bonusSummaryClose">تمام، شكراً</button>
-  </div>
-</div>
+<div id="wheelOverlay"><div class="wheel-scrim"></div><div class="wheel-card">
+<div class="wheel-title">🎡 عجلة الحظ</div>
+<canvas id="wheelCanvas" width="360" height="360"></canvas>
+<div class="wheel-result" id="wheelResult">اضغط للدوران</div>
+<button id="wheelSpinBtn">🎯 دوّر العجلة</button>
+<div id="wheelTimer"></div>
+</div></div>
 
-<div id="autoMenu">
-  <div class="auto-scrim"></div>
-  <div class="auto-card">
-    <h3>🔄 اختر عدد اللفات</h3>
-    <div class="auto-btns">
-      <button class="auto-btn" data-n="10">10</button>
-      <button class="auto-btn" data-n="25">25</button>
-      <button class="auto-btn" data-n="50">50</button>
-      <button class="auto-btn" data-n="100">100</button>
-      <button class="auto-btn cancel" data-n="0">إلغاء</button>
-    </div>
-  </div>
+<div id="bonusSummaryOverlay"><div class="gamble-scrim"></div><div class="bonus-summary-card">
+<div class="bonus-summary-title">🎁 انتهى البونص</div>
+<div class="bonus-summary-sub">إليك ملخص جولاتك المجانية</div>
+<div id="bonusSummaryBody"></div>
+<button class="bonus-summary-close" id="bonusSummaryClose">تمام، شكراً</button>
+</div></div>
+
+<div id="autoMenu"><div class="auto-scrim"></div><div class="auto-card">
+<h3>🔄 اختر عدد اللفات</h3>
+<div class="auto-btns">
+<button class="auto-btn" data-n="10">10</button>
+<button class="auto-btn" data-n="25">25</button>
+<button class="auto-btn" data-n="50">50</button>
+<button class="auto-btn" data-n="100">100</button>
+<button class="auto-btn cancel" data-n="0">إلغاء</button>
 </div>
+</div></div>
 
 <div id="toast"></div>
 
@@ -790,745 +394,107 @@ const $=id=>document.getElementById(id);
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
 const sl=ms=>new Promise(r=>setTimeout(r,ms));
 
-const Prefs = {
-  data: { sound: true, turbo: false, betIndex: 2 },
-  load() { try { const s = localStorage.getItem('sc_prefs'); if (s) this.data = { ...this.data, ...JSON.parse(s) }; } catch(e){} },
-  save() { try { localStorage.setItem('sc_prefs', JSON.stringify(this.data)); } catch(e){} }
-};
+const Prefs={data:{sound:true,turbo:false,betIndex:2},load(){try{const s=localStorage.getItem('sc_prefs');if(s)this.data={...this.data,...JSON.parse(s)}}catch(e){}},save(){try{localStorage.setItem('sc_prefs',JSON.stringify(this.data))}catch(e){}}};
 Prefs.load();
 
-/* ==================== AUDIO ==================== */
+/* AUDIO */
 const Aud=(()=>{
-  let c=null,mg=null,drone=null,on=Prefs.data.sound,rev=null,chimeTimer=null,ready=false;
-  function init(){
-    if(c)return;
-    try{
-      c=new (window.AudioContext||window.webkitAudioContext)();
-      const comp=c.createDynamicsCompressor();
-      comp.threshold.value=-10;comp.knee.value=6;comp.ratio.value=14;
-      mg=c.createGain();mg.gain.value=.4;
-      mg.connect(comp);comp.connect(c.destination);
-      const len=c.sampleRate*3.2,imp=c.createBuffer(2,len,c.sampleRate);
-      for(let ch=0;ch<2;ch++){const d=imp.getChannelData(ch);
-        for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.5)}
-      rev=c.createConvolver();rev.buffer=imp;
-      const rg=c.createGain();rg.gain.value=.4;
-      rev.connect(rg);rg.connect(mg);
-      ready=true;
-    }catch(e){}
-  }
-  function resume(){ if(!c)return; if(c.state==='suspended'){c.resume().catch(()=>{});} }
-  function send(node,dry,wet){
-    const d=c.createGain();d.gain.value=dry;node.connect(d);d.connect(mg);
-    const w=c.createGain();w.gain.value=wet;node.connect(w);w.connect(rev);
-  }
-  function thunder(i=1){
-    if(!on||!ready)return; resume();
-    try{
-      const sub=c.createOscillator();sub.type='sine';
-      sub.frequency.setValueAtTime(80,c.currentTime);
-      sub.frequency.exponentialRampToValueAtTime(25,c.currentTime+.7);
-      const sg=c.createGain();sg.gain.setValueAtTime(.4*i,c.currentTime);
-      sg.gain.exponentialRampToValueAtTime(.001,c.currentTime+1.2);
-      sub.connect(sg);sg.connect(mg);sub.start();sub.stop(c.currentTime+1.3);
-      const dur=2.2;
-      const buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);
-      const d=buf.getChannelData(0);
-      for(let k=0;k<d.length;k++){const t=k/d.length;
-        d[k]=(Math.random()*2-1)*Math.exp(-t*2.8)*.55}
-      const s=c.createBufferSource();s.buffer=buf;
-      const lp=c.createBiquadFilter();lp.type='lowpass';
-      lp.frequency.setValueAtTime(900,c.currentTime);
-      lp.frequency.exponentialRampToValueAtTime(50,c.currentTime+1.8);
-      const g=c.createGain();g.gain.value=.6*i;
-      s.connect(lp);lp.connect(g);send(g,1,.5);s.start();
-    }catch(e){}
-  }
-  function reelStop(col){
-    if(!on||!ready)return; resume();
-    try{
-      const b=70+col*12;
-      const o=c.createOscillator();o.type='triangle';
-      o.frequency.setValueAtTime(b*4,c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(b*.5,c.currentTime+.13);
-      const g=c.createGain();g.gain.setValueAtTime(.4,c.currentTime);
-      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.18);
-      o.connect(g);send(g,1,.3);o.start();o.stop(c.currentTime+.2);
-    }catch(e){}
-  }
-  function reelSpin(col){
-    if(!on||!ready)return; resume();
-    try{
-      const o=c.createOscillator();o.type='sawtooth';
-      o.frequency.value=45+col*6;
-      const g=c.createGain();g.gain.setValueAtTime(.03,c.currentTime);
-      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.5);
-      const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=400;
-      o.connect(lp);lp.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+.55);
-    }catch(e){}
-  }
-  function mult(v){
-    if(!on||!ready)return; resume();
-    try{
-      const b=280+Math.log2(v+1)*180;
-      const o=c.createOscillator();o.type='triangle';
-      o.frequency.setValueAtTime(b,c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(b*2.8,c.currentTime+.2);
-      const g=c.createGain();g.gain.setValueAtTime(.25,c.currentTime);
-      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4);
-      o.connect(g);send(g,1,.4);o.start();o.stop(c.currentTime+.42);
-    }catch(e){}
-  }
-  function winLevel(level=1){
-    if(!on||!ready)return; resume();
-    try{
-      const melodies = {
-        1: [{f:523.25,d:.15,w:.04},{f:659.25,d:.20,w:.04}],
-        2: [{f:523.25,d:.12,w:.06},{f:659.25,d:.12,w:.06},{f:783.99,d:.20,w:.06}],
-        3: [{f:523.25,d:.10,w:.08},{f:659.25,d:.10,w:.08},{f:783.99,d:.10,w:.08},{f:1046.50,d:.15,w:.08},{f:1318.51,d:.30,w:.08}],
-        4: [{f:392,d:.08,w:.10},{f:523.25,d:.08,w:.10},{f:659.25,d:.08,w:.10},{f:783.99,d:.08,w:.10},{f:1046.50,d:.12,w:.10},{f:1318.51,d:.12,w:.10},{f:1567.98,d:.40,w:.10}],
-        5: [{f:261.63,d:.08,w:.12},{f:329.63,d:.08,w:.12},{f:392,d:.08,w:.12},{f:523.25,d:.08,w:.12},{f:659.25,d:.08,w:.12},{f:783.99,d:.08,w:.12},{f:1046.50,d:.10,w:.12},{f:1318.51,d:.10,w:.12},{f:1567.98,d:.50,w:.15}]
-      };
-      const melody = melodies[level] || melodies[1];
-      const start = c.currentTime + 0.01;
-      let t = start;
-      melody.forEach(note => {
-        const o = c.createOscillator();
-        const g = c.createGain();
-        o.type = level >= 4 ? 'sawtooth' : 'sine';
-        o.frequency.value = note.f;
-        g.gain.setValueAtTime(0, t);
-        g.gain.linearRampToValueAtTime(note.w, t + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.001, t + note.d + 0.3);
-        const lp = c.createBiquadFilter();
-        lp.type = 'lowpass';
-        lp.frequency.value = level >= 4 ? 3200 : 2200;
-        o.connect(lp); lp.connect(g);
-        send(g, 1, level >= 4 ? 0.6 : 0.4);
-        o.start(t); o.stop(t + note.d + 0.35);
-        t += note.d;
-      });
-      if (level >= 4) setTimeout(() => thunder(level >= 5 ? 1.4 : 0.9), 200);
-      if (level >= 5) setTimeout(() => thunder(1.2), 700);
-    }catch(e){}
-  }
-  function tumble(){
-    if(!on||!ready)return; resume();
-    try{
-      const o=c.createOscillator();o.type='square';
-      o.frequency.setValueAtTime(600,c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(100,c.currentTime+.2);
-      const g=c.createGain();g.gain.setValueAtTime(.1,c.currentTime);
-      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.25);
-      const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1200;
-      o.connect(lp);lp.connect(g);send(g,1,.3);o.start();o.stop(c.currentTime+.27);
-    }catch(e){}
-  }
-  function buy(premium=false){
-    if(!on||!ready)return; resume();
-    try{
-      const notes=premium?
-        [261.63,329.63,392,523.25,659.25,783.99,1046.5,1318.5]:
-        [261.63,329.63,392,523.25,659.25];
-      notes.forEach((f,i)=>{
-        const o=c.createOscillator();o.type='sine';o.frequency.value=f;
-        const g=c.createGain();const t=c.currentTime+i*.06;
-        g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.12,t+.03);
-        g.gain.exponentialRampToValueAtTime(.001,t+.8);
-        o.connect(g);send(g,1,.5);o.start(t);o.stop(t+.82);
-      });
-      thunder(1.2);
-    }catch(e){}
-  }
-  function strike(){
-    if(!on||!ready)return; resume();
-    try{
-      const o=c.createOscillator();o.type='sine';
-      o.frequency.setValueAtTime(150,c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(30,c.currentTime+.5);
-      const g=c.createGain();g.gain.setValueAtTime(.5,c.currentTime);
-      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.75);
-      o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+.8);
-    }catch(e){}
-  }
-  function chime(){
-    if(!on||!ready)return;
-    try{
-      const notes=[329.63,392,440,523.25,587.33,659.25];
-      const f=notes[Math.floor(Math.random()*notes.length)];
-      const o=c.createOscillator();o.type='sine';o.frequency.value=f;
-      const g=c.createGain();const t=c.currentTime;
-      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.03,t+.9);
-      g.gain.exponentialRampToValueAtTime(.001,t+4);
-      o.connect(g);send(g,1,.7);o.start(t);o.stop(t+4);
-    }catch(e){}
-  }
-  function droneOn(){
-    if(!on||drone||!ready)return;
-    try{
-      const o1=c.createOscillator(),o2=c.createOscillator(),o3=c.createOscillator();
-      o1.type='sine';o1.frequency.value=55;
-      o2.type='sine';o2.frequency.value=82.5;
-      o3.type='triangle';o3.frequency.value=110;
-      const g=c.createGain();g.gain.value=.03;
-      const lfo=c.createOscillator();lfo.frequency.value=.08;
-      const lg=c.createGain();lg.gain.value=.015;
-      lfo.connect(lg);lg.connect(g.gain);
-      o1.connect(g);o2.connect(g);o3.connect(g);g.connect(mg);
-      o1.start();o2.start();o3.start();lfo.start();
-      drone={o1,o2,o3,lfo};
-      chimeTimer=setInterval(()=>{if(Math.random()<.5)chime()},6500);
-    }catch(e){}
-  }
-  function droneOff(){
-    if(!drone)return;
-    try{drone.o1.stop();drone.o2.stop();drone.o3.stop();drone.lfo.stop()}catch(e){}
-    drone=null;
-    if(chimeTimer){clearInterval(chimeTimer);chimeTimer=null}
-  }
-  function toggle(){
-    on=!on;
-    Prefs.data.sound = on; Prefs.save();
-    if(!on)droneOff(); else { init(); resume(); droneOn(); }
-    return on;
-  }
-  return {thunder,reelStop,reelSpin,mult,winLevel,tumble,buy,strike,
-          droneOn,droneOff,init,resume,toggle,get on(){return on},get ready(){return ready}};
+let c=null,mg=null,drone=null,on=Prefs.data.sound,rev=null,chimeTimer=null,ready=false;
+function init(){if(c)return;try{c=new(window.AudioContext||window.webkitAudioContext)();const comp=c.createDynamicsCompressor();comp.threshold.value=-10;comp.knee.value=6;comp.ratio.value=14;mg=c.createGain();mg.gain.value=.4;mg.connect(comp);comp.connect(c.destination);const len=c.sampleRate*3.2,imp=c.createBuffer(2,len,c.sampleRate);for(let ch=0;ch<2;ch++){const d=imp.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.5)}rev=c.createConvolver();rev.buffer=imp;const rg=c.createGain();rg.gain.value=.4;rev.connect(rg);rg.connect(mg);ready=true}catch(e){}}
+function resume(){if(!c)return;if(c.state==='suspended'){c.resume().catch(()=>{})}}
+function send(node,dry,wet){const d=c.createGain();d.gain.value=dry;node.connect(d);d.connect(mg);const w=c.createGain();w.gain.value=wet;node.connect(w);w.connect(rev)}
+function thunder(i=1){if(!on||!ready)return;resume();try{const sub=c.createOscillator();sub.type='sine';sub.frequency.setValueAtTime(80,c.currentTime);sub.frequency.exponentialRampToValueAtTime(25,c.currentTime+.7);const sg=c.createGain();sg.gain.setValueAtTime(.4*i,c.currentTime);sg.gain.exponentialRampToValueAtTime(.001,c.currentTime+1.2);sub.connect(sg);sg.connect(mg);sub.start();sub.stop(c.currentTime+1.3);const dur=2.2;const buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);const d=buf.getChannelData(0);for(let k=0;k<d.length;k++){const t=k/d.length;d[k]=(Math.random()*2-1)*Math.exp(-t*2.8)*.55}const s=c.createBufferSource();s.buffer=buf;const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.setValueAtTime(900,c.currentTime);lp.frequency.exponentialRampToValueAtTime(50,c.currentTime+1.8);const g=c.createGain();g.gain.value=.6*i;s.connect(lp);lp.connect(g);send(g,1,.5);s.start()}catch(e){}}
+function reelStop(col){if(!on||!ready)return;resume();try{const b=70+col*12;const o=c.createOscillator();o.type='triangle';o.frequency.setValueAtTime(b*4,c.currentTime);o.frequency.exponentialRampToValueAtTime(b*.5,c.currentTime+.13);const g=c.createGain();g.gain.setValueAtTime(.4,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.18);o.connect(g);send(g,1,.3);o.start();o.stop(c.currentTime+.2)}catch(e){}}
+function reelSpin(col){if(!on||!ready)return;resume();try{const o=c.createOscillator();o.type='sawtooth';o.frequency.value=45+col*6;const g=c.createGain();g.gain.setValueAtTime(.03,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.5);const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=400;o.connect(lp);lp.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+.55)}catch(e){}}
+function mult(v){if(!on||!ready)return;resume();try{const b=280+Math.log2(v+1)*180;const o=c.createOscillator();o.type='triangle';o.frequency.setValueAtTime(b,c.currentTime);o.frequency.exponentialRampToValueAtTime(b*2.8,c.currentTime+.2);const g=c.createGain();g.gain.setValueAtTime(.25,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4);o.connect(g);send(g,1,.4);o.start();o.stop(c.currentTime+.42)}catch(e){}}
+function winLevel(level=1){if(!on||!ready)return;resume();try{const melodies={1:[{f:523.25,d:.15,w:.04},{f:659.25,d:.20,w:.04}],2:[{f:523.25,d:.12,w:.06},{f:659.25,d:.12,w:.06},{f:783.99,d:.20,w:.06}],3:[{f:523.25,d:.10,w:.08},{f:659.25,d:.10,w:.08},{f:783.99,d:.10,w:.08},{f:1046.50,d:.15,w:.08},{f:1318.51,d:.30,w:.08}],4:[{f:392,d:.08,w:.10},{f:523.25,d:.08,w:.10},{f:659.25,d:.08,w:.10},{f:783.99,d:.08,w:.10},{f:1046.50,d:.12,w:.10},{f:1318.51,d:.12,w:.10},{f:1567.98,d:.40,w:.10}],5:[{f:261.63,d:.08,w:.12},{f:329.63,d:.08,w:.12},{f:392,d:.08,w:.12},{f:523.25,d:.08,w:.12},{f:659.25,d:.08,w:.12},{f:783.99,d:.08,w:.12},{f:1046.50,d:.10,w:.12},{f:1318.51,d:.10,w:.12},{f:1567.98,d:.50,w:.15}]};const melody=melodies[level]||melodies[1];const start=c.currentTime+0.01;let t=start;melody.forEach(note=>{const o=c.createOscillator();const g=c.createGain();o.type=level>=4?'sawtooth':'sine';o.frequency.value=note.f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(note.w,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+note.d+0.3);const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=level>=4?3200:2200;o.connect(lp);lp.connect(g);send(g,1,level>=4?0.6:0.4);o.start(t);o.stop(t+note.d+0.35);t+=note.d});if(level>=4)setTimeout(()=>thunder(level>=5?1.4:0.9),200);if(level>=5)setTimeout(()=>thunder(1.2),700)}catch(e){}}
+function tumble(){if(!on||!ready)return;resume();try{const o=c.createOscillator();o.type='square';o.frequency.setValueAtTime(600,c.currentTime);o.frequency.exponentialRampToValueAtTime(100,c.currentTime+.2);const g=c.createGain();g.gain.setValueAtTime(.1,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.25);const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1200;o.connect(lp);lp.connect(g);send(g,1,.3);o.start();o.stop(c.currentTime+.27)}catch(e){}}
+function buy(premium=false){if(!on||!ready)return;resume();try{const notes=premium?[261.63,329.63,392,523.25,659.25,783.99,1046.5,1318.5]:[261.63,329.63,392,523.25,659.25];notes.forEach((f,i)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=f;const g=c.createGain();const t=c.currentTime+i*.06;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.12,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+.8);o.connect(g);send(g,1,.5);o.start(t);o.stop(t+.82)});thunder(1.2)}catch(e){}}
+function strike(){if(!on||!ready)return;resume();try{const o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(150,c.currentTime);o.frequency.exponentialRampToValueAtTime(30,c.currentTime+.5);const g=c.createGain();g.gain.setValueAtTime(.5,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.75);o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+.8)}catch(e){}}
+function chime(){if(!on||!ready)return;try{const notes=[329.63,392,440,523.25,587.33,659.25];const f=notes[Math.floor(Math.random()*notes.length)];const o=c.createOscillator();o.type='sine';o.frequency.value=f;const g=c.createGain();const t=c.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.03,t+.9);g.gain.exponentialRampToValueAtTime(.001,t+4);o.connect(g);send(g,1,.7);o.start(t);o.stop(t+4)}catch(e){}}
+function droneOn(){if(!on||drone||!ready)return;try{const o1=c.createOscillator(),o2=c.createOscillator(),o3=c.createOscillator();o1.type='sine';o1.frequency.value=55;o2.type='sine';o2.frequency.value=82.5;o3.type='triangle';o3.frequency.value=110;const g=c.createGain();g.gain.value=.03;const lfo=c.createOscillator();lfo.frequency.value=.08;const lg=c.createGain();lg.gain.value=.015;lfo.connect(lg);lg.connect(g.gain);o1.connect(g);o2.connect(g);o3.connect(g);g.connect(mg);o1.start();o2.start();o3.start();lfo.start();drone={o1,o2,o3,lfo};chimeTimer=setInterval(()=>{if(Math.random()<.5)chime()},6500)}catch(e){}}
+function droneOff(){if(!drone)return;try{drone.o1.stop();drone.o2.stop();drone.o3.stop();drone.lfo.stop()}catch(e){}drone=null;if(chimeTimer){clearInterval(chimeTimer);chimeTimer=null}}
+function toggle(){on=!on;Prefs.data.sound=on;Prefs.save();if(!on)droneOff();else{init();resume();droneOn()}return on}
+return{thunder,reelStop,reelSpin,mult,winLevel,tumble,buy,strike,droneOn,droneOff,init,resume,toggle,get on(){return on},get ready(){return ready}};
 })();
 
-/* ==================== API ==================== */
-async function api(path, opts={}){
-  const token = localStorage.getItem('sc_token');
-  const headers = { 'Content-Type':'application/json', ...(opts.headers||{}) };
-  if(token) headers['Authorization'] = 'Bearer '+token;
-  const res = await fetch(path, { ...opts, headers });
-  const data = await res.json();
-  if(!res.ok) throw new Error(data.error || 'خطأ');
-  return data;
-}
-function toast(msg, isErr){
-  const t = $('toast');
-  t.textContent = msg;
-  t.className = isErr ? 'err on' : 'on';
-  setTimeout(() => t.classList.remove('on'), 2500);
-}
+async function api(path,opts={}){const token=localStorage.getItem('sc_token');const headers={'Content-Type':'application/json',...(opts.headers||{})};if(token)headers['Authorization']='Bearer '+token;const res=await fetch(path,{...opts,headers});const data=await res.json();if(!res.ok)throw new Error(data.error||'خطأ');return data}
+function toast(msg,isErr){const t=$('toast');t.textContent=msg;t.className=isErr?'err on':'on';setTimeout(()=>t.classList.remove('on'),2500)}
 
-/* ==================== AUTH ==================== */
 (function initAuth(){
-  const auth = $('auth');
-  $('goSignup').onclick = () => {
-    $('loginForm').style.display = 'none';
-    $('signupForm').style.display = 'block';
-    $('authTitle').textContent = 'إنشاء حساب';
-    $('authSub').textContent = '— انضم إلى العاصفة —';
-    $('authErr').classList.remove('on');
-  };
-  $('goLogin').onclick = () => {
-    $('signupForm').style.display = 'none';
-    $('loginForm').style.display = 'block';
-    $('authTitle').textContent = 'STORMCROWN';
-    $('authSub').textContent = '— بوابة العاصفة —';
-    $('authErr').classList.remove('on');
-  };
-  function showErr(m){ $('authErr').textContent = '⚠ '+m; $('authErr').classList.add('on'); }
-
-  const urlParams = new URLSearchParams(location.search);
-  const refCode = urlParams.get('ref') || '';
-  if(refCode) $('suInvite').value = refCode;
-
-  $('signupBtn').onclick = async () => {
-    Aud.init(); Aud.resume();
-    $('authErr').classList.remove('on');
-    const first = $('suFirst').value.trim();
-    const last = $('suLast').value.trim();
-    const phone = $('suPhone').value.trim();
-    const email = $('suEmail').value.trim();
-    const password = $('suPass').value;
-    const inviteCode = $('suInvite').value.trim();
-    if(!first || first.length < 2) return showErr('الاسم مطلوب');
-    if(!last || last.length < 2) return showErr('الكنية مطلوبة');
-    if(!phone || phone.length < 8) return showErr('رقم الهاتف غير صحيح');
-    if(!email || !email.includes('@')) return showErr('البريد غير صحيح');
-    if(!password || password.length < 4) return showErr('كلمة المرور 4 أحرف على الأقل');
-    try {
-      const res = await api('/api/register', {
-        method: 'POST',
-        body: JSON.stringify({ first, last, phone, email, password, inviteCode })
-      });
-      localStorage.setItem('sc_token', res.token);
-      localStorage.setItem('sc_user', JSON.stringify(res.user));
-      $('authTitle').textContent = 'مرحباً '+first+'!';
-      $('authSub').textContent = '— جاهز —';
-      setTimeout(() => enterGame(res.user), 800);
-    } catch(e){ showErr(e.message); }
-  };
-
-  $('loginBtn').onclick = async () => {
-    Aud.init(); Aud.resume();
-    $('authErr').classList.remove('on');
-    const id = $('loginId').value.trim();
-    const password = $('loginPass').value;
-    if(!id) return showErr('أدخل رقم الهاتف أو البريد');
-    if(!password) return showErr('أدخل كلمة المرور');
-    try {
-      const res = await api('/api/login', {
-        method: 'POST',
-        body: JSON.stringify({ id, password })
-      });
-      localStorage.setItem('sc_token', res.token);
-      localStorage.setItem('sc_user', JSON.stringify(res.user));
-      $('authTitle').textContent = 'مرحباً '+res.user.first+'!';
-      $('authSub').textContent = '— جاري الدخول —';
-      setTimeout(() => enterGame(res.user), 700);
-    } catch(e){ showErr(e.message); }
-  };
-
-  window.enterGame = async (user) => {
-    S.bal = user.balance || 0;
-    S.best = user.best || 0;
-    S.laps = user.laps || 0;
-    upd();
-    auth.classList.add('fade');
-    setTimeout(() => {
-      auth.style.display = 'none';
-      $('game').classList.add('on');
-      $('topBtns').classList.add('on');
-      Aud.init();
-      Aud.resume();
-      setTimeout(()=>{ Aud.resume(); Aud.droneOn(); }, 100);
-      setTimeout(()=>ZeusChar.say('مرحباً بك في العاصفة',3000),600);
-      refreshMe();
-    }, 800);
-  };
+const auth=$('auth');
+$('goSignup').onclick=()=>{$('loginForm').style.display='none';$('signupForm').style.display='block';$('authTitle').textContent='إنشاء حساب';$('authSub').textContent='— انضم إلى العاصفة —';$('authErr').classList.remove('on')};
+$('goLogin').onclick=()=>{$('signupForm').style.display='none';$('loginForm').style.display='block';$('authTitle').textContent='STORMCROWN';$('authSub').textContent='— بوابة العاصفة —';$('authErr').classList.remove('on')};
+function showErr(m){$('authErr').textContent='⚠ '+m;$('authErr').classList.add('on')}
+const urlParams=new URLSearchParams(location.search);const refCode=urlParams.get('ref')||'';if(refCode)$('suInvite').value=refCode;
+$('signupBtn').onclick=async()=>{Aud.init();Aud.resume();$('authErr').classList.remove('on');const first=$('suFirst').value.trim();const last=$('suLast').value.trim();const phone=$('suPhone').value.trim();const email=$('suEmail').value.trim();const password=$('suPass').value;const inviteCode=$('suInvite').value.trim();if(!first||first.length<2)return showErr('الاسم مطلوب');if(!last||last.length<2)return showErr('الكنية مطلوبة');if(!phone||phone.length<8)return showErr('رقم الهاتف غير صحيح');if(!email||!email.includes('@'))return showErr('البريد غير صحيح');if(!password||password.length<4)return showErr('كلمة المرور 4 أحرف على الأقل');try{const res=await api('/api/register',{method:'POST',body:JSON.stringify({first,last,phone,email,password,inviteCode})});localStorage.setItem('sc_token',res.token);localStorage.setItem('sc_user',JSON.stringify(res.user));$('authTitle').textContent='مرحباً '+first+'!';$('authSub').textContent='— جاهز —';setTimeout(()=>enterGame(res.user),800)}catch(e){showErr(e.message)}};
+$('loginBtn').onclick=async()=>{Aud.init();Aud.resume();$('authErr').classList.remove('on');const id=$('loginId').value.trim();const password=$('loginPass').value;if(!id)return showErr('أدخل رقم الهاتف أو البريد');if(!password)return showErr('أدخل كلمة المرور');try{const res=await api('/api/login',{method:'POST',body:JSON.stringify({id,password})});localStorage.setItem('sc_token',res.token);localStorage.setItem('sc_user',JSON.stringify(res.user));$('authTitle').textContent='مرحباً '+res.user.first+'!';$('authSub').textContent='— جاري الدخول —';setTimeout(()=>enterGame(res.user),700)}catch(e){showErr(e.message)}};
+window.enterGame=async(user)=>{S.bal=user.balance||0;S.best=user.best||0;S.laps=user.laps||0;upd();auth.classList.add('fade');setTimeout(()=>{auth.style.display='none';$('game').classList.add('on');$('topBtns').classList.add('on');Aud.init();Aud.resume();setTimeout(()=>{Aud.resume();Aud.droneOn()},100);setTimeout(()=>ZeusChar.say('مرحباً بك في العاصفة',3000),600);refreshMe()},800)};
 })();
 
-async function refreshMe(){
-  try {
-    const u = await api('/api/me');
-    S.bal = u.balance; S.best = u.best; S.laps = u.laps;
-    if(u.activeBonus){
-      S.fs = u.activeBonus.spinsLeft;
-      S.cumMult = u.activeBonus.cumulativeMult;
-      S.bonusWins = u.activeBonus.totalWonInBonus;
-      showCumMultBar();
-      fireOn(false);
-    }
-    upd();
-    const stored = JSON.parse(localStorage.getItem('sc_user') || '{}');
-    localStorage.setItem('sc_user', JSON.stringify({ ...stored, balance: u.balance }));
-  } catch(e){}
-}
+async function refreshMe(){try{const u=await api('/api/me');S.bal=u.balance;S.best=u.best;S.laps=u.laps;if(u.activeBonus){S.fs=u.activeBonus.spinsLeft;S.cumMult=u.activeBonus.cumulativeMult;S.bonusWins=u.activeBonus.totalWonInBonus;showCumMultBar();fireOn(false)}upd();const stored=JSON.parse(localStorage.getItem('sc_user')||'{}');localStorage.setItem('sc_user',JSON.stringify({...stored,balance:u.balance}))}catch(e){}}
 
-$('logoutTopBtn').onclick = () => {
-  if(confirm('هل تريد تسجيل الخروج؟')){
-    localStorage.removeItem('sc_token');
-    localStorage.removeItem('sc_user');
-    location.reload();
-  }
-};
+$('logoutTopBtn').onclick=()=>{if(confirm('هل تريد تسجيل الخروج؟')){localStorage.removeItem('sc_token');localStorage.removeItem('sc_user');location.reload()}};
 
-/* ==================== STATE ==================== */
 const COLS=6,ROWS=5,CELL=115,PADX=12,PADY=12;
-const rcv=$('reels');
-const rcx=rcv.getContext('2d');
-
-const SYM = {
-  zeusFist:  { pay: 2.0 }, crown:     { pay: 1.0 },
-  chalice:   { pay: 0.7 }, hourglass: { pay: 0.5 },
-  ring:      { pay: 0.35 }, flaming:  { pay: 0.24 },
-  gem_red:   { pay: 0.19 }, gem_blue: { pay: 0.15 },
-  gem_green: { pay: 0.11 }, gem_purple:{ pay: 0.07 }
-};
-
+const rcv=$('reels');const rcx=rcv.getContext('2d');
+const SYM={zeusFist:{pay:2.0},crown:{pay:1.0},chalice:{pay:0.7},hourglass:{pay:0.5},ring:{pay:0.35},flaming:{pay:0.24},gem_red:{pay:0.19},gem_blue:{pay:0.15},gem_green:{pay:0.11},gem_purple:{pay:0.07}};
 const BETS=[20,50,100,200,500,1000,2000,5000,10000];
-const PRICE_NORMAL_MULT=50;
-const PRICE_PREMIUM_MULT=200;
+const PRICE_NORMAL_MULT=50,PRICE_PREMIUM_MULT=200;
 const ZEUS_MAIN=[2,3,5,10,15,25];
 const FS_COUNT=15;
 
-const S={
-  bal:0, bi: Prefs.data.betIndex || 2, bet:BETS[Prefs.data.betIndex || 2],
-  grid:[], spin:false, fs:0, mc:0, lw:0, cumMult:0,
-  laps:0, best:0, wagered:0, won:0, fire:false,
-  autoSpins:0, autoActive:false,
-  turbo:Prefs.data.turbo || false,
-  bonusWins:0, bonusBestWin:0, bonusStartBalance:0,
-  sessionSpins:0, sessionWins:0, sessionWagered:0, sessionWon:0,
-  multipliersCollected:[]
-};
+const S={bal:0,bi:Prefs.data.betIndex||2,bet:BETS[Prefs.data.betIndex||2],grid:[],spin:false,fs:0,mc:0,lw:0,cumMult:0,laps:0,best:0,wagered:0,won:0,fire:false,autoSpins:0,autoActive:false,turbo:false,bonusWins:0,bonusBestWin:0,bonusStartBalance:0,sessionSpins:0,sessionWins:0,sessionWagered:0,sessionWon:0,multipliersCollected:[]};
 
-const ExplosionFX = (() => {
-  const cvs = document.createElement('canvas');
-  cvs.style.cssText = 'position:fixed;inset:0;z-index:50;pointer-events:none';
-  document.body.appendChild(cvs);
-  const ctx = cvs.getContext('2d');
-  let W=0,H=0,DPR=Math.min(2, window.devicePixelRatio||1);
-  function resize(){W=innerWidth;H=innerHeight;cvs.width=W*DPR;cvs.height=H*DPR;
-    cvs.style.width=W+'px';cvs.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0);}
-  addEventListener('resize',resize);resize();
-  const particles=[];
-  const colors=['#ffd24a','#ffaa40','#ffe89a'];
-  function boom(x,y){
-    for(let i=0;i<6;i++){
-      const a=Math.random()*Math.PI*2,s=2+Math.random()*3.5;
-      particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1,life:1,
-        decay:.028+Math.random()*.015,size:1.8+Math.random()*2,
-        col:colors[Math.floor(Math.random()*colors.length)]});
-    }
-  }
-  function update(){
-    for(let i=particles.length-1;i>=0;i--){
-      const p=particles[i];
-      p.x+=p.vx;p.y+=p.vy;p.vy+=.15;p.vx*=.95;p.life-=p.decay;
-      if(p.life<=0)particles.splice(i,1);
-    }
-  }
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    for(const p of particles){
-      ctx.globalAlpha=p.life*.7;ctx.fillStyle=p.col;
-      ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
-    }
-    ctx.globalAlpha=1;
-  }
-  function loop(){update();draw();requestAnimationFrame(loop);}
-  loop();
-  return { boom };
-})();
+const ExplosionFX=(()=>{const cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;z-index:50;pointer-events:none';document.body.appendChild(cvs);const ctx=cvs.getContext('2d');let W=0,H=0,DPR=Math.min(2,window.devicePixelRatio||1);function resize(){W=innerWidth;H=innerHeight;cvs.width=W*DPR;cvs.height=H*DPR;cvs.style.width=W+'px';cvs.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0)}addEventListener('resize',resize);resize();const particles=[];const colors=['#ffd24a','#ffaa40','#ffe89a'];function boom(x,y){for(let i=0;i<6;i++){const a=Math.random()*Math.PI*2,s=2+Math.random()*3.5;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1,life:1,decay:.028+Math.random()*.015,size:1.8+Math.random()*2,col:colors[Math.floor(Math.random()*colors.length)]})}}function update(){for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.15;p.vx*=.95;p.life-=p.decay;if(p.life<=0)particles.splice(i,1)}}function draw(){ctx.clearRect(0,0,W,H);for(const p of particles){ctx.globalAlpha=p.life*.7;ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1}function loop(){update();draw();requestAnimationFrame(loop)}loop();return{boom}})();
 
-const ZeusChar=(()=>{
-  const back=$('zeusBackdrop');
-  const bc=back.getContext('2d');
-  let state='idle',animT=0,bubbleTimer=null,mouthOpen=0,mouthPhase=0;
-  function say(text,duration=2500){
-    const b=$('zeusBubble');
-    b.textContent=text;
-    b.style.transform='translate(-50%,0) scale(1)';
-    b.style.opacity='1';
-    clearTimeout(bubbleTimer);
-    bubbleTimer=setTimeout(()=>{
-      b.style.transform='translate(-50%,30px) scale(.8)';
-      b.style.opacity='0';
-    },duration);
-  }
-  function draw(){
-    bc.clearRect(0,0,back.width,back.height);
-    const t=animT,cx=back.width/2,cy=back.height/2+60;
-    let auraColor;
-    if(state==='happy')auraColor=['rgba(255,210,74,.3)','rgba(255,140,0,.12)','rgba(0,0,0,0)'];
-    else if(state==='sad')auraColor=['rgba(80,40,120,.25)','rgba(40,0,80,.1)','rgba(0,0,0,0)'];
-    else if(state==='angry')auraColor=['rgba(255,42,0,.35)','rgba(255,140,0,.15)','rgba(0,0,0,0)'];
-    else auraColor=['rgba(155,89,255,.2)','rgba(106,74,154,.08)','rgba(0,0,0,0)'];
-    const ag=bc.createRadialGradient(cx,cy-40,0,cx,cy-40,300);
-    ag.addColorStop(0,auraColor[0]);ag.addColorStop(.5,auraColor[1]);ag.addColorStop(1,auraColor[2]);
-    bc.fillStyle=ag;bc.fillRect(0,0,back.width,back.height);
-    bc.save();bc.globalAlpha=.4;bc.translate(cx,cy);bc.scale(1.7,1.7);
-    let headY=-90,headSway=0;
-    if(state==='happy'){headY=-90+Math.sin(t*.006)*4;headSway=Math.sin(t*.004)*3}
-    else if(state==='sad'){headY=-80+Math.sin(t*.002)*2}
-    else if(state==='angry'){headY=-92;headSway=Math.sin(t*.02)*2}
-    else{headY=-90+Math.sin(t*.003)*2}
-    bc.fillStyle='#0a0320';
-    bc.beginPath();bc.moveTo(-80,-40);bc.quadraticCurveTo(-100,140,-90,240);
-    bc.lineTo(90,240);bc.quadraticCurveTo(100,140,80,-40);bc.closePath();bc.fill();
-    bc.strokeStyle='rgba(155,89,255,.5)';bc.lineWidth=2;bc.stroke();
-    const tg=bc.createLinearGradient(0,-40,0,40);
-    tg.addColorStop(0,'#ffd24a');tg.addColorStop(1,'#8b4000');
-    bc.fillStyle=tg;
-    bc.beginPath();bc.moveTo(-60,-20);bc.lineTo(0,40);bc.lineTo(60,-20);
-    bc.lineTo(0,-40);bc.closePath();bc.fill();
-    bc.save();bc.translate(headSway,0);
-    bc.fillStyle='#0a0320';
-    bc.beginPath();bc.ellipse(0,headY,46,54,0,0,Math.PI*2);bc.fill();
-    bc.strokeStyle='rgba(155,89,255,.7)';bc.lineWidth=2;bc.stroke();
-    bc.strokeStyle='#b8860b';bc.lineWidth=3;
-    bc.beginPath();bc.arc(0,headY-24,48,Math.PI*1.15,Math.PI*1.85);bc.stroke();
-    let eyeColor,eyeSize,pupilY=0;
-    if(state==='happy'){eyeColor='rgba(255,220,120,1)';eyeSize=8}
-    else if(state==='sad'){eyeColor='rgba(150,140,200,.9)';eyeSize=6;pupilY=3}
-    else if(state==='angry'){eyeColor='rgba(255,80,20,1)';eyeSize=9}
-    else{eyeColor='rgba(255,210,74,1)';eyeSize=7}
-    const ep=.6+Math.sin(t*.004)*.4;
-    bc.fillStyle=eyeColor;bc.shadowColor=eyeColor;bc.shadowBlur=20+ep*20;
-    bc.beginPath();bc.ellipse(-16,headY-2+pupilY,eyeSize,eyeSize*.5,0,0,Math.PI*2);bc.fill();
-    bc.beginPath();bc.ellipse(16,headY-2+pupilY,eyeSize,eyeSize*.5,0,0,Math.PI*2);bc.fill();
-    bc.shadowBlur=0;
-    bc.fillStyle='#05000f';
-    bc.beginPath();
-    bc.moveTo(-32,headY+28);bc.quadraticCurveTo(-18,headY+80,0,headY+88);
-    bc.quadraticCurveTo(18,headY+80,32,headY+28);
-    bc.quadraticCurveTo(0,headY+50,-32,headY+28);bc.closePath();bc.fill();
-    bc.restore();
-    bc.save();bc.translate(60,-20);
-    bc.strokeStyle='#0a0320';bc.lineWidth=22;bc.lineCap='round';
-    bc.beginPath();bc.moveTo(0,0);bc.lineTo(40,60);bc.lineTo(70,100);bc.stroke();
-    const ba=.6+Math.sin(t*.008)*.4;
-    bc.strokeStyle='rgba(255,210,74,'+ba+')';
-    bc.lineWidth=5;bc.lineCap='round';
-    bc.shadowColor='#ffd24a';bc.shadowBlur=25;
-    bc.beginPath();
-    bc.moveTo(70,100);bc.lineTo(60,150);bc.lineTo(80,155);
-    bc.lineTo(65,210);bc.lineTo(90,220);
-    bc.stroke();
-    bc.shadowBlur=0;bc.restore();bc.restore();
-  }
-  function loop(){animT+=16;draw();requestAnimationFrame(loop);}
-  function setState(s,duration=2500){
-    state=s;
-    let msgs=[];
-    if(s==='happy')msgs=['نصر عظيم','أحسنت','البرق يخدمك','غضبي راض','العاصفة معك'];
-    else if(s==='sad')msgs=['خسارة','حاول مرة أخرى','الرعد يخذلك','الحظ يغادرك'];
-    else if(s==='angry')msgs=['غضبي يحل','الحظ يبتسم','انفجار','العاصفة تهتز'];
-    if(msgs.length)say(msgs[Math.floor(Math.random()*msgs.length)],duration);
-    setTimeout(()=>{state='idle'},duration);
-  }
-  requestAnimationFrame(loop);
-  return {setState,say};
-})();
+const ZeusChar=(()=>{const back=$('zeusBackdrop');const bc=back.getContext('2d');let state='idle',animT=0,bubbleTimer=null;function say(text,duration=2500){const b=$('zeusBubble');b.textContent=text;b.style.transform='translate(-50%,0) scale(1)';b.style.opacity='1';clearTimeout(bubbleTimer);bubbleTimer=setTimeout(()=>{b.style.transform='translate(-50%,30px) scale(.8)';b.style.opacity='0'},duration)}function draw(){bc.clearRect(0,0,back.width,back.height);const t=animT,cx=back.width/2,cy=back.height/2+60;let auraColor;if(state==='happy')auraColor=['rgba(255,210,74,.3)','rgba(255,140,0,.12)','rgba(0,0,0,0)'];else if(state==='sad')auraColor=['rgba(80,40,120,.25)','rgba(40,0,80,.1)','rgba(0,0,0,0)'];else if(state==='angry')auraColor=['rgba(255,42,0,.35)','rgba(255,140,0,.15)','rgba(0,0,0,0)'];else auraColor=['rgba(155,89,255,.2)','rgba(106,74,154,.08)','rgba(0,0,0,0)'];const ag=bc.createRadialGradient(cx,cy-40,0,cx,cy-40,300);ag.addColorStop(0,auraColor[0]);ag.addColorStop(.5,auraColor[1]);ag.addColorStop(1,auraColor[2]);bc.fillStyle=ag;bc.fillRect(0,0,back.width,back.height);bc.save();bc.globalAlpha=.4;bc.translate(cx,cy);bc.scale(1.7,1.7);let headY=-90,headSway=0;if(state==='happy'){headY=-90+Math.sin(t*.006)*4;headSway=Math.sin(t*.004)*3}else if(state==='sad'){headY=-80+Math.sin(t*.002)*2}else if(state==='angry'){headY=-92;headSway=Math.sin(t*.02)*2}else{headY=-90+Math.sin(t*.003)*2}bc.fillStyle='#0a0320';bc.beginPath();bc.moveTo(-80,-40);bc.quadraticCurveTo(-100,140,-90,240);bc.lineTo(90,240);bc.quadraticCurveTo(100,140,80,-40);bc.closePath();bc.fill();bc.strokeStyle='rgba(155,89,255,.5)';bc.lineWidth=2;bc.stroke();const tg=bc.createLinearGradient(0,-40,0,40);tg.addColorStop(0,'#ffd24a');tg.addColorStop(1,'#8b4000');bc.fillStyle=tg;bc.beginPath();bc.moveTo(-60,-20);bc.lineTo(0,40);bc.lineTo(60,-20);bc.lineTo(0,-40);bc.closePath();bc.fill();bc.save();bc.translate(headSway,0);bc.fillStyle='#0a0320';bc.beginPath();bc.ellipse(0,headY,46,54,0,0,Math.PI*2);bc.fill();bc.strokeStyle='rgba(155,89,255,.7)';bc.lineWidth=2;bc.stroke();let eyeColor,eyeSize,pupilY=0;if(state==='happy'){eyeColor='rgba(255,220,120,1)';eyeSize=8}else if(state==='sad'){eyeColor='rgba(150,140,200,.9)';eyeSize=6;pupilY=3}else if(state==='angry'){eyeColor='rgba(255,80,20,1)';eyeSize=9}else{eyeColor='rgba(255,210,74,1)';eyeSize=7}const ep=.6+Math.sin(t*.004)*.4;bc.fillStyle=eyeColor;bc.shadowColor=eyeColor;bc.shadowBlur=20+ep*20;bc.beginPath();bc.ellipse(-16,headY-2+pupilY,eyeSize,eyeSize*.5,0,0,Math.PI*2);bc.fill();bc.beginPath();bc.ellipse(16,headY-2+pupilY,eyeSize,eyeSize*.5,0,0,Math.PI*2);bc.fill();bc.shadowBlur=0;bc.restore();bc.save();bc.translate(60,-20);bc.strokeStyle='#0a0320';bc.lineWidth=22;bc.lineCap='round';bc.beginPath();bc.moveTo(0,0);bc.lineTo(40,60);bc.lineTo(70,100);bc.stroke();const ba=.6+Math.sin(t*.008)*.4;bc.strokeStyle='rgba(255,210,74,'+ba+')';bc.lineWidth=5;bc.lineCap='round';bc.shadowColor='#ffd24a';bc.shadowBlur=25;bc.beginPath();bc.moveTo(70,100);bc.lineTo(60,150);bc.lineTo(80,155);bc.lineTo(65,210);bc.lineTo(90,220);bc.stroke();bc.shadowBlur=0;bc.restore();bc.restore()}function loop(){animT+=16;draw();requestAnimationFrame(loop)}function setState(s,duration=2500){state=s;let msgs=[];if(s==='happy')msgs=['نصر عظيم','أحسنت','البرق يخدمك','غضبي راض','العاصفة معك'];else if(s==='sad')msgs=['خسارة','حاول مرة أخرى','الرعد يخذلك','الحظ يغادرك'];else if(s==='angry')msgs=['غضبي يحل','الحظ يبتسم','انفجار','العاصفة تهتز'];if(msgs.length)say(msgs[Math.floor(Math.random()*msgs.length)],duration);setTimeout(()=>{state='idle'},duration)}requestAnimationFrame(loop);return{setState,say}})();
 
-const RS={
-  off:new Array(COLS).fill(0),spd:new Array(COLS).fill(0),
-  stop:new Array(COLS).fill(true),str:[],
-  bounce:new Array(COLS).fill(0),bounceV:new Array(COLS).fill(0)
-};
+const RS={off:new Array(COLS).fill(0),spd:new Array(COLS).fill(0),stop:new Array(COLS).fill(true),str:[],bounce:new Array(COLS).fill(0),bounceV:new Array(COLS).fill(0)};
 
-function rSymVisual(){
-  const r=Math.random()*1000;
-  if(r<40)return{type:'zeus',v:rnd(ZEUS_MAIN)};
-  if(r<60)return{type:'scatter'};
-  if(r<160)return{type:'gem_purple'};
-  if(r<280)return{type:'gem_green'};
-  if(r<400)return{type:'gem_blue'};
-  if(r<510)return{type:'gem_red'};
-  if(r<610)return{type:'flaming'};
-  if(r<710)return{type:'ring'};
-  if(r<800)return{type:'hourglass'};
-  if(r<880)return{type:'chalice'};
-  if(r<950)return{type:'crown'};
-  return{type:'zeusFist'};
-}
+function rSymVisual(){const r=Math.random()*1000;if(r<40)return{type:'zeus',v:rnd(ZEUS_MAIN)};if(r<60)return{type:'scatter'};if(r<160)return{type:'gem_purple'};if(r<280)return{type:'gem_green'};if(r<400)return{type:'gem_blue'};if(r<510)return{type:'gem_red'};if(r<610)return{type:'flaming'};if(r<710)return{type:'ring'};if(r<800)return{type:'hourglass'};if(r<880)return{type:'chalice'};if(r<950)return{type:'crown'};return{type:'zeusFist'}}
 function stripVisual(){const a=[];for(let i=0;i<ROWS+3;i++)a.push(rSymVisual());return a}
 
 let lt=0;
-function loop(t){
-  const dt=Math.min(50,t-lt);lt=t;
-  for(let x=0;x<COLS;x++){
-    if(!RS.stop[x]){
-      RS.off[x]+=RS.spd[x]*dt/16;
-      while(RS.off[x]>=CELL){
-        RS.off[x]-=CELL;RS.str[x].unshift(rSymVisual());RS.str[x].pop();
-      }
-    }else if(Math.abs(RS.bounce[x])>0.1||Math.abs(RS.bounceV[x])>0.1){
-      RS.bounceV[x]+=-RS.bounce[x]*.35;
-      RS.bounceV[x]*=.72;
-      RS.bounce[x]+=RS.bounceV[x];
-      if(Math.abs(RS.bounce[x])<.05&&Math.abs(RS.bounceV[x])<.05){
-        RS.bounce[x]=0;RS.bounceV[x]=0;
-      }
-    }
-  }
-  draw(t);requestAnimationFrame(loop);
-}
+function loop(t){const dt=Math.min(50,t-lt);lt=t;for(let x=0;x<COLS;x++){if(!RS.stop[x]){RS.off[x]+=RS.spd[x]*dt/16;while(RS.off[x]>=CELL){RS.off[x]-=CELL;RS.str[x].unshift(rSymVisual());RS.str[x].pop()}}else if(Math.abs(RS.bounce[x])>0.1||Math.abs(RS.bounceV[x])>0.1){RS.bounceV[x]+=-RS.bounce[x]*.35;RS.bounceV[x]*=.72;RS.bounce[x]+=RS.bounceV[x];if(Math.abs(RS.bounce[x])<.05&&Math.abs(RS.bounceV[x])<.05){RS.bounce[x]=0;RS.bounceV[x]=0}}}draw(t);requestAnimationFrame(loop)}
 
-function paintSymbol(g,type,cx,cy,size){
-  const s=size/64;
-  g.save();g.translate(cx,cy);
-  if(type==='crown'){
-    const grad=g.createLinearGradient(0,-26*s,0,18*s);
-    grad.addColorStop(0,'#fff9d8');grad.addColorStop(.5,'#ffd24a');grad.addColorStop(1,'#7a4a08');
-    g.fillStyle=grad;g.beginPath();
-    g.moveTo(-26*s,14*s);g.lineTo(-26*s,-10*s);g.lineTo(-16*s,-2*s);
-    g.lineTo(-8*s,-22*s);g.lineTo(0,-6*s);g.lineTo(8*s,-22*s);
-    g.lineTo(16*s,-2*s);g.lineTo(26*s,-10*s);g.lineTo(26*s,14*s);g.closePath();g.fill();
-    g.fillStyle='#9b59ff';g.beginPath();g.arc(0,0,3.5*s,0,Math.PI*2);g.fill();
-  }else if(type==='zeusFist'){
-    const grad=g.createLinearGradient(-12*s,-24*s,12*s,24*s);
-    grad.addColorStop(0,'#fff');grad.addColorStop(.5,'#ffd24a');grad.addColorStop(1,'#ff8c00');
-    g.fillStyle=grad;g.shadowColor='#ffd24a';g.shadowBlur=20*s;
-    g.beginPath();
-    g.moveTo(6*s,-26*s);g.lineTo(-12*s,-4*s);g.lineTo(0,-2*s);
-    g.lineTo(-10*s,26*s);g.lineTo(14*s,4*s);g.lineTo(2*s,2*s);g.closePath();g.fill();
-  }else if(type==='chalice'){
-    const grad=g.createLinearGradient(0,-22*s,0,20*s);
-    grad.addColorStop(0,'#f0d8ff');grad.addColorStop(.5,'#9b59ff');grad.addColorStop(1,'#4a0080');
-    g.fillStyle=grad;g.beginPath();
-    g.moveTo(-19*s,-18*s);g.quadraticCurveTo(-23*s,10*s,0,12*s);
-    g.quadraticCurveTo(23*s,10*s,19*s,-18*s);g.closePath();g.fill();
-    g.fillStyle='#8b6914';g.fillRect(-3*s,10*s,6*s,10*s);
-    g.beginPath();g.ellipse(0,22*s,10*s,3*s,0,0,Math.PI*2);g.fill();
-  }else if(type==='hourglass'){
-    g.fillStyle='#b8860b';g.fillRect(-16*s,-24*s,32*s,3.5*s);g.fillRect(-16*s,20*s,32*s,3.5*s);
-    g.strokeStyle='#8a6a2a';g.lineWidth=1.5*s;
-    g.beginPath();
-    g.moveTo(-13*s,-20*s);g.lineTo(-2*s,0);g.lineTo(-13*s,20*s);
-    g.moveTo(13*s,-20*s);g.lineTo(2*s,0);g.lineTo(13*s,20*s);g.stroke();
-  }else if(type==='ring'){
-    g.strokeStyle='#ffd24a';g.lineWidth=6*s;
-    g.beginPath();g.arc(0,6*s,12*s,0,Math.PI*2);g.stroke();
-    const dg=g.createLinearGradient(0,-26*s,0,-8*s);
-    dg.addColorStop(0,'#fff');dg.addColorStop(1,'#4a9eff');
-    g.fillStyle=dg;
-    g.beginPath();g.moveTo(0,-26*s);g.lineTo(-9*s,-14*s);g.lineTo(-4*s,-8*s);
-    g.lineTo(4*s,-8*s);g.lineTo(9*s,-14*s);g.closePath();g.fill();
-  }else if(type==='flaming'){
-    const o=g.createRadialGradient(0,8*s,4*s,0,2*s,26*s);
-    o.addColorStop(0,'#fff5b8');o.addColorStop(.4,'#ffd24a');
-    o.addColorStop(.7,'#ff8c00');o.addColorStop(1,'#c92000');
-    g.fillStyle=o;
-    g.beginPath();g.moveTo(0,-24*s);g.quadraticCurveTo(16*s,-10*s,14*s,6*s);
-    g.quadraticCurveTo(12*s,18*s,0,20*s);g.quadraticCurveTo(-12*s,18*s,-14*s,6*s);
-    g.quadraticCurveTo(-16*s,-10*s,0,-24*s);g.fill();
-  }else if(type==='gem_purple'){
-    const grad=g.createRadialGradient(-6*s,-6*s,2*s,0,0,22*s);
-    grad.addColorStop(0,'#f5e0ff');grad.addColorStop(.5,'#9b59ff');grad.addColorStop(1,'#3a0060');
-    g.fillStyle=grad;
-    g.beginPath();g.moveTo(0,-20*s);g.lineTo(16*s,-6*s);g.lineTo(10*s,18*s);
-    g.lineTo(-10*s,18*s);g.lineTo(-16*s,-6*s);g.closePath();g.fill();
-  }else if(type==='gem_blue'){
-    const grad=g.createRadialGradient(-6*s,-6*s,2*s,0,0,22*s);
-    grad.addColorStop(0,'#e8f4ff');grad.addColorStop(.5,'#4a9eff');grad.addColorStop(1,'#002a60');
-    g.fillStyle=grad;g.beginPath();
-    for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/2;
-      const x=Math.cos(a)*18*s,y=Math.sin(a)*18*s;
-      if(i===0)g.moveTo(x,y);else g.lineTo(x,y);}
-    g.closePath();g.fill();
-  }else if(type==='gem_green'){
-    const grad=g.createRadialGradient(-6*s,-6*s,2*s,0,0,22*s);
-    grad.addColorStop(0,'#e8ffe8');grad.addColorStop(.5,'#2ecc71');grad.addColorStop(1,'#004a20');
-    g.fillStyle=grad;
-    g.beginPath();g.moveTo(0,-20*s);g.lineTo(15*s,0);g.lineTo(0,20*s);g.lineTo(-15*s,0);
-    g.closePath();g.fill();
-  }else if(type==='gem_red'){
-    const grad=g.createRadialGradient(-6*s,-4*s,2*s,0,4*s,22*s);
-    grad.addColorStop(0,'#ffe8e8');grad.addColorStop(.5,'#ff4a4a');grad.addColorStop(1,'#600000');
-    g.fillStyle=grad;
-    g.beginPath();g.moveTo(-17*s,-10*s);g.lineTo(17*s,-10*s);g.lineTo(0,20*s);g.closePath();g.fill();
-  }else if(type==='zeus'){
-    const fg=g.createRadialGradient(-4*s,-10*s,2*s,0,-4*s,20*s);
-    fg.addColorStop(0,'#fff');fg.addColorStop(.5,'#e8d0ff');fg.addColorStop(1,'#7a3aff');
-    g.fillStyle=fg;g.beginPath();g.ellipse(0,-6*s,14*s,16*s,0,0,Math.PI*2);g.fill();
-    g.fillStyle='#ffd24a';g.shadowColor='#ffd24a';g.shadowBlur=10*s;
-    g.beginPath();g.ellipse(-5*s,-8*s,2*s,1.5*s,0,0,Math.PI*2);g.fill();
-    g.beginPath();g.ellipse(5*s,-8*s,2*s,1.5*s,0,0,Math.PI*2);g.fill();
-    g.shadowBlur=0;
-    g.fillStyle='#ffd24a';
-    g.beginPath();g.moveTo(-15*s,-20*s);g.lineTo(-9*s,-26*s);g.lineTo(-3*s,-22*s);
-    g.lineTo(3*s,-26*s);g.lineTo(9*s,-22*s);g.lineTo(15*s,-20*s);
-    g.lineTo(15*s,-14*s);g.lineTo(-15*s,-14*s);g.closePath();g.fill();
-  }else if(type==='scatter'){
-    const grad=g.createLinearGradient(0,-24*s,0,24*s);
-    grad.addColorStop(0,'#fff');grad.addColorStop(.5,'#ffd24a');grad.addColorStop(1,'#ff8c00');
-    g.shadowColor='#ffd24a';g.shadowBlur=15*s;
-    for(let i=0;i<3;i++){
-      g.save();g.rotate((i-1)*.4);g.fillStyle=grad;
-      g.beginPath();g.moveTo(0,-24*s);g.lineTo(-7*s,-4*s);g.lineTo(2*s,-2*s);
-      g.lineTo(-5*s,22*s);g.lineTo(9*s,2*s);g.lineTo(0,0);g.closePath();g.fill();
-      g.restore();
-    }
-  }
-  g.restore();
-}
+function paintSymbol(g,type,cx,cy,size){const s=size/64;g.save();g.translate(cx,cy);if(type==='crown'){const grad=g.createLinearGradient(0,-26*s,0,18*s);grad.addColorStop(0,'#fff9d8');grad.addColorStop(.5,'#ffd24a');grad.addColorStop(1,'#7a4a08');g.fillStyle=grad;g.beginPath();g.moveTo(-26*s,14*s);g.lineTo(-26*s,-10*s);g.lineTo(-16*s,-2*s);g.lineTo(-8*s,-22*s);g.lineTo(0,-6*s);g.lineTo(8*s,-22*s);g.lineTo(16*s,-2*s);g.lineTo(26*s,-10*s);g.lineTo(26*s,14*s);g.closePath();g.fill()}else if(type==='zeusFist'){const grad=g.createLinearGradient(-12*s,-24*s,12*s,24*s);grad.addColorStop(0,'#fff');grad.addColorStop(.5,'#ffd24a');grad.addColorStop(1,'#ff8c00');g.fillStyle=grad;g.shadowColor='#ffd24a';g.shadowBlur=20*s;g.beginPath();g.moveTo(6*s,-26*s);g.lineTo(-12*s,-4*s);g.lineTo(0,-2*s);g.lineTo(-10*s,26*s);g.lineTo(14*s,4*s);g.lineTo(2*s,2*s);g.closePath();g.fill()}else if(type==='chalice'){const grad=g.createLinearGradient(0,-22*s,0,20*s);grad.addColorStop(0,'#f0d8ff');grad.addColorStop(.5,'#9b59ff');grad.addColorStop(1,'#4a0080');g.fillStyle=grad;g.beginPath();g.moveTo(-19*s,-18*s);g.quadraticCurveTo(-23*s,10*s,0,12*s);g.quadraticCurveTo(23*s,10*s,19*s,-18*s);g.closePath();g.fill();g.fillStyle='#8b6914';g.fillRect(-3*s,10*s,6*s,10*s);g.beginPath();g.ellipse(0,22*s,10*s,3*s,0,0,Math.PI*2);g.fill()}else if(type==='hourglass'){g.fillStyle='#b8860b';g.fillRect(-16*s,-24*s,32*s,3.5*s);g.fillRect(-16*s,20*s,32*s,3.5*s);g.strokeStyle='#8a6a2a';g.lineWidth=1.5*s;g.beginPath();g.moveTo(-13*s,-20*s);g.lineTo(-2*s,0);g.lineTo(-13*s,20*s);g.moveTo(13*s,-20*s);g.lineTo(2*s,0);g.lineTo(13*s,20*s);g.stroke()}else if(type==='ring'){g.strokeStyle='#ffd24a';g.lineWidth=6*s;g.beginPath();g.arc(0,6*s,12*s,0,Math.PI*2);g.stroke();const dg=g.createLinearGradient(0,-26*s,0,-8*s);dg.addColorStop(0,'#fff');dg.addColorStop(1,'#4a9eff');g.fillStyle=dg;g.beginPath();g.moveTo(0,-26*s);g.lineTo(-9*s,-14*s);g.lineTo(-4*s,-8*s);g.lineTo(4*s,-8*s);g.lineTo(9*s,-14*s);g.closePath();g.fill()}else if(type==='flaming'){const o=g.createRadialGradient(0,8*s,4*s,0,2*s,26*s);o.addColorStop(0,'#fff5b8');o.addColorStop(.4,'#ffd24a');o.addColorStop(.7,'#ff8c00');o.addColorStop(1,'#c92000');g.fillStyle=o;g.beginPath();g.moveTo(0,-24*s);g.quadraticCurveTo(16*s,-10*s,14*s,6*s);g.quadraticCurveTo(12*s,18*s,0,20*s);g.quadraticCurveTo(-12*s,18*s,-14*s,6*s);g.quadraticCurveTo(-16*s,-10*s,0,-24*s);g.fill()}else if(type==='gem_purple'){const grad=g.createRadialGradient(-6*s,-6*s,2*s,0,0,22*s);grad.addColorStop(0,'#f5e0ff');grad.addColorStop(.5,'#9b59ff');grad.addColorStop(1,'#3a0060');g.fillStyle=grad;g.beginPath();g.moveTo(0,-20*s);g.lineTo(16*s,-6*s);g.lineTo(10*s,18*s);g.lineTo(-10*s,18*s);g.lineTo(-16*s,-6*s);g.closePath();g.fill()}else if(type==='gem_blue'){const grad=g.createRadialGradient(-6*s,-6*s,2*s,0,0,22*s);grad.addColorStop(0,'#e8f4ff');grad.addColorStop(.5,'#4a9eff');grad.addColorStop(1,'#002a60');g.fillStyle=grad;g.beginPath();for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/2;const x=Math.cos(a)*18*s,y=Math.sin(a)*18*s;if(i===0)g.moveTo(x,y);else g.lineTo(x,y)}g.closePath();g.fill()}else if(type==='gem_green'){const grad=g.createRadialGradient(-6*s,-6*s,2*s,0,0,22*s);grad.addColorStop(0,'#e8ffe8');grad.addColorStop(.5,'#2ecc71');grad.addColorStop(1,'#004a20');g.fillStyle=grad;g.beginPath();g.moveTo(0,-20*s);g.lineTo(15*s,0);g.lineTo(0,20*s);g.lineTo(-15*s,0);g.closePath();g.fill()}else if(type==='gem_red'){const grad=g.createRadialGradient(-6*s,-4*s,2*s,0,4*s,22*s);grad.addColorStop(0,'#ffe8e8');grad.addColorStop(.5,'#ff4a4a');grad.addColorStop(1,'#600000');g.fillStyle=grad;g.beginPath();g.moveTo(-17*s,-10*s);g.lineTo(17*s,-10*s);g.lineTo(0,20*s);g.closePath();g.fill()}else if(type==='zeus'){const fg=g.createRadialGradient(-4*s,-10*s,2*s,0,-4*s,20*s);fg.addColorStop(0,'#fff');fg.addColorStop(.5,'#e8d0ff');fg.addColorStop(1,'#7a3aff');g.fillStyle=fg;g.beginPath();g.ellipse(0,-6*s,14*s,16*s,0,0,Math.PI*2);g.fill();g.fillStyle='#ffd24a';g.shadowColor='#ffd24a';g.shadowBlur=10*s;g.beginPath();g.ellipse(-5*s,-8*s,2*s,1.5*s,0,0,Math.PI*2);g.fill();g.beginPath();g.ellipse(5*s,-8*s,2*s,1.5*s,0,0,Math.PI*2);g.fill();g.shadowBlur=0;g.fillStyle='#ffd24a';g.beginPath();g.moveTo(-15*s,-20*s);g.lineTo(-9*s,-26*s);g.lineTo(-3*s,-22*s);g.lineTo(3*s,-26*s);g.lineTo(9*s,-22*s);g.lineTo(15*s,-20*s);g.lineTo(15*s,-14*s);g.lineTo(-15*s,-14*s);g.closePath();g.fill()}else if(type==='scatter'){const grad=g.createLinearGradient(0,-24*s,0,24*s);grad.addColorStop(0,'#fff');grad.addColorStop(.5,'#ffd24a');grad.addColorStop(1,'#ff8c00');g.shadowColor='#ffd24a';g.shadowBlur=15*s;for(let i=0;i<3;i++){g.save();g.rotate((i-1)*.4);g.fillStyle=grad;g.beginPath();g.moveTo(0,-24*s);g.lineTo(-7*s,-4*s);g.lineTo(2*s,-2*s);g.lineTo(-5*s,22*s);g.lineTo(9*s,2*s);g.lineTo(0,0);g.closePath();g.fill();g.restore()}}g.restore()}
 
-function drawSymbolAt(x,y,sym,t,fire,hl){
-  if(!sym)return;
-  const sz=CELL-14,ccx=x+CELL/2,ccy=y+CELL/2;
-  const iconSize=sz*.95;
-  if(fire||sym.type==='zeus'||sym.type==='scatter'||sym.type==='zeusFist'){
-    const pulse=.6+Math.sin(t/100)*.4;
-    rcx.save();rcx.globalAlpha=pulse*.5;
-    const rg=rcx.createRadialGradient(ccx,ccy,0,ccx,ccy,sz*.85);
-    rg.addColorStop(0,fire?'rgba(255,140,0,.8)':sym.type==='zeus'?'rgba(255,210,74,.7)':'rgba(255,255,255,.5)');
-    rg.addColorStop(1,'rgba(0,0,0,0)');
-    rcx.fillStyle=rg;rcx.fillRect(ccx-sz,ccy-sz,sz*2,sz*2);
-    rcx.restore();
-  }
-  if(hl){
-    rcx.save();rcx.globalAlpha=.55+Math.sin(t/80)*.35;
-    rcx.strokeStyle='#2ecc71';rcx.lineWidth=4;
-    rcx.shadowColor='#2ecc71';rcx.shadowBlur=18;
-    rcx.strokeRect(x+6,y+6,CELL-12,CELL-12);rcx.restore();
-  }
-  paintSymbol(rcx,sym.type,ccx,ccy,iconSize);
-  if(sym.type==='zeus'){
-    rcx.save();
-    rcx.textAlign='center';rcx.textBaseline='middle';
-    rcx.font='900 22px serif';
-    const grad=rcx.createLinearGradient(0,ccy+16,0,ccy+38);
-    grad.addColorStop(0,'#fff');grad.addColorStop(.5,'#ffd24a');grad.addColorStop(1,'#ff8c00');
-    rcx.fillStyle=grad;rcx.shadowColor='#000';rcx.shadowBlur=6;
-    rcx.strokeStyle='#000';rcx.lineWidth=3;
-    rcx.strokeText(sym.v+'×',ccx,ccy+sz*.32);
-    rcx.fillText(sym.v+'×',ccx,ccy+sz*.32);
-    rcx.restore();
-  }
-}
+function drawSymbolAt(x,y,sym,t,fire,hl){if(!sym)return;const sz=CELL-14,ccx=x+CELL/2,ccy=y+CELL/2;const iconSize=sz*.95;if(fire||sym.type==='zeus'||sym.type==='scatter'||sym.type==='zeusFist'){const pulse=.6+Math.sin(t/100)*.4;rcx.save();rcx.globalAlpha=pulse*.5;const rg=rcx.createRadialGradient(ccx,ccy,0,ccx,ccy,sz*.85);rg.addColorStop(0,fire?'rgba(255,140,0,.8)':sym.type==='zeus'?'rgba(255,210,74,.7)':'rgba(255,255,255,.5)');rg.addColorStop(1,'rgba(0,0,0,0)');rcx.fillStyle=rg;rcx.fillRect(ccx-sz,ccy-sz,sz*2,sz*2);rcx.restore()}if(hl){rcx.save();rcx.globalAlpha=.55+Math.sin(t/80)*.35;rcx.strokeStyle='#2ecc71';rcx.lineWidth=4;rcx.shadowColor='#2ecc71';rcx.shadowBlur=18;rcx.strokeRect(x+6,y+6,CELL-12,CELL-12);rcx.restore()}paintSymbol(rcx,sym.type,ccx,ccy,iconSize);if(sym.type==='zeus'){rcx.save();rcx.textAlign='center';rcx.textBaseline='middle';rcx.font='900 22px serif';const grad=rcx.createLinearGradient(0,ccy+16,0,ccy+38);grad.addColorStop(0,'#fff');grad.addColorStop(.5,'#ffd24a');grad.addColorStop(1,'#ff8c00');rcx.fillStyle=grad;rcx.shadowColor='#000';rcx.shadowBlur=6;rcx.strokeStyle='#000';rcx.lineWidth=3;rcx.strokeText(sym.v+'×',ccx,ccy+sz*.32);rcx.fillText(sym.v+'×',ccx,ccy+sz*.32);rcx.restore()}}
 
 let currentWinSymbols=[];
-function draw(t){
-  const W=rcv.width,H=rcv.height;
-  rcx.clearRect(0,0,W,H);
-  const innerBg=rcx.createRadialGradient(W/2,H/2,100,W/2,H/2,W);
-  if(S.fire){innerBg.addColorStop(0,'rgba(90,30,0,.35)');innerBg.addColorStop(1,'rgba(10,0,10,.5)');}
-  else{innerBg.addColorStop(0,'rgba(40,15,80,.25)');innerBg.addColorStop(1,'rgba(5,0,20,.45)');}
-  rcx.fillStyle=innerBg;rcx.fillRect(PADX,PADY,COLS*CELL,ROWS*CELL);
-  rcx.strokeStyle=S.fire?'rgba(255,140,0,.15)':'rgba(155,89,255,.15)';
-  rcx.lineWidth=1;
-  for(let x=1;x<COLS;x++){rcx.beginPath();rcx.moveTo(PADX+x*CELL,PADY);
-    rcx.lineTo(PADX+x*CELL,PADY+ROWS*CELL);rcx.stroke();}
-  for(let y=1;y<ROWS;y++){rcx.beginPath();rcx.moveTo(PADX,PADY+y*CELL);
-    rcx.lineTo(PADX+COLS*CELL,PADY+y*CELL);rcx.stroke();}
-  for(let x=0;x<COLS;x++){
-    const px=PADX+x*CELL;
-    rcx.save();rcx.beginPath();rcx.rect(px,PADY,CELL,ROWS*CELL);rcx.clip();
-    if(RS.stop[x]){
-      const b=RS.bounce[x];
-      for(let y=0;y<ROWS;y++)if(S.grid[x]&&S.grid[x][y]){
-        const sym=S.grid[x][y];
-        const hl=currentWinSymbols.includes(sym.type);
-        drawSymbolAt(px,PADY+y*CELL+b,sym,t,S.fire,hl);
-      }
-    }else{
-      const st=RS.str[x]||[],off=RS.off[x]%CELL;
-      rcx.save();rcx.globalAlpha=.2;
-      for(let i=0;i<st.length;i++){
-        const yy=PADY+i*CELL-off;
-        if(yy>PADY-CELL&&yy<PADY+ROWS*CELL+CELL)
-          drawSymbolAt(px,yy,st[i],t,S.fire,false);
-      }
-      rcx.restore();
-      for(let i=0;i<st.length;i++){
-        const yy=PADY+i*CELL-off+14;
-        if(yy>PADY-CELL&&yy<PADY+ROWS*CELL+CELL)
-          drawSymbolAt(px,yy,st[i],t,S.fire,false);
-      }
-    }
-    rcx.restore();
-  }
-  if(S.fire){
-    const fg=rcx.createLinearGradient(0,H,0,H-100);
-    fg.addColorStop(0,'rgba(255,80,0,.25)');fg.addColorStop(1,'rgba(255,80,0,0)');
-    rcx.fillStyle=fg;rcx.fillRect(0,H-100,W,100);
-  }
-}
+function draw(t){const W=rcv.width,H=rcv.height;rcx.clearRect(0,0,W,H);const innerBg=rcx.createRadialGradient(W/2,H/2,100,W/2,H/2,W);if(S.fire){innerBg.addColorStop(0,'rgba(90,30,0,.35)');innerBg.addColorStop(1,'rgba(10,0,10,.5)')}else{innerBg.addColorStop(0,'rgba(40,15,80,.25)');innerBg.addColorStop(1,'rgba(5,0,20,.45)')}rcx.fillStyle=innerBg;rcx.fillRect(PADX,PADY,COLS*CELL,ROWS*CELL);rcx.strokeStyle=S.fire?'rgba(255,140,0,.15)':'rgba(155,89,255,.15)';rcx.lineWidth=1;for(let x=1;x<COLS;x++){rcx.beginPath();rcx.moveTo(PADX+x*CELL,PADY);rcx.lineTo(PADX+x*CELL,PADY+ROWS*CELL);rcx.stroke()}for(let y=1;y<ROWS;y++){rcx.beginPath();rcx.moveTo(PADX,PADY+y*CELL);rcx.lineTo(PADX+COLS*CELL,PADY+y*CELL);rcx.stroke()}for(let x=0;x<COLS;x++){const px=PADX+x*CELL;rcx.save();rcx.beginPath();rcx.rect(px,PADY,CELL,ROWS*CELL);rcx.clip();if(RS.stop[x]){const b=RS.bounce[x];for(let y=0;y<ROWS;y++)if(S.grid[x]&&S.grid[x][y]){const sym=S.grid[x][y];const hl=currentWinSymbols.includes(sym.type);drawSymbolAt(px,PADY+y*CELL+b,sym,t,S.fire,hl)}}else{const st=RS.str[x]||[],off=RS.off[x]%CELL;rcx.save();rcx.globalAlpha=.2;for(let i=0;i<st.length;i++){const yy=PADY+i*CELL-off;if(yy>PADY-CELL&&yy<PADY+ROWS*CELL+CELL)drawSymbolAt(px,yy,st[i],t,S.fire,false)}rcx.restore();for(let i=0;i<st.length;i++){const yy=PADY+i*CELL-off+14;if(yy>PADY-CELL&&yy<PADY+ROWS*CELL+CELL)drawSymbolAt(px,yy,st[i],t,S.fire,false)}}rcx.restore()}if(S.fire){const fg=rcx.createLinearGradient(0,H,0,H-100);fg.addColorStop(0,'rgba(255,80,0,.25)');fg.addColorStop(1,'rgba(255,80,0,0)');rcx.fillStyle=fg;rcx.fillRect(0,H-100,W,100)}}
 
-function delay(ms){ return sl(S.turbo ? ms*0.4 : ms); }
+function delay(ms){return sl(S.turbo?ms*0.4:ms)}
 
+/* ============================================================
+   ⚡ أنيميشن جديد: نزول صف صف (بطيء ومرئي)
+   كل بكرة تنزل منفصلة، ثم كل صف يظهر واحد تلو الآخر
+   ============================================================ */
 async function animSpinToGrid(finalGrid){
   for(let x=0;x<COLS;x++){
     RS.str[x]=stripVisual();RS.off[x]=0;RS.stop[x]=false;
-    RS.spd[x]=40+Math.random()*20;RS.bounce[x]=0;RS.bounceV[x]=0;
+    RS.spd[x]=45+Math.random()*15;RS.bounce[x]=0;RS.bounceV[x]=0;
     Aud.reelSpin(x);
   }
-  const dl=[300,420,540,660,780,900];
+  const stopDelays = [500,700,900,1100,1300,1500];
   for(let x=0;x<COLS;x++){
-    await sl(delay(dl[x]-(x>0?dl[x-1]:0)));
+    await sl(delay(stopDelays[x] - (x>0?stopDelays[x-1]:0)));
     RS.stop[x]=true;RS.off[x]=0;
-    for(let y=0;y<ROWS;y++) S.grid[x][y]=finalGrid[x][y];
-    RS.bounce[x]=-14;RS.bounceV[x]=-3;
+
+    /* النزول التدريجي: نملأ الشبكة صفاً واحداً في كل مرة */
+    for(let y=0;y<ROWS;y++){
+      S.grid[x][y] = finalGrid[x][y];
+      RS.bounce[x] = -8;
+      RS.bounceV[x] = -2;
+      await sl(S.turbo ? 40 : 110);
+    }
+    RS.bounce[x]=-12;RS.bounceV[x]=-2.5;
     Aud.reelStop(x);
-    shake(.25,140);
+    shake(.3,150);
+    await sl(S.turbo ? 80 : 200);
   }
-  await delay(150);
+  await delay(250);
 }
 
 async function animTumbleTo(nextGrid, winningSymbols){
@@ -1549,887 +515,208 @@ async function animTumbleTo(nextGrid, winningSymbols){
       }, idx*35);
     });
   }
-  shake(0.5,150);Aud.thunder(0.6);
-  await delay(260);
+  shake(0.6,200);Aud.thunder(0.7);
+  await delay(400);
+
+  /* كل عمود ينزل صف صف */
   for(let x=0;x<COLS;x++){
     S.grid[x]=nextGrid[x].slice();
-    RS.bounce[x]=-10;RS.bounceV[x]=-2;
+    RS.bounce[x]=-8;RS.bounceV[x]=-2;
     Aud.reelStop(x);
-    await sl(55);
+    await sl(S.turbo ? 60 : 140);
   }
-  await delay(180);
+  await delay(250);
 }
 
-function shake(i=1,d=400){
-  const e=$('mainArea');if(!e)return;const st=performance.now();
-  (function lp(t){
-    const p=(t-st)/d;if(p>=1){e.style.transform='';return}
-    const a=i*8*(1-p);
-    e.style.transform='translate('+(Math.random()-.5)*a+'px,'+(Math.random()-.5)*a+'px)';
-    requestAnimationFrame(lp);
-  })(st);
-}
-function flash(d=200,i=1){
-  const f=$('flash');f.style.transition='none';f.style.opacity=i;
-  requestAnimationFrame(()=>{
-    f.style.transition='opacity '+d+'ms ease-out';f.style.opacity=0;
-  });
-}
-function bigShow(t,d=1400){
-  const e=$('bigTxt');e.textContent=t;
-  e.style.transition='none';e.style.opacity=0;
-  e.style.transform='translate(-50%,-50%) scale(.3)';
-  requestAnimationFrame(()=>{
-    e.style.transition='all .5s cubic-bezier(.2,2,.4,1)';
-    e.style.opacity=1;e.style.transform='translate(-50%,-50%) scale(1)';
-    setTimeout(()=>{
-      e.style.transition='all .7s ease-in';e.style.opacity=0;
-      e.style.transform='translate(-50%,-50%) scale(1.6)';
-    },d);
-  });
-}
-function multPop(v,x,y){
-  const el=document.createElement('div');
-  el.className='mpop';el.textContent=v+'×';
-  el.style.left=x+'px';el.style.top=y+'px';
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),1400);
-}
-function showTier(tier){
-  const badge=$('tierBadge');
-  const map={
-    green:{cls:'tier-green',txt:'🟢 فوز صغير'},
-    yellow:{cls:'tier-yellow',txt:'🟡 فوز متوسط'},
-    orange:{cls:'tier-orange',txt:'🟠 فوز كبير'},
-    red:{cls:'tier-red',txt:'🔴 فوز ضخم'},
-    gold:{cls:'tier-gold',txt:'🏆 أسطوري!'}
-  };
-  const t=map[tier];
-  if(!t)return;
-  badge.className=t.cls;
-  badge.textContent=t.txt;
-  badge.classList.remove('show');
-  void badge.offsetWidth;
-  badge.classList.add('show');
-}
+function shake(i=1,d=400){const e=$('mainArea');if(!e)return;const st=performance.now();(function lp(t){const p=(t-st)/d;if(p>=1){e.style.transform='';return}const a=i*8*(1-p);e.style.transform='translate('+(Math.random()-.5)*a+'px,'+(Math.random()-.5)*a+'px)';requestAnimationFrame(lp)})(st)}
+function flash(d=200,i=1){const f=$('flash');f.style.transition='none';f.style.opacity=i;requestAnimationFrame(()=>{f.style.transition='opacity '+d+'ms ease-out';f.style.opacity=0})}
+function bigShow(t,d=1400){const e=$('bigTxt');e.textContent=t;e.style.transition='none';e.style.opacity=0;e.style.transform='translate(-50%,-50%) scale(.3)';requestAnimationFrame(()=>{e.style.transition='all .5s cubic-bezier(.2,2,.4,1)';e.style.opacity=1;e.style.transform='translate(-50%,-50%) scale(1)';setTimeout(()=>{e.style.transition='all .7s ease-in';e.style.opacity=0;e.style.transform='translate(-50%,-50%) scale(1.6)'},d)})}
+function multPop(v,x,y){const el=document.createElement('div');el.className='mpop';el.textContent=v+'×';el.style.left=x+'px';el.style.top=y+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),1500)}
+function showTier(tier){const badge=$('tierBadge');const map={green:{cls:'tier-green',txt:'🟢 فوز صغير'},yellow:{cls:'tier-yellow',txt:'🟡 فوز متوسط'},orange:{cls:'tier-orange',txt:'🟠 فوز كبير'},red:{cls:'tier-red',txt:'🔴 فوز ضخم'},gold:{cls:'tier-gold',txt:'🏆 أسطوري!'}};const t=map[tier];if(!t)return;badge.className=t.cls;badge.textContent=t.txt;badge.classList.remove('show');void badge.offsetWidth;badge.classList.add('show')}
 
-/* شريط المضاعف التراكمي */
-function showCumMultBar(){
-  const bar = $('cumMultBar');
-  bar.classList.add('on');
-  $('cumMultVal').textContent = S.cumMult + '×';
-  $('cumMultSpins').textContent = S.fs + ' لفة';
-}
-function hideCumMultBar(){
-  $('cumMultBar').classList.remove('on');
-  $('multList').classList.remove('on');
-}
-function addMultToList(val){
-  S.multipliersCollected.push(val);
-  const list = $('multList');
-  list.classList.add('on');
-  const item = document.createElement('span');
-  item.className = 'item';
-  item.textContent = val + '×';
-  list.appendChild(item);
-}
-function clearMultList(){
-  S.multipliersCollected = [];
-  $('multList').innerHTML = '';
-  $('multList').classList.remove('on');
-}
+function showCumMultBar(){const bar=$('cumMultBar');bar.classList.add('on');$('cumMultVal').textContent=S.cumMult+'×';$('cumMultSpins').textContent=S.fs+' لفة'}
+function hideCumMultBar(){$('cumMultBar').classList.remove('on');$('multList').classList.remove('on')}
+function addMultToList(val){S.multipliersCollected.push(val);const list=$('multList');list.classList.add('on');const item=document.createElement('span');item.className='item';item.textContent=val+'×';list.appendChild(item)}
+function clearMultList(){S.multipliersCollected=[];$('multList').innerHTML='';$('multList').classList.remove('on')}
 
-/* ==================== SPIN ==================== */
-function getTier(win, bet){
-  if(win === 0) return null;
-  const x = win / bet;
-  if(x >= 200) return 'gold';
-  if(x >= 50)  return 'red';
-  if(x >= 15)  return 'orange';
-  if(x >= 5)   return 'yellow';
-  return 'green';
-}
-function getTierLevel(tier){
-  return {green:1, yellow:2, orange:3, red:4, gold:5}[tier] || 1;
-}
+function getTier(win,bet){if(win===0)return null;const x=win/bet;if(x>=200)return'gold';if(x>=50)return'red';if(x>=15)return'orange';if(x>=5)return'yellow';return'green'}
+function getTierLevel(tier){return{green:1,yellow:2,orange:3,red:4,gold:5}[tier]||1}
 
 async function spin(){
-  if(S.spin)return;
-  const isFree = S.fs > 0;
-  if(!isFree && S.bal < S.bet){ toast('رصيد غير كافٍ',true); stopAuto(); return; }
-  Aud.resume();
-  S.spin=true;
-  const wheel=$('spinWheel');
-  wheel.classList.add('spinning','disabled');
-  $('buyNormal').disabled=true;$('buyPremium').disabled=true;
-  const currentBet=S.bet;
-
-  try {
-    const res = await api('/api/spin', {
-      method:'POST',
-      body: JSON.stringify({ bet: currentBet })
-    });
-
-    const isFreeNow = res.isFree;
-    const chains = res.chains || [];
-    const finalGrid = res.finalGrid;
-    const totalWin = res.totalWin || 0;
-    const scatterCount = res.scatterCount || 0;
-
-    S.bal = res.balance;
-
-    /* تحديث حالة البونص من السيرفر */
-    if(res.activeBonus){
-      S.fs = res.activeBonus.spinsLeft;
-      S.cumMult = res.activeBonus.cumulativeMult;
-      S.bonusWins = res.activeBonus.totalWonInBonus;
-    } else if(isFreeNow){
-      S.fs = Math.max(0, S.fs - 1);
-    }
-
-    upd();
-
-    if(isFreeNow){
-      showCumMultBar();
-      $('cumMultVal').textContent = S.cumMult + '×';
-      $('cumMultSpins').textContent = S.fs + ' لفة';
-    }
-
-    const firstGrid = chains.length > 0 ? chains[0].grid : finalGrid;
-    await animSpinToGrid(firstGrid);
-    S.grid = firstGrid;
-
-    let cumulativeMult = S.cumMult;
-
-    for(let i=0;i<chains.length;i++){
-      const chain = chains[i];
-
-      if(chain.zeusSum > 0){
-        Aud.mult(chain.zeusSum);Aud.strike();
-        ZeusChar.setState('angry',1500);
-        const rect=rcv.getBoundingClientRect();
-        for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
-          const s=S.grid[x][y];
-          if(s&&s.type==='zeus'){
-            const px=rect.left+PADX+x*CELL+CELL/2;
-            const py=rect.top+PADY+y*CELL+CELL/2;
-            multPop(s.v+'×',px,py);
-            if(isFreeNow) addMultToList(s.v);
-          }
-        }
-        await delay(400);
-      }
-
-      currentWinSymbols = chain.wins.map(w=>w.symbol);
-      const chainWin = chain.winAmount;
-      cumulativeMult = chain.cumulativeMult || 0;
-      S.mc = cumulativeMult;
-      S.cumMult = cumulativeMult;
-
-      if(isFreeNow){
-        $('cumMultVal').textContent = cumulativeMult + '×';
-        $('multHud').classList.add('hot');
-      }
-
-      const tier = getTier(chainWin, currentBet);
-      const level = getTierLevel(tier);
-      Aud.winLevel(level);
-
-      flash(180, .35 + Math.min(chainWin/2500, .4));
-      shake(.9 + Math.min(chainWin/1200, 1.5), 300);
-
-      const mt = chain.multiplier > 1 ? ' × '+chain.multiplier+'×' : '';
-      log('سلسلة '+(i+1)+': '+Math.floor(chainWin)+' ل.س'+mt);
-
-      if(tier && (tier==='orange'||tier==='red'||tier==='gold')) showTier(tier);
-
-      if(chainWin >= 500) ZeusChar.setState('angry',2500);
-      else if(chainWin >= 150) ZeusChar.setState('happy',2000);
-
-      await delay(700);
-
-      const nextGrid = (i < chains.length - 1) ? chains[i+1].grid : finalGrid;
-      currentWinSymbols = [];
-      Aud.tumble();
-      await animTumbleTo(nextGrid, chain.wins.map(w=>w.symbol));
-      S.grid = nextGrid;
-    }
-
-    currentWinSymbols = [];
-    S.grid = finalGrid;
-
-    S.lw = totalWin;
-    S.won += totalWin;
-    if(totalWin > S.best) S.best = totalWin;
-
-    S.sessionSpins++;
-    S.sessionWagered += currentBet;
-    S.sessionWon += totalWin;
-    if(totalWin > 0) S.sessionWins++;
-
-    if(isFreeNow){
-      S.bonusWins += totalWin;
-      if(totalWin > S.bonusBestWin) S.bonusBestWin = totalWin;
-    }
-
-    upd();
-    updateStats();
-    addHistory(currentBet, totalWin, cumulativeMult, isFreeNow);
-
-    const tier = getTier(totalWin, currentBet);
-    if(tier && tier !== 'green') {
-      setTimeout(()=>showBigWinOverlay(totalWin,0,tier),400);
-      await delay(2500);
-    }
-
-    if(totalWin === 0){
-      log('— لا فوز —');
-      ZeusChar.setState('sad',2000);
-    } else {
-      log('✅ إجمالي: '+Math.floor(totalWin)+' ل.س');
-    }
-
-    if(res.freeSpinsTriggered){
-      S.fs = FS_COUNT;
-      S.mc = 0;
-      S.cumMult = 0;
-      S.bonusWins = 0;
-      S.bonusBestWin = 0;
-      clearMultList();
-      log('⚡ '+scatterCount+' موزعة — '+FS_COUNT+' جولة مجانية');
-      flash(700,1); shake(2.5,700);
-      fireOn(false);
-      ZeusChar.setState('angry',3000);
-      setTimeout(()=>showBigWinOverlay(totalWin,FS_COUNT,'fs'),500);
-      await sl(2500);
-    }
-
-    S.spin = false;
-    wheel.classList.remove('spinning','disabled');
-
-    /* نهاية البونص — ملخص */
-    if(res.bonusEnded && res.bonusSummary){
-      const bs = res.bonusSummary;
-      $('bonusSummaryBody').innerHTML = `
-        <div class="bonus-summary-row"><span class="lbl">عدد اللفات المجانية</span><span class="val">${bs.spins}</span></div>
-        <div class="bonus-summary-row"><span class="lbl">قيمة الرهان لكل لفة</span><span class="val">${bs.initialBet}</span></div>
-        <div class="bonus-summary-row"><span class="lbl">إجمالي الرهان</span><span class="val">${bs.initialBet * bs.spins}</span></div>
-        <div class="bonus-summary-row"><span class="lbl">إجمالي الأرباح</span><span class="val green">${Math.floor(bs.totalWon)}</span></div>
-        <div class="bonus-summary-row"><span class="lbl">أفضل لفة</span><span class="val">${Math.floor(bs.bestWin)}</span></div>
-        <div class="bonus-summary-row"><span class="lbl">المضاعف النهائي</span><span class="val">${bs.finalMultiplier}×</span></div>
-        <div class="bonus-summary-total">
-          <div class="lbl">صافي الربح من البونص</div>
-          <div class="val pos">+${Math.floor(bs.totalWon)} ل.س</div>
-        </div>
-      `;
-      $('bonusSummaryOverlay').classList.add('show');
-      S.fs = 0;
-      S.cumMult = 0;
-      hideCumMultBar();
-      fireOff();
-    }
-
-    if(S.fs > 0){
-      $('buyNormal').disabled=true;$('buyPremium').disabled=true;
-      setTimeout(spin, S.turbo ? 300 : 700);
-      return;
-    }
-
-    $('buyNormal').disabled=false;
-    $('buyPremium').disabled=false;
-
-    if(S.autoActive && S.autoSpins > 0){
-      S.autoSpins--;
-      $('autoCounter').textContent = S.autoSpins;
-      if(S.autoSpins <= 0 || S.bal < S.bet){
-        stopAuto();
-      } else {
-        setTimeout(spin, S.turbo ? 200 : 500);
-      }
-    }
-
-  } catch(e){
-    console.error(e);
-    toast(e.message || 'خطأ في الجولة', true);
-    S.spin = false;
-    wheel.classList.remove('spinning','disabled');
-    $('buyNormal').disabled=false;
-    $('buyPremium').disabled=false;
-    stopAuto();
-    refreshMe();
-  }
+if(S.spin)return;
+const isFree=S.fs>0;
+if(!isFree&&S.bal<S.bet){toast('رصيد غير كافٍ',true);stopAuto();return}
+Aud.resume();S.spin=true;
+const wheel=$('spinWheel');wheel.classList.add('spinning','disabled');
+$('buyNormal').disabled=true;$('buyPremium').disabled=true;
+const currentBet=S.bet;
+try{
+const res=await api('/api/spin',{method:'POST',body:JSON.stringify({bet:currentBet})});
+const isFreeNow=res.isFree;const chains=res.chains||[];const finalGrid=res.finalGrid;const totalWin=res.totalWin||0;const scatterCount=res.scatterCount||0;
+S.bal=res.balance;
+if(res.activeBonus){S.fs=res.activeBonus.spinsLeft;S.cumMult=res.activeBonus.cumulativeMult;S.bonusWins=res.activeBonus.totalWonInBonus}
+else if(isFreeNow){S.fs=Math.max(0,S.fs-1)}
+upd();
+if(isFreeNow){showCumMultBar();$('cumMultVal').textContent=S.cumMult+'×';$('cumMultSpins').textContent=S.fs+' لفة'}
+const firstGrid=chains.length>0?chains[0].grid:finalGrid;
+await animSpinToGrid(firstGrid);
+S.grid=firstGrid;
+let cumulativeMult=S.cumMult;
+for(let i=0;i<chains.length;i++){
+const chain=chains[i];
+if(chain.zeusSum>0){
+Aud.mult(chain.zeusSum);Aud.strike();ZeusChar.setState('angry',1500);
+const rect=rcv.getBoundingClientRect();
+for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){const s=S.grid[x][y];if(s&&s.type==='zeus'){const px=rect.left+PADX+x*CELL+CELL/2;const py=rect.top+PADY+y*CELL+CELL/2;multPop(s.v+'×',px,py);if(isFreeNow)addMultToList(s.v)}}
+await delay(500);
+}
+currentWinSymbols=chain.wins.map(w=>w.symbol);
+const chainWin=chain.winAmount;
+cumulativeMult=chain.cumulativeMult||0;
+S.mc=cumulativeMult;S.cumMult=cumulativeMult;
+if(isFreeNow){$('cumMultVal').textContent=cumulativeMult+'×';$('multHud').classList.add('hot')}
+const tier=getTier(chainWin,currentBet);const level=getTierLevel(tier);Aud.winLevel(level);
+flash(180,.35+Math.min(chainWin/2500,.4));
+shake(.9+Math.min(chainWin/1200,1.5),300);
+const mt=chain.multiplier>1?' × '+chain.multiplier+'×':'';
+log('سلسلة '+(i+1)+': '+Math.floor(chainWin)+' ل.س'+mt);
+if(tier&&(tier==='orange'||tier==='red'||tier==='gold'))showTier(tier);
+if(chainWin>=500)ZeusChar.setState('angry',2500);
+else if(chainWin>=150)ZeusChar.setState('happy',2000);
+await delay(800);
+const nextGrid=(i<chains.length-1)?chains[i+1].grid:finalGrid;
+currentWinSymbols=[];Aud.tumble();
+await animTumbleTo(nextGrid,chain.wins.map(w=>w.symbol));
+S.grid=nextGrid;
+}
+currentWinSymbols=[];S.grid=finalGrid;
+S.lw=totalWin;S.won+=totalWin;if(totalWin>S.best)S.best=totalWin;
+S.sessionSpins++;S.sessionWagered+=currentBet;S.sessionWon+=totalWin;if(totalWin>0)S.sessionWins++;
+if(isFreeNow){S.bonusWins+=totalWin;if(totalWin>S.bonusBestWin)S.bonusBestWin=totalWin}
+upd();updateStats();addHistory(currentBet,totalWin,cumulativeMult,isFreeNow);
+const tier=getTier(totalWin,currentBet);
+if(tier&&tier!=='green'){setTimeout(()=>showBigWinOverlay(totalWin,0,tier),400);await delay(2500)}
+if(totalWin===0){log('— لا فوز —');ZeusChar.setState('sad',2000)}else{log('✅ إجمالي: '+Math.floor(totalWin)+' ل.س')}
+if(res.freeSpinsTriggered){
+S.fs=FS_COUNT;S.mc=0;S.cumMult=0;S.bonusWins=0;S.bonusBestWin=0;clearMultList();
+log('⚡ '+scatterCount+' موزعة — '+FS_COUNT+' جولة مجانية');
+flash(700,1);shake(2.5,700);fireOn(false);ZeusChar.setState('angry',3000);
+setTimeout(()=>showBigWinOverlay(totalWin,FS_COUNT,'fs'),500);
+await sl(2500);
+}
+S.spin=false;wheel.classList.remove('spinning','disabled');
+if(res.bonusEnded&&res.bonusSummary){
+const bs=res.bonusSummary;
+$('bonusSummaryBody').innerHTML=`
+<div class="bonus-summary-row"><span class="lbl">عدد اللفات المجانية</span><span class="val">${bs.spins}</span></div>
+<div class="bonus-summary-row"><span class="lbl">قيمة الرهان لكل لفة</span><span class="val">${bs.initialBet}</span></div>
+<div class="bonus-summary-row"><span class="lbl">إجمالي الرهان</span><span class="val">${bs.initialBet*bs.spins}</span></div>
+<div class="bonus-summary-row"><span class="lbl">إجمالي الأرباح</span><span class="val green">${Math.floor(bs.totalWon)}</span></div>
+<div class="bonus-summary-row"><span class="lbl">أفضل لفة</span><span class="val">${Math.floor(bs.bestWin)}</span></div>
+<div class="bonus-summary-row"><span class="lbl">المضاعف النهائي</span><span class="val">${bs.finalMultiplier}×</span></div>
+<div class="bonus-summary-total"><div class="lbl">صافي الربح من البونص</div><div class="val pos">+${Math.floor(bs.totalWon)} ل.س</div></div>`;
+$('bonusSummaryOverlay').classList.add('show');
+S.fs=0;S.cumMult=0;hideCumMultBar();fireOff();
+}
+if(S.fs>0){$('buyNormal').disabled=true;$('buyPremium').disabled=true;setTimeout(spin,S.turbo?300:900);return}
+$('buyNormal').disabled=false;$('buyPremium').disabled=false;
+if(S.autoActive&&S.autoSpins>0){
+S.autoSpins--;$('autoCounter').textContent=S.autoSpins;
+if(S.autoSpins<=0||S.bal<S.bet){stopAuto()}else{setTimeout(spin,S.turbo?300:800)}
+}
+}catch(e){console.error(e);toast(e.message||'خطأ في الجولة',true);S.spin=false;wheel.classList.remove('spinning','disabled');$('buyNormal').disabled=false;$('buyPremium').disabled=false;stopAuto();refreshMe()}
 }
 
-/* ==================== BONUS SUMMARY ==================== */
-$('bonusSummaryClose').onclick = () => {
-  $('bonusSummaryOverlay').classList.remove('show');
-  S.bonusWins = 0;
-  S.bonusBestWin = 0;
-  hideCumMultBar();
-  clearMultList();
+$('bonusSummaryClose').onclick=()=>{$('bonusSummaryOverlay').classList.remove('show');S.bonusWins=0;S.bonusBestWin=0;hideCumMultBar();clearMultList()};
+
+/* WHEEL */
+let wheelRot=0,wheelSpinning=false;
+function drawWheel(highlight=-1){const canvas=$('wheelCanvas');const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;const cx=W/2,cy=H/2,R=Math.min(W,H)/2-6;const values=[0,100,500,1000,2000,5000,10000,25000];const N=values.length;const slice=(Math.PI*2)/N;ctx.clearRect(0,0,W,H);const colors=['#3a1a6a','#4a1a7a','#5a1a8a','#6a2a9a','#7a3aaa','#8a4aba','#9a5aca','#aa6ada'];for(let i=0;i<N;i++){const start=-Math.PI/2+i*slice;const end=start+slice;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,start,end);ctx.closePath();ctx.fillStyle=highlight===i?'#ffd24a':colors[i];ctx.fill();ctx.strokeStyle='#ffd24a';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(start+slice/2);ctx.textAlign='right';ctx.fillStyle=highlight===i?'#000':'#fff';ctx.font='bold 14px monospace';ctx.fillText(values[i].toLocaleString(),R-14,5);ctx.restore()}ctx.beginPath();ctx.arc(cx,cy,26,0,Math.PI*2);ctx.fillStyle='#1a0230';ctx.fill();ctx.strokeStyle='#ffd24a';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='#ffd24a';ctx.font='bold 20px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🎡',cx,cy)}
+async function openWheel(){try{const status=await api('/api/wheel/status');$('wheelOverlay').classList.add('show');drawWheel();if(status.canSpin){$('wheelSpinBtn').disabled=false;$('wheelTimer').textContent='';$('wheelResult').textContent='اضغط للدوران'}else{$('wheelSpinBtn').disabled=true;const diff=status.nextAvailable-Date.now();const h=Math.floor(diff/3600000);const m=Math.floor((diff%3600000)/60000);$('wheelTimer').textContent='⏰ العجلة متاحة بعد '+h+' ساعة و '+m+' دقيقة';$('wheelResult').textContent='تم استخدامها اليوم'}}catch(e){toast(e.message,true)}}
+$('wheelBtn').onclick=openWheel;
+document.querySelector('.wheel-scrim').onclick=()=>$('wheelOverlay').classList.remove('show');
+$('wheelSpinBtn').onclick=async()=>{
+if(wheelSpinning)return;wheelSpinning=true;$('wheelSpinBtn').disabled=true;$('wheelResult').textContent='...';
+try{const res=await api('/api/wheel/spin',{method:'POST'});const idx=res.index;const N=8;const slice=360/N;const targetAngle=360*5+(360-(idx*slice+slice/2));const startRot=wheelRot%360;const duration=4000;const startTime=performance.now();
+const animate=(now)=>{const elapsed=now-startTime;const p=Math.min(1,elapsed/duration);const ease=1-Math.pow(1-p,3);wheelRot=startRot+(targetAngle-startRot)*ease;const canvas=$('wheelCanvas');const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;ctx.save();ctx.translate(W/2,H/2);ctx.rotate(wheelRot*Math.PI/180);ctx.translate(-W/2,-H/2);drawWheel();ctx.restore();
+if(p<1){requestAnimationFrame(animate)}else{drawWheel(idx);S.bal=res.newBalance;upd();const amt=res.amount;$('wheelResult').textContent=amt>0?'🎉 ربحت '+amt.toLocaleString()+' ل.س!':'😢 حظ أوفر';if(amt>0){Aud.winLevel(amt>=5000?5:amt>=1000?4:3);flash(400,.6)}else{Aud.winLevel(1)}wheelSpinning=false}};
+requestAnimationFrame(animate);
+}catch(e){toast(e.message,true);wheelSpinning=false;$('wheelSpinBtn').disabled=false}
 };
 
-/* ==================== WHEEL ==================== */
-let wheelRot = 0;
-let wheelSpinning = false;
+/* AUTO */
+$('autoBtn').onclick=()=>{if(S.autoActive){stopAuto();return}$('autoMenu').classList.add('show')};
+document.querySelector('.auto-scrim').onclick=()=>$('autoMenu').classList.remove('show');
+document.querySelectorAll('.auto-btn').forEach(btn=>{btn.onclick=()=>{const n=parseInt(btn.dataset.n);$('autoMenu').classList.remove('show');if(n===0){stopAuto();return}S.autoSpins=n;S.autoActive=true;$('autoCounter').textContent=n;$('autoCounter').classList.add('on');$('autoBtn').classList.add('active');if(!S.spin)spin()}});
+function stopAuto(){S.autoActive=false;S.autoSpins=0;$('autoCounter').classList.remove('on');$('autoBtn').classList.remove('active')}
 
-function drawWheel(highlight = -1){
-  const canvas = $('wheelCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const cx = W/2, cy = H/2, R = Math.min(W,H)/2 - 6;
-  const values = [0, 100, 500, 1000, 2000, 5000, 10000, 25000];
-  const N = values.length;
-  const slice = (Math.PI * 2) / N;
-  ctx.clearRect(0,0,W,H);
-  const colors = ['#3a1a6a','#4a1a7a','#5a1a8a','#6a2a9a','#7a3aaa','#8a4aba','#9a5aca','#aa6ada'];
-  for(let i=0;i<N;i++){
-    const start = -Math.PI/2 + i*slice;
-    const end = start + slice;
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,R,start,end);
-    ctx.closePath();
-    ctx.fillStyle = highlight === i ? '#ffd24a' : colors[i];
-    ctx.fill();
-    ctx.strokeStyle = '#ffd24a';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.save();
-    ctx.translate(cx,cy);
-    ctx.rotate(start + slice/2);
-    ctx.textAlign = 'right';
-    ctx.fillStyle = highlight === i ? '#000' : '#fff';
-    ctx.font = 'bold 14px monospace';
-    ctx.fillText(values[i].toLocaleString(), R - 14, 5);
-    ctx.restore();
-  }
-  ctx.beginPath();
-  ctx.arc(cx,cy,26,0,Math.PI*2);
-  ctx.fillStyle = '#1a0230';
-  ctx.fill();
-  ctx.strokeStyle = '#ffd24a';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  ctx.fillStyle = '#ffd24a';
-  ctx.font = 'bold 20px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('🎡', cx, cy);
-}
+/* TURBO */
+$('turboBtn').onclick=()=>{S.turbo=!S.turbo;Prefs.data.turbo=S.turbo;Prefs.save();if(S.turbo){$('turboBtn').classList.add('active');toast('⚡ Turbo مفعّل')}else{$('turboBtn').classList.remove('active');toast('Turbo معطّل')}};
+/* لا نفعّل Turbo من التفضيلات المحفوظة — يبدأ دائماً معطلاً */
+S.turbo=false;
 
-async function openWheel(){
-  try {
-    const status = await api('/api/wheel/status');
-    $('wheelOverlay').classList.add('show');
-    drawWheel();
-    if(status.canSpin){
-      $('wheelSpinBtn').disabled = false;
-      $('wheelTimer').textContent = '';
-      $('wheelResult').textContent = 'اضغط للدوران';
-    } else {
-      $('wheelSpinBtn').disabled = true;
-      const diff = status.nextAvailable - Date.now();
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      $('wheelTimer').textContent = '⏰ العجلة متاحة بعد ' + h + ' ساعة و ' + m + ' دقيقة';
-      $('wheelResult').textContent = 'تم استخدامها اليوم';
-    }
-  } catch(e){ toast(e.message, true); }
-}
+function fireOn(premium){S.fire=true;$('frame').classList.add('fire');$('fsBanner').classList.add('on')}
+function fireOff(){S.fire=false;$('frame').classList.remove('fire');$('fsBanner').classList.remove('on');S.mc=0}
 
-$('wheelBtn').onclick = openWheel;
-document.querySelector('.wheel-scrim').onclick = () => $('wheelOverlay').classList.remove('show');
+function showBigWinOverlay(amount,fsCount,tier){const overlay=$('bwOverlay');const titles={green:'فوز صغير',yellow:'فوز جيد',orange:'ربح كبير!',red:'ربح ضخم!',gold:'كنز العاصفة!',fs:'تهانينا!'};$('bwTitle').textContent=titles[tier]||'تهانينا!';$('bwAmount').textContent=Math.floor(amount);const fsEl=$('bwFs');if(fsCount>0){fsEl.style.display='inline-block';fsEl.textContent='🎁 '+fsCount+' لفات مجانية'}else fsEl.style.display='none';overlay.classList.add('show');const hide=()=>{overlay.classList.remove('show');overlay.removeEventListener('click',hide)};overlay.addEventListener('click',hide);setTimeout(hide,5000)}
 
-$('wheelSpinBtn').onclick = async () => {
-  if(wheelSpinning) return;
-  wheelSpinning = true;
-  $('wheelSpinBtn').disabled = true;
-  $('wheelResult').textContent = '...';
-  try {
-    const res = await api('/api/wheel/spin', { method: 'POST' });
-    const idx = res.index;
-    const N = 8;
-    const slice = 360 / N;
-    const targetAngle = 360 * 5 + (360 - (idx * slice + slice/2));
-    const startRot = wheelRot % 360;
-    const duration = 4000;
-    const startTime = performance.now();
-    const animate = (now) => {
-      const elapsed = now - startTime;
-      const p = Math.min(1, elapsed / duration);
-      const ease = 1 - Math.pow(1 - p, 3);
-      wheelRot = startRot + (targetAngle - startRot) * ease;
-      const canvas = $('wheelCanvas');
-      const ctx = canvas.getContext('2d');
-      const W = canvas.width, H = canvas.height;
-      ctx.save();
-      ctx.translate(W/2, H/2);
-      ctx.rotate(wheelRot * Math.PI / 180);
-      ctx.translate(-W/2, -H/2);
-      drawWheel();
-      ctx.restore();
-      if(p < 1){
-        requestAnimationFrame(animate);
-      } else {
-        drawWheel(idx);
-        S.bal = res.newBalance;
-        upd();
-        const amt = res.amount;
-        $('wheelResult').textContent = amt > 0 ? '🎉 ربحت ' + amt.toLocaleString() + ' ل.س!' : '😢 حظ أوفر';
-        if(amt > 0){ Aud.winLevel(amt >= 5000 ? 5 : amt >= 1000 ? 4 : 3); flash(400, 0.6); }
-        else { Aud.winLevel(1); }
-        wheelSpinning = false;
-      }
-    };
-    requestAnimationFrame(animate);
-  } catch(e){
-    toast(e.message, true);
-    wheelSpinning = false;
-    $('wheelSpinBtn').disabled = false;
-  }
-};
+function log(m){const e=$('log');e.innerHTML=m+'<br>'+e.innerHTML;while(e.children.length>30)e.removeChild(e.lastChild)}
+function addHistory(bet,won,mult,isFree){const list=$('historyList');if(!list)return;const row=document.createElement('div');const net=won-bet;let cls='zero';if(net>0.5)cls='win';else if(net<-0.5)cls='loss';row.className='histRow '+cls;const icon=net>0.5?'✅':net<-0.5?'❌':'➖';const sign=net>0?'+':'';const freeTag=isFree?'<span style="color:#ffd24a;font-size:8px">⚡</span>':'';const mt=mult>1?' <span style="color:#9b59ff">×'+mult+'</span>':'';row.innerHTML='<span class="icon">'+icon+freeTag+'</span>'+'<span class="hb">'+bet+' → '+won+mt+'</span>'+'<span class="hn">'+sign+net+'</span>';list.insertBefore(row,list.firstChild);while(list.children.length>20)list.removeChild(list.lastChild)}
 
-/* ==================== AUTO SPIN ==================== */
-$('autoBtn').onclick = () => {
-  if(S.autoActive){ stopAuto(); return; }
-  $('autoMenu').classList.add('show');
-};
-document.querySelector('.auto-scrim').onclick = () => $('autoMenu').classList.remove('show');
+function updateStats(){$('sSpins').textContent=S.sessionSpins;$('sBest').textContent=Math.floor(S.best);if(S.sessionWagered>0){const rtp=(S.sessionWon/S.sessionWagered*100).toFixed(1);$('sRTP').textContent=rtp+'%'}else{$('sRTP').textContent='—'}if(S.sessionSpins>0){const wr=(S.sessionWins/S.sessionSpins*100).toFixed(1);$('sWR').textContent=wr+'%'}else{$('sWR').textContent='—'}}
 
-document.querySelectorAll('.auto-btn').forEach(btn => {
-  btn.onclick = () => {
-    const n = parseInt(btn.dataset.n);
-    $('autoMenu').classList.remove('show');
-    if(n === 0){ stopAuto(); return; }
-    S.autoSpins = n;
-    S.autoActive = true;
-    $('autoCounter').textContent = n;
-    $('autoCounter').classList.add('on');
-    $('autoBtn').classList.add('active');
-    if(!S.spin) spin();
-  };
-});
+function upd(){$('bal').textContent=Math.floor(S.bal);$('lastWin').textContent=Math.floor(S.lw);$('fs').textContent=S.fs;$('mult').textContent=S.mc+'×';$('betVal').textContent=S.bet;$('priceNormal').textContent=S.bet*PRICE_NORMAL_MULT;$('pricePremium').textContent=S.bet*PRICE_PREMIUM_MULT;Prefs.data.betIndex=S.bi;Prefs.save()}
 
-function stopAuto(){
-  S.autoActive = false;
-  S.autoSpins = 0;
-  $('autoCounter').classList.remove('on');
-  $('autoBtn').classList.remove('active');
-}
-
-/* ==================== TURBO ==================== */
-$('turboBtn').onclick = () => {
-  S.turbo = !S.turbo;
-  Prefs.data.turbo = S.turbo; Prefs.save();
-  if(S.turbo){
-    $('turboBtn').classList.add('active');
-    toast('⚡ Turbo مفعّل');
-  } else {
-    $('turboBtn').classList.remove('active');
-    toast('Turbo معطّل');
-  }
-};
-if(S.turbo){ $('turboBtn').classList.add('active'); }
-
-function fireOn(premium){
-  S.fire=true;$('frame').classList.add('fire');
-  $('fsBanner').classList.add('on');
-}
-function fireOff(){
-  S.fire=false;$('frame').classList.remove('fire');
-  $('fsBanner').classList.remove('on');
-  S.mc=0;
-}
-
-function showBigWinOverlay(amount, fsCount, tier){
-  const overlay=$('bwOverlay');
-  const titles={
-    green:'فوز صغير', yellow:'فوز جيد', orange:'ربح كبير!',
-    red:'ربح ضخم!', gold:'كنز العاصفة!', fs:'تهانينا!'
-  };
-  $('bwTitle').textContent=titles[tier]||'تهانينا!';
-  $('bwAmount').textContent=Math.floor(amount);
-  const fsEl=$('bwFs');
-  if(fsCount>0){fsEl.style.display='inline-block';fsEl.textContent='🎁 '+fsCount+' لفات مجانية';}
-  else fsEl.style.display='none';
-  overlay.classList.add('show');
-  const hide=()=>{overlay.classList.remove('show');overlay.removeEventListener('click',hide);};
-  overlay.addEventListener('click',hide);
-  setTimeout(hide,5000);
-}
-
-function log(m){
-  const e=$('log');e.innerHTML=m+'<br>'+e.innerHTML;
-  while(e.children.length>30)e.removeChild(e.lastChild);
-}
-
-function addHistory(bet, won, mult, isFree){
-  const list=$('historyList');if(!list)return;
-  const row=document.createElement('div');
-  const net=won-bet;
-  let cls='zero';
-  if(net>0.5)cls='win';else if(net<-0.5)cls='loss';
-  row.className='histRow '+cls;
-  const icon = net>0.5 ? '✅' : net<-0.5 ? '❌' : '➖';
-  const sign = net>0 ? '+' : '';
-  const freeTag = isFree ? '<span style="color:#ffd24a;font-size:8px">⚡</span>' : '';
-  const mt=mult>1?' <span style="color:#9b59ff">×'+mult+'</span>':'';
-  row.innerHTML =
-    '<span class="icon">'+icon+freeTag+'</span>'+
-    '<span class="hb">'+bet+' → '+won+mt+'</span>'+
-    '<span class="hn">'+sign+net+'</span>';
-  list.insertBefore(row,list.firstChild);
-  while(list.children.length>20)list.removeChild(list.lastChild);
-}
-
-function updateStats(){
-  $('sSpins').textContent = S.sessionSpins;
-  $('sBest').textContent = Math.floor(S.best);
-  if(S.sessionWagered > 0){
-    const rtp = (S.sessionWon / S.sessionWagered * 100).toFixed(1);
-    $('sRTP').textContent = rtp + '%';
-  } else {
-    $('sRTP').textContent = '—';
-  }
-  if(S.sessionSpins > 0){
-    const wr = (S.sessionWins / S.sessionSpins * 100).toFixed(1);
-    $('sWR').textContent = wr + '%';
-  } else {
-    $('sWR').textContent = '—';
-  }
-}
-
-function upd(){
-  $('bal').textContent=Math.floor(S.bal);
-  $('lastWin').textContent=Math.floor(S.lw);
-  $('fs').textContent=S.fs;
-  $('mult').textContent=S.mc+'×';
-  $('betVal').textContent=S.bet;
-  $('priceNormal').textContent=S.bet*PRICE_NORMAL_MULT;
-  $('pricePremium').textContent=S.bet*PRICE_PREMIUM_MULT;
-  Prefs.data.betIndex = S.bi; Prefs.save();
-}
-
-$('betDown').onclick=()=>{
-  if(S.spin||S.fs>0)return;
-  if(S.bi>0){S.bi--;S.bet=BETS[S.bi];upd();Aud.reelStop(0)}
-};
-$('betUp').onclick=()=>{
-  if(S.spin||S.fs>0)return;
-  if(S.bi<BETS.length-1){S.bi++;S.bet=BETS[S.bi];upd();Aud.reelStop(5)}
-};
+$('betDown').onclick=()=>{if(S.spin||S.fs>0)return;if(S.bi>0){S.bi--;S.bet=BETS[S.bi];upd();Aud.reelStop(0)}};
+$('betUp').onclick=()=>{if(S.spin||S.fs>0)return;if(S.bi<BETS.length-1){S.bi++;S.bet=BETS[S.bi];upd();Aud.reelStop(5)}};
 $('spinWheel').onclick=spin;
 $('buyNormal').onclick=()=>buyBonus('normal');
 $('buyPremium').onclick=()=>buyBonus('premium');
 
-$('soundBtn').onclick=()=>{
-  const newOn=Aud.toggle();
-  const icon = $('soundIcon');
-  if(newOn){
-    icon.innerHTML = '<use href="#ic-sound-on"/>';
-    $('soundBtn').style.borderColor = '#6a4a9a';
-    Aud.resume();Aud.droneOn();
-  } else {
-    icon.innerHTML = '<use href="#ic-sound-off"/>';
-    $('soundBtn').style.borderColor = '#ff4a4a';
-  }
-};
-if(!Prefs.data.sound){
-  $('soundIcon').innerHTML = '<use href="#ic-sound-off"/>';
-  $('soundBtn').style.borderColor = '#ff4a4a';
-}
+$('soundBtn').onclick=()=>{const newOn=Aud.toggle();const icon=$('soundIcon');if(newOn){icon.innerHTML='<use href="#ic-sound-on"/>';$('soundBtn').style.borderColor='#b8860b';Aud.resume();Aud.droneOn()}else{icon.innerHTML='<use href="#ic-sound-off"/>';$('soundBtn').style.borderColor='#ff4a4a'}};
+if(!Prefs.data.sound){$('soundIcon').innerHTML='<use href="#ic-sound-off"/>';$('soundBtn').style.borderColor='#ff4a4a'}
 
 async function buyBonus(type){
-  if(S.spin||S.fs>0)return;
-  const price=type==='premium'?S.bet*PRICE_PREMIUM_MULT:S.bet*PRICE_NORMAL_MULT;
-  if(S.bal<price){toast('رصيد غير كافٍ',true);return;}
-  try {
-    const r=await api('/api/buy-bonus',{method:'POST',body:JSON.stringify({price,type})});
-    S.bal=r.balance;
-    S.fs = FS_COUNT;
-    S.mc = 0;
-    S.cumMult = 0;
-    S.bonusWins = 0;
-    S.bonusBestWin = 0;
-    clearMultList();
-  } catch(e){ toast(e.message,true); return; }
-  upd();
-  Aud.buy(type==='premium');
-  bigShow(type==='premium'?'بونص مميز':'بونص عادي',1500);
-  fireOn(type==='premium');
-  ZeusChar.setState('angry',3000);
-  showCumMultBar();
-  setTimeout(spin,800);
+if(S.spin||S.fs>0)return;
+const price=type==='premium'?S.bet*PRICE_PREMIUM_MULT:S.bet*PRICE_NORMAL_MULT;
+if(S.bal<price){toast('رصيد غير كافٍ',true);return}
+try{const r=await api('/api/buy-bonus',{method:'POST',body:JSON.stringify({price,type})});S.bal=r.balance;S.fs=FS_COUNT;S.mc=0;S.cumMult=0;S.bonusWins=0;S.bonusBestWin=0;clearMultList()}catch(e){toast(e.message,true);return}
+upd();Aud.buy(type==='premium');bigShow(type==='premium'?'بونص مميز':'بونص عادي',1500);fireOn(type==='premium');ZeusChar.setState('angry',3000);showCumMultBar();setTimeout(spin,900);
 }
 
-(function buildPaytable(){
-  const box=$('ptRows');
-  const order=['zeusFist','crown','chalice','hourglass','ring','flaming',
-    'gem_red','gem_blue','gem_green','gem_purple'];
-  order.forEach(k=>{
-    const r=document.createElement('div');
-    r.className='ptRow';
-    const ico=document.createElement('div');
-    ico.className='ico';
-    const ic=document.createElement('canvas');
-    ic.width=40;ic.height=40;
-    paintSymbol(ic.getContext('2d'),k,20,20,36);
-    ico.appendChild(ic);
-    const v=document.createElement('span');
-    v.className='val';
-    v.textContent = SYM[k].pay >= 1 ? (SYM[k].pay + '×') : SYM[k].pay;
-    r.appendChild(ico);r.appendChild(v);
-    box.appendChild(r);
-  });
-})();
+(function buildPaytable(){const box=$('ptRows');const order=['zeusFist','crown','chalice','hourglass','ring','flaming','gem_red','gem_blue','gem_green','gem_purple'];order.forEach(k=>{const r=document.createElement('div');r.className='ptRow';const ico=document.createElement('div');ico.className='ico';const ic=document.createElement('canvas');ic.width=40;ic.height=40;paintSymbol(ic.getContext('2d'),k,20,20,36);ico.appendChild(ic);const v=document.createElement('span');v.className='val';v.textContent=SYM[k].pay>=1?(SYM[k].pay+'×'):SYM[k].pay;r.appendChild(ico);r.appendChild(v);box.appendChild(r)})})();
 
-/* ==================== WALLET ==================== */
-const PAY_INFO={
-  sham_syp:{name:'شام كاش ل.س',rate:1,min:200,max:5000000,cur:'ل.س'},
-  sham_usd:{name:'شام كاش $',rate:15000,min:5,max:5000,cur:'$'},
-  usdt_bep20:{name:'USDT BEP20',rate:15000,min:5,max:5000,cur:'USDT'},
-  usdt_trc20:{name:'USDT TRC20',rate:15000,min:5,max:5000,cur:'USDT'}
-};
+const PAY_INFO={sham_syp:{name:'شام كاش ل.س',rate:1,min:200,max:5000000,cur:'ل.س'},sham_usd:{name:'شام كاش $',rate:15000,min:5,max:5000,cur:'$'},usdt_bep20:{name:'USDT BEP20',rate:15000,min:5,max:5000,cur:'USDT'},usdt_trc20:{name:'USDT TRC20',rate:15000,min:5,max:5000,cur:'USDT'}};
 let currentDepMethod='sham_syp',currentWdMethod='sham_syp';
+const COMPANY_ADDRESSES={sham_syp:'066f10afcd1b2d1a8f66dbe1a1eb3f17',sham_usd:'066f10afcd1b2d1a8f66dbe1a1eb3f17',usdt_bep20:'0x3932890a5d1acb3ab036bd39ade26c47929b37e5',usdt_trc20:'TXYZ1234567890abcdef1234567890abcdef'};
 
-const COMPANY_ADDRESSES={
-  sham_syp:'066f10afcd1b2d1a8f66dbe1a1eb3f17',
-  sham_usd:'066f10afcd1b2d1a8f66dbe1a1eb3f17',
-  usdt_bep20:'0x3932890a5d1acb3ab036bd39ade26c47929b37e5',
-  usdt_trc20:'TXYZ1234567890abcdef1234567890abcdef'
-};
-
-$('walletBtn').onclick=async()=>{
-  $('walletModal').classList.add('on');
-  updateDepInfo();updateWdInfo();
-  await loadMyAddresses();
-  await loadWalletHistory();
-};
-
-document.querySelectorAll('.walletTab').forEach(t=>{
-  t.onclick=()=>{
-    document.querySelectorAll('.walletTab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.walletPanel').forEach(p=>p.classList.remove('active'));
-    t.classList.add('active');
-    $('wp-'+t.dataset.wt).classList.add('active');
-    if(t.dataset.wt==='history')loadWalletHistory();
-  };
-});
-
-function updateDepInfo(){
-  const m=PAY_INFO[currentDepMethod];
-  $('depInfo').innerHTML='الحد الأدنى: <b>'+m.min+' '+m.cur+'</b> · الحد الأقصى: <b>'+m.max+' '+m.cur+'</b>';
-  const labels={
-    sham_syp:'📋 عنوان شام كاش (ل.س)',
-    sham_usd:'📋 عنوان شام كاش ($)',
-    usdt_bep20:'📋 عنوان USDT (BEP20)',
-    usdt_trc20:'📋 عنوان USDT (TRC20)'
-  };
-  const cw=$('companyWallet');
-  cw.dataset.wallet=COMPANY_ADDRESSES[currentDepMethod];
-  cw.innerHTML=
-    '<div class="cw-label">'+labels[currentDepMethod]+'</div>'+
-    '<div class="cw-address">'+COMPANY_ADDRESSES[currentDepMethod]+'</div>'+
-    '<div class="cw-hint">📱 اضغط لنسخ العنوان</div>';
-}
-
-function updateWdInfo(){
-  const m=PAY_INFO[currentWdMethod];
-  $('wdInfo').innerHTML='الحد الأدنى: <b>'+m.min+' '+m.cur+'</b> · الحد الأقصى: <b>'+m.max+' '+m.cur+'</b>';
-}
-
-$('depMethod').onchange=e=>{currentDepMethod=e.target.value;updateDepInfo();};
-$('wdMethod').onchange=e=>{currentWdMethod=e.target.value;updateWdInfo();};
-
-function copyCompanyWallet(){
-  const cw=$('companyWallet');
-  const w=cw.dataset.wallet;
-  if(!w)return;
-  const hint=cw.querySelector('.cw-hint');
-  const done=()=>{
-    toast('✅ تم نسخ العنوان');
-    if(hint){hint.textContent='✅ تم النسخ بنجاح';hint.style.color='#2ecc71';}
-    setTimeout(()=>{if(hint){hint.textContent='📱 اضغط لنسخ العنوان';hint.style.color='';}},2000);
-  };
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(w).then(done).catch(()=>{
-      const ta=document.createElement('textarea');
-      ta.value=w;ta.style.position='fixed';ta.style.left='-9999px';
-      document.body.appendChild(ta);ta.select();
-      try{document.execCommand('copy');done()}catch(e){toast('⚠ حدد العنوان يدوياً',true)}
-      ta.remove();
-    });
-  } else {
-    const ta=document.createElement('textarea');
-    ta.value=w;ta.style.position='fixed';ta.style.left='-9999px';
-    document.body.appendChild(ta);ta.select();
-    try{document.execCommand('copy');done()}catch(e){toast('⚠ حدد العنوان يدوياً',true)}
-    ta.remove();
-  }
-}
+$('walletBtn').onclick=async()=>{$('walletModal').classList.add('on');updateDepInfo();updateWdInfo();await loadMyAddresses();await loadWalletHistory()};
+document.querySelectorAll('.walletTab').forEach(t=>{t.onclick=()=>{document.querySelectorAll('.walletTab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.walletPanel').forEach(p=>p.classList.remove('active'));t.classList.add('active');$('wp-'+t.dataset.wt).classList.add('active');if(t.dataset.wt==='history')loadWalletHistory()}});
+function updateDepInfo(){const m=PAY_INFO[currentDepMethod];$('depInfo').innerHTML='الحد الأدنى: <b>'+m.min+' '+m.cur+'</b> · الحد الأقصى: <b>'+m.max+' '+m.cur+'</b>';const labels={sham_syp:'📋 عنوان شام كاش (ل.س)',sham_usd:'📋 عنوان شام كاش ($)',usdt_bep20:'📋 عنوان USDT (BEP20)',usdt_trc20:'📋 عنوان USDT (TRC20)'};const cw=$('companyWallet');cw.dataset.wallet=COMPANY_ADDRESSES[currentDepMethod];cw.innerHTML='<div class="cw-label">'+labels[currentDepMethod]+'</div>'+'<div class="cw-address">'+COMPANY_ADDRESSES[currentDepMethod]+'</div>'+'<div class="cw-hint">📱 اضغط لنسخ العنوان</div>'}
+function updateWdInfo(){const m=PAY_INFO[currentWdMethod];$('wdInfo').innerHTML='الحد الأدنى: <b>'+m.min+' '+m.cur+'</b> · الحد الأقصى: <b>'+m.max+' '+m.cur+'</b>'}
+$('depMethod').onchange=e=>{currentDepMethod=e.target.value;updateDepInfo()};
+$('wdMethod').onchange=e=>{currentWdMethod=e.target.value;updateWdInfo()};
+function copyCompanyWallet(){const cw=$('companyWallet');const w=cw.dataset.wallet;if(!w)return;const hint=cw.querySelector('.cw-hint');const done=()=>{toast('✅ تم نسخ العنوان');if(hint){hint.textContent='✅ تم النسخ بنجاح';hint.style.color='#2ecc71'}setTimeout(()=>{if(hint){hint.textContent='📱 اضغط لنسخ العنوان';hint.style.color=''}},2000)};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(w).then(done).catch(()=>{const ta=document.createElement('textarea');ta.value=w;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){toast('⚠ حدد العنوان يدوياً',true)}ta.remove()})}else{const ta=document.createElement('textarea');ta.value=w;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){toast('⚠ حدد العنوان يدوياً',true)}ta.remove()}}
 window.copyCompanyWallet=copyCompanyWallet;
 
-$('depBtn').onclick=async()=>{
-  const amount=parseFloat($('depAmount').value);
-  const tx=$('depTx').value.trim();
-  const m=PAY_INFO[currentDepMethod];
-  if(isNaN(amount))return toast('أدخل مبلغ صحيح',true);
-  if(amount<m.min||amount>m.max)return toast('المبلغ بين '+m.min+' و '+m.max,true);
-  $('depBtn').disabled=true;
-  try{
-    const res=await api('/api/wallet/deposit',{method:'POST',
-      body:JSON.stringify({method_code:currentDepMethod,amount,tx_hash:tx})});
-    toast('✅ '+res.message);
-    $('depAmount').value='';$('depTx').value='';
-    loadWalletHistory();
-  }catch(e){toast(e.message,true);}
-  $('depBtn').disabled=false;
-};
+$('depBtn').onclick=async()=>{const amount=parseFloat($('depAmount').value);const tx=$('depTx').value.trim();const m=PAY_INFO[currentDepMethod];if(isNaN(amount))return toast('أدخل مبلغ صحيح',true);if(amount<m.min||amount>m.max)return toast('المبلغ بين '+m.min+' و '+m.max,true);$('depBtn').disabled=true;try{const res=await api('/api/wallet/deposit',{method:'POST',body:JSON.stringify({method_code:currentDepMethod,amount,tx_hash:tx})});toast('✅ '+res.message);$('depAmount').value='';$('depTx').value='';loadWalletHistory()}catch(e){toast(e.message,true)}$('depBtn').disabled=false};
+$('wdBtn').onclick=async()=>{const amount=parseFloat($('wdAmount').value);const addr=$('wdAddress').value.trim();const m=PAY_INFO[currentWdMethod];if(isNaN(amount))return toast('أدخل مبلغ صحيح',true);if(amount<m.min||amount>m.max)return toast('المبلغ بين '+m.min+' و '+m.max,true);if(!addr)return toast('أدخل عنوان الاستلام',true);$('wdBtn').disabled=true;try{const res=await api('/api/wallet/withdraw',{method:'POST',body:JSON.stringify({method_code:currentWdMethod,amount,wallet_to:addr})});toast('✅ '+res.message);$('wdAmount').value='';$('wdAddress').value='';loadWalletHistory();refreshMe()}catch(e){toast(e.message,true)}$('wdBtn').disabled=false};
 
-$('wdBtn').onclick=async()=>{
-  const amount=parseFloat($('wdAmount').value);
-  const addr=$('wdAddress').value.trim();
-  const m=PAY_INFO[currentWdMethod];
-  if(isNaN(amount))return toast('أدخل مبلغ صحيح',true);
-  if(amount<m.min||amount>m.max)return toast('المبلغ بين '+m.min+' و '+m.max,true);
-  if(!addr)return toast('أدخل عنوان الاستلام',true);
-  $('wdBtn').disabled=true;
-  try{
-    const res=await api('/api/wallet/withdraw',{method:'POST',
-      body:JSON.stringify({method_code:currentWdMethod,amount,wallet_to:addr})});
-    toast('✅ '+res.message);
-    $('wdAmount').value='';$('wdAddress').value='';
-    loadWalletHistory();refreshMe();
-  }catch(e){toast(e.message,true);}
-  $('wdBtn').disabled=false;
-};
+async function loadWalletHistory(){try{const{deposits,withdraws}=await api('/api/wallet/history');const all=[...deposits.map(d=>({...d,kind:'deposit'})),...withdraws.map(w=>({...w,kind:'withdraw'}))].sort((a,b)=>b.created_at-a.created_at).slice(0,40);if(!all.length){$('walletHistoryList').innerHTML='<div style="text-align:center;color:#888;padding:20px">لا يوجد سجل</div>';return}$('walletHistoryList').innerHTML=all.map(x=>{const isDep=x.kind==='deposit';const amount=isDep?x.amount:-x.amount;const cur=PAY_INFO[x.method_code]?.cur||'';const st=x.status==='pending'?'⏳':x.status==='approved'?'✅':'❌';return '<div class="historyItem '+x.status+'"><span>'+(isDep?'📥':'📤')+' '+x.method_code+'</span><span>'+amount+' '+cur+'</span><span>'+st+'</span></div>'}).join('')}catch(e){$('walletHistoryList').innerHTML='<div style="color:#ff6a6a;text-align:center;padding:20px">⚠ '+e.message+'</div>'}}
+async function loadMyAddresses(){try{const a=await api('/api/wallet/my-addresses');$('addrShamSyp').value=a.sham_syp||'';$('addrShamUsd').value=a.sham_usd||'';$('addrUsdtBep').value=a.usdt_bep20||'';$('addrUsdtTrc').value=a.usdt_trc20||''}catch(e){}}
+$('saveAddrBtn').onclick=async()=>{try{await api('/api/wallet/save-address',{method:'POST',body:JSON.stringify({sham_syp:$('addrShamSyp').value.trim(),sham_usd:$('addrShamUsd').value.trim(),usdt_bep20:$('addrUsdtBep').value.trim(),usdt_trc20:$('addrUsdtTrc').value.trim()})});toast('✅ تم الحفظ')}catch(e){toast(e.message,true)}};
 
-async function loadWalletHistory(){
-  try{
-    const {deposits,withdraws}=await api('/api/wallet/history');
-    const all=[
-      ...deposits.map(d=>({...d,kind:'deposit'})),
-      ...withdraws.map(w=>({...w,kind:'withdraw'}))
-    ].sort((a,b)=>b.created_at-a.created_at).slice(0,40);
-    if(!all.length){
-      $('walletHistoryList').innerHTML='<div style="text-align:center;color:#888;padding:20px">لا يوجد سجل</div>';
-      return;
-    }
-    $('walletHistoryList').innerHTML=all.map(x=>{
-      const isDep=x.kind==='deposit';
-      const amount=isDep?x.amount:-x.amount;
-      const cur=PAY_INFO[x.method_code]?.cur||'';
-      const st=x.status==='pending'?'⏳':x.status==='approved'?'✅':'❌';
-      return '<div class="historyItem '+x.status+'"><span>'+(isDep?'📥':'📤')+' '+x.method_code+'</span><span>'+amount+' '+cur+'</span><span>'+st+'</span></div>';
-    }).join('');
-  }catch(e){
-    $('walletHistoryList').innerHTML='<div style="color:#ff6a6a;text-align:center;padding:20px">⚠ '+e.message+'</div>';
-  }
-}
+$('profileBtn').onclick=async()=>{const u=JSON.parse(localStorage.getItem('sc_user')||'{}');$('profileContent').innerHTML='<div class="profileRow"><span class="lbl">الاسم</span><span class="val">'+(u.first||'')+' '+(u.last||'')+'</span></div>'+'<div class="profileRow"><span class="lbl">رقم الهاتف</span><span class="val">'+(u.phone||'')+'</span></div>'+'<div class="profileRow"><span class="lbl">البريد</span><span class="val">'+(u.email||'')+'</span></div>'+'<div class="profileUID" id="uidBox"><small>🆔 UID — اضغط للنسخ</small>'+(u.uid||'')+'</div>'+'<div class="profileRow"><span class="lbl">الرصيد</span><span class="val">'+Math.floor(S.bal)+' ل.س</span></div>'+'<div class="profileRow"><span class="lbl">لفات</span><span class="val">'+S.laps+'</span></div>'+'<div class="profileRow"><span class="lbl">أفضل فوز</span><span class="val">'+Math.floor(S.best)+' ل.س</span></div>'+'<div class="profileRow"><span class="lbl">كود الدعوة</span><span class="val">'+(u.invite_code||'—')+'</span></div>';$('profileModal').classList.add('on');const uid=$('uidBox');if(uid)uid.onclick=()=>{if(navigator.clipboard){navigator.clipboard.writeText(u.uid||'').then(()=>{uid.innerHTML='<small>✅ تم النسخ</small>'+(u.uid||'')}).catch(()=>{})}}};
 
-async function loadMyAddresses(){
-  try{
-    const a=await api('/api/wallet/my-addresses');
-    $('addrShamSyp').value=a.sham_syp||'';
-    $('addrShamUsd').value=a.sham_usd||'';
-    $('addrUsdtBep').value=a.usdt_bep20||'';
-    $('addrUsdtTrc').value=a.usdt_trc20||'';
-  }catch(e){}
-}
-
-$('saveAddrBtn').onclick=async()=>{
-  try{
-    await api('/api/wallet/save-address',{method:'POST',
-      body:JSON.stringify({
-        sham_syp:$('addrShamSyp').value.trim(),
-        sham_usd:$('addrShamUsd').value.trim(),
-        usdt_bep20:$('addrUsdtBep').value.trim(),
-        usdt_trc20:$('addrUsdtTrc').value.trim()
-      })});
-    toast('✅ تم الحفظ');
-  }catch(e){toast(e.message,true);}
-};
-
-$('profileBtn').onclick=async()=>{
-  const u=JSON.parse(localStorage.getItem('sc_user')||'{}');
-  $('profileContent').innerHTML=
-    '<div class="profileRow"><span class="lbl">الاسم</span><span class="val">'+(u.first||'')+' '+(u.last||'')+'</span></div>'+
-    '<div class="profileRow"><span class="lbl">رقم الهاتف</span><span class="val">'+(u.phone||'')+'</span></div>'+
-    '<div class="profileRow"><span class="lbl">البريد</span><span class="val">'+(u.email||'')+'</span></div>'+
-    '<div class="profileUID" id="uidBox"><small>🆔 UID — اضغط للنسخ</small>'+(u.uid||'')+'</div>'+
-    '<div class="profileRow"><span class="lbl">الرصيد</span><span class="val">'+Math.floor(S.bal)+' ل.س</span></div>'+
-    '<div class="profileRow"><span class="lbl">لفات</span><span class="val">'+S.laps+'</span></div>'+
-    '<div class="profileRow"><span class="lbl">أفضل فوز</span><span class="val">'+Math.floor(S.best)+' ل.س</span></div>'+
-    '<div class="profileRow"><span class="lbl">كود الدعوة</span><span class="val">'+(u.invite_code||'—')+'</span></div>';
-  $('profileModal').classList.add('on');
-  const uid=$('uidBox');
-  if(uid)uid.onclick=()=>{
-    if(navigator.clipboard){
-      navigator.clipboard.writeText(u.uid||'').then(()=>{
-        uid.innerHTML='<small>✅ تم النسخ</small>'+(u.uid||'');
-      }).catch(()=>{});
-    }
-  };
-};
-
-$('agentBadge').onclick=async()=>{
-  $('agentModal').classList.add('on');
-  try{
-    const info=await api('/api/agent/info');
-    const link=location.origin+'/?ref='+info.invite_code;
-    const levelTxt=info.agent_level===0?'لاعب عادي':
-                   info.agent_level===1?'🥉 وكيل 1 — 3%':
-                   info.agent_level===2?'🥈 وكيل 2 — 5%':'🥇 وكيل 3 — 8%';
-    $('agentContent').innerHTML=
-      '<div class="agentBox"><b>كود الدعوة:</b> <span style="font-family:monospace;color:#fff">'+info.invite_code+'</span></div>'+
-      '<div class="agentBox"><b>رابط الدعوة (اضغط لنسخ):</b><div class="agentLink" id="inviteLink">'+link+'</div></div>'+
-      '<div class="agentStats">'+
-        '<div class="agentStat"><div class="lbl">المستوى</div><div class="val">'+levelTxt+'</div></div>'+
-        '<div class="agentStat"><div class="lbl">إجمالي عمولات</div><div class="val">'+(info.total_commission||0).toLocaleString()+'</div></div>'+
-        '<div class="agentStat"><div class="lbl">عدد الإحالات</div><div class="val">'+info.referrals_count+'</div></div>'+
-        '<div class="agentStat"><div class="lbl">خسائر المُحالين</div><div class="val">'+(info.stats.total_ref_lost||0).toLocaleString()+'</div></div>'+
-      '</div>'+
-      (info.agent_level===0?'<button class="walletBtn" onclick="becomeAgent()" style="background:linear-gradient(180deg,#9b59ff,#4a1a7a)">✨ ترقية إلى وكيل</button>':'');
-    const il=$('inviteLink');
-    if(il)il.onclick=()=>{
-      if(navigator.clipboard){
-        navigator.clipboard.writeText(link).then(()=>toast('✅ تم نسخ الرابط')).catch(()=>{});
-      }
-    };
-  }catch(e){
-    $('agentContent').innerHTML='<div style="color:#ff6a6a;padding:20px">⚠ '+e.message+'</div>';
-  }
-};
-window.becomeAgent=async()=>{
-  try{
-    const r=await api('/api/agent/become',{method:'POST'});
-    toast('✅ '+r.message);
-    $('agentBadge').click();
-  }catch(e){toast(e.message,true);}
-};
+$('agentBadge').onclick=async()=>{$('agentModal').classList.add('on');try{const info=await api('/api/agent/info');const link=location.origin+'/?ref='+info.invite_code;const levelTxt=info.agent_level===0?'لاعب عادي':info.agent_level===1?'🥉 وكيل 1 — 3%':info.agent_level===2?'🥈 وكيل 2 — 5%':'🥇 وكيل 3 — 8%';$('agentContent').innerHTML='<div class="agentBox"><b>كود الدعوة:</b> <span style="font-family:monospace;color:#fff">'+info.invite_code+'</span></div>'+'<div class="agentBox"><b>رابط الدعوة (اضغط لنسخ):</b><div class="agentLink" id="inviteLink">'+link+'</div></div>'+'<div class="agentStats">'+'<div class="agentStat"><div class="lbl">المستوى</div><div class="val">'+levelTxt+'</div></div>'+'<div class="agentStat"><div class="lbl">إجمالي عمولات</div><div class="val">'+(info.total_commission||0).toLocaleString()+'</div></div>'+'<div class="agentStat"><div class="lbl">عدد الإحالات</div><div class="val">'+info.referrals_count+'</div></div>'+'<div class="agentStat"><div class="lbl">خسائر المُحالين</div><div class="val">'+(info.stats.total_ref_lost||0).toLocaleString()+'</div></div>'+'</div>'+(info.agent_level===0?'<button class="walletBtn" onclick="becomeAgent()" style="background:linear-gradient(180deg,#9b59ff,#4a1a7a)">✨ ترقية إلى وكيل</button>':'');const il=$('inviteLink');if(il)il.onclick=()=>{if(navigator.clipboard){navigator.clipboard.writeText(link).then(()=>toast('✅ تم نسخ الرابط')).catch(()=>{})}}}catch(e){$('agentContent').innerHTML='<div style="color:#ff6a6a;padding:20px">⚠ '+e.message+'</div>'}};
+window.becomeAgent=async()=>{try{const r=await api('/api/agent/become',{method:'POST'});toast('✅ '+r.message);$('agentBadge').click()}catch(e){toast(e.message,true)}};
 
 S.grid=[];
-for(let x=0;x<COLS;x++){
-  S.grid[x]=[];
-  for(let y=0;y<ROWS;y++)S.grid[x][y]=rSymVisual();
-}
-for(let x=0;x<COLS;x++){RS.str[x]=stripVisual();RS.stop[x]=true;}
-requestAnimationFrame(loop);
-updateStats();
+for(let x=0;x<COLS;x++){S.grid[x]=[];for(let y=0;y<ROWS;y++)S.grid[x][y]=rSymVisual()}
+for(let x=0;x<COLS;x++){RS.str[x]=stripVisual();RS.stop[x]=true}
+requestAnimationFrame(loop);updateStats();
 
-(async()=>{
-  const token=localStorage.getItem('sc_token');
-  if(token){
-    try{
-      const u=await api('/api/me');
-      await enterGame(u);
-    }catch(e){
-      localStorage.removeItem('sc_token');
-      localStorage.removeItem('sc_user');
-    }
-  }
-})();
+(async()=>{const token=localStorage.getItem('sc_token');if(token){try{const u=await api('/api/me');await enterGame(u)}catch(e){localStorage.removeItem('sc_token');localStorage.removeItem('sc_user')}}})();
 </script>
 </body>
 </html>
