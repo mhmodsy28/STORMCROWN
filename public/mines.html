@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#05000f">
+<title>💎 ألغام العاصفة — STORMMINES</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Amiri:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#05000f;color:#fff;font-family:'Amiri',serif;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+
+/* ===== TOP ===== */
+#topBtns{position:fixed;top:6px;left:0;right:0;z-index:60;height:48px;pointer-events:none}
+#topBtns button{pointer-events:auto;position:absolute;border-radius:50%;width:40px;height:40px;border:2px solid #2ecc71;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:7px;background:linear-gradient(180deg,rgba(20,80,40,.95),rgba(5,20,10,.95));box-shadow:0 0 15px rgba(46,204,113,.3)}
+#topBtns button:active{transform:scale(.9)}
+#topBtns button svg{width:100%;height:100%;fill:#2ecc71}
+#homeBtn{top:0;left:6px}
+#soundBtn{top:0;right:6px}
+
+#balBox{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:60;background:linear-gradient(180deg,rgba(20,80,40,.95),rgba(5,20,10,.98));border:2px solid #2ecc71;border-radius:10px;padding:4px 16px;text-align:center;box-shadow:0 0 20px rgba(46,204,113,.4)}
+#balBox small{display:block;font-size:9px;color:#7effb0;font-family:'Cinzel Decorative',serif}
+#balBox b{color:#fff;font-family:monospace;font-size:16px;text-shadow:0 0 10px #2ecc71}
+
+/* ===== GAME AREA ===== */
+#gameArea{position:fixed;inset:0;display:flex;flex-direction:column;padding:52px 0 0 0;background:radial-gradient(ellipse at 50% 100%,#0a3015 0%,#051008 50%,#000 100%)}
+
+/* ===== SETUP SCREEN ===== */
+#setupScreen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:16px;overflow-y:auto}
+#setupScreen.hidden{display:none}
+.setupTitle{font-family:'Cinzel Decorative',serif;font-size:26px;font-weight:900;color:#7effb0;text-shadow:0 0 25px rgba(46,204,113,.8);margin-bottom:6px;text-align:center}
+.setupSub{font-size:12px;color:#8ec8a0;margin-bottom:14px;text-align:center}
+.setupCard{background:linear-gradient(180deg,rgba(20,60,30,.7),rgba(5,20,10,.9));border:2px solid #2ecc71;border-radius:14px;padding:16px;width:100%;max-width:440px;box-shadow:0 0 30px rgba(46,204,113,.2)}
+.setupCard h3{color:#7effb0;font-family:'Cinzel Decorative',serif;font-size:14px;margin-bottom:10px;text-align:center;letter-spacing:.05em}
+.mineOptions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.mineOpt{padding:12px 4px;background:linear-gradient(180deg,rgba(30,70,40,.6),rgba(10,30,15,.9));border:2px solid rgba(46,204,113,.4);border-radius:10px;cursor:pointer;text-align:center;transition:all .15s}
+.mineOpt.selected{background:linear-gradient(180deg,#2ecc71,#1a5a2a);border-color:#7effb0;box-shadow:0 0 20px rgba(46,204,113,.8)}
+.mineOpt .num{font-family:monospace;font-size:20px;font-weight:900;color:#fff}
+.mineOpt .lbl{font-size:9px;color:#8ec8a0;margin-top:2px}
+.mineOpt.selected .lbl{color:#fff}
+.betRow{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px}
+.betBtn{padding:8px 14px;font-family:'Amiri',serif;font-weight:700;font-size:14px;border-radius:9px;cursor:pointer;border:2px solid #2ecc71;background:linear-gradient(180deg,rgba(30,80,40,.95),rgba(5,20,10,.98));color:#7effb0;min-width:44px}
+.betBtn:active{transform:scale(.94)}
+.betBtn:disabled{opacity:.4;cursor:not-allowed}
+.betDisplay{background:rgba(5,20,10,.9);border:2px solid #2ecc71;padding:8px 18px;border-radius:10px;text-align:center;min-width:120px}
+.betDisplay small{display:block;font-size:9px;color:#7effb0;font-family:'Cinzel Decorative',serif;letter-spacing:.05em}
+.betDisplay b{color:#fff;font-family:monospace;font-size:18px;text-shadow:0 0 10px #2ecc71}
+.startBtn{width:100%;padding:14px;font-family:'Cinzel Decorative',serif;font-size:16px;font-weight:900;border-radius:12px;cursor:pointer;border:3px solid #2ecc71;background:linear-gradient(180deg,#2ecc71,#1a5a2a);color:#fff;letter-spacing:.05em;box-shadow:0 0 30px rgba(46,204,113,.6)}
+.startBtn:active{transform:scale(.97)}
+.startBtn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ===== PLAY SCREEN ===== */
+#playScreen{flex:1;display:none;flex-direction:column;padding:8px 10px 10px;gap:8px;overflow:hidden}
+#playScreen.on{display:flex}
+.gameStats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;flex-shrink:0}
+.gsBox{background:linear-gradient(180deg,rgba(30,70,40,.7),rgba(10,30,15,.9));border:2px solid #2ecc71;border-radius:9px;padding:4px 12px;text-align:center;min-width:80px}
+.gsBox small{display:block;font-size:8px;color:#7effb0;font-family:'Cinzel Decorative',serif;letter-spacing:.05em}
+.gsBox b{color:#fff;font-family:monospace;font-size:14px;text-shadow:0 0 8px #2ecc71}
+.gsBox.hot{border-color:#ffd24a;box-shadow:0 0 15px rgba(255,210,74,.6)}
+.gsBox.hot b{color:#ffd24a;text-shadow:0 0 10px #ffd24a}
+
+#gridWrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;padding:4px;position:relative}
+#minesGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:100%;max-width:min(90vw,520px);max-height:100%;aspect-ratio:1}
+.tile{aspect-ratio:1;background:linear-gradient(180deg,#2a5a3a,#0a2a15);border:2px solid #3a7a4a;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,5vw,42px);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;user-select:none}
+.tile::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.15),transparent 60%);pointer-events:none}
+.tile:hover:not(.revealed):not(.mine-hit){transform:translateY(-2px);box-shadow:0 4px 15px rgba(46,204,113,.4)}
+.tile:active:not(.revealed):not(.mine-hit){transform:scale(.96)}
+.tile.safe{background:linear-gradient(180deg,#3a8a50,#1a5a2a);border-color:#7effb0;animation:popIn .3s ease-out;box-shadow:inset 0 0 20px rgba(126,255,176,.3)}
+.tile.mine-hit{background:linear-gradient(180deg,#a01010,#4a0000);border-color:#ff3a3a;animation:mineHit .4s ease-out;box-shadow:inset 0 0 30px rgba(255,58,58,.6)}
+.tile.mine-reveal{background:linear-gradient(180deg,#3a1010,#1a0000);border-color:#7a2020;opacity:.7}
+.tile.dim{opacity:.35;cursor:default}
+.tile .tileIcon{position:relative;z-index:1;font-size:inherit;filter:drop-shadow(0 0 8px rgba(255,255,255,.5))}
+@keyframes popIn{0%{transform:scale(.7)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes mineHit{0%{transform:scale(1)}30%{transform:scale(1.2) rotate(5deg)}60%{transform:scale(.95) rotate(-3deg)}100%{transform:scale(1) rotate(0)}}
+
+#playCtrl{display:flex;gap:8px;justify-content:center;flex-shrink:0;padding-top:4px}
+.playBtn{flex:1;max-width:220px;padding:14px;font-family:'Cinzel Decorative',serif;font-size:14px;font-weight:900;border-radius:11px;cursor:pointer;border:3px solid;letter-spacing:.05em;transition:all .15s}
+.playBtn:active{transform:scale(.97)}
+.playBtn:disabled{opacity:.4;cursor:not-allowed}
+#cashoutBtn{background:linear-gradient(180deg,#c94000,#6a1a00);border-color:#ff8c00;color:#fff;box-shadow:0 0 25px rgba(255,140,0,.5)}
+#cashoutBtn.pulse{animation:cashPulse 0.7s ease-in-out infinite alternate}
+@keyframes cashPulse{to{box-shadow:0 0 40px rgba(255,140,0,.9)}}
+#newGameBtn{background:linear-gradient(180deg,#2a2a4a,#1a1a30);border-color:#888;color:#ccc;max-width:140px}
+
+/* ===== RESULT OVERLAY ===== */
+#resultOverlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)}
+#resultOverlay.show{display:flex;animation:overlayIn .3s ease}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+.resultCard{position:relative;width:100%;max-width:420px;padding:26px 20px 22px;border-radius:18px;text-align:center;animation:cardIn .5s cubic-bezier(.19,1.6,.3,1)}
+@keyframes cardIn{0%{transform:scale(.4) rotate(-6deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.resultCard.win{background:linear-gradient(180deg,#1a5a3a,#0a2015);border:3px solid #2ecc71;box-shadow:0 0 80px rgba(46,204,113,.7),inset 0 0 40px rgba(46,204,113,.15)}
+.resultCard.lose{background:linear-gradient(180deg,#5a0a0a,#1a0000);border:3px solid #ff3a3a;box-shadow:0 0 80px rgba(255,58,58,.7),inset 0 0 40px rgba(255,58,58,.15)}
+.resultTitle{font-family:'Cinzel Decorative',serif;font-size:30px;font-weight:900;margin-bottom:6px}
+.resultCard.win .resultTitle{color:#7effb0;text-shadow:0 0 25px rgba(46,204,113,.9)}
+.resultCard.lose .resultTitle{color:#ff8080;text-shadow:0 0 25px rgba(255,58,58,.9)}
+.resultSub{font-size:12px;color:#c8b0e8;margin-bottom:14px}
+.resultAmount{display:inline-block;padding:14px 28px;border-radius:12px;font-family:monospace;font-size:34px;font-weight:900;margin:6px 0 14px;min-width:200px}
+.resultCard.win .resultAmount{background:linear-gradient(180deg,#1a3a8a,#0a1a4a);border:2px solid #ffd24a;color:#fff;text-shadow:0 0 15px #ffd24a}
+.resultCard.lose .resultAmount{background:linear-gradient(180deg,#3a0a0a,#200000);border:2px solid #ff3a3a;color:#ffaaaa;text-shadow:0 0 15px #ff3a3a}
+.resultRows{margin:10px 0 16px;display:flex;flex-direction:column;gap:6px}
+.resultRow{display:flex;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.06);border-radius:8px;font-size:12px}
+.resultRow .lbl{color:#c8b0e8}
+.resultRow .val{font-family:monospace;font-weight:900;color:#fff}
+.resultBtn{width:100%;padding:14px;font-family:'Cinzel Decorative',serif;font-size:15px;font-weight:900;border-radius:11px;cursor:pointer;border:3px solid #2ecc71;background:linear-gradient(180deg,#2ecc71,#1a5a2a);color:#fff;margin-top:8px;letter-spacing:.05em}
+.resultBtn:active{transform:scale(.97)}
+
+/* ===== TOAST ===== */
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;padding:10px 18px;border-radius:8px;font-weight:bold;z-index:9999;transition:transform .3s;font-size:12px;max-width:90vw;text-align:center}
+#toast.on{transform:translateX(-50%) translateY(0)}
+#toast.err{background:linear-gradient(180deg,#ff4a4a,#8b0000)}
+
+/* ===== WIN POP ANIMATION ===== */
+.winPop{position:fixed;z-index:150;pointer-events:none;font-family:'Cinzel Decorative',serif;font-weight:900;font-size:24px;color:#7effb0;text-shadow:0 0 15px #2ecc71;animation:winPopUp 1.2s ease-out forwards}
+@keyframes winPopUp{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}20%{transform:translate(-50%,-50%) scale(1.3);opacity:1}40%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-160%) scale(.9);opacity:0}}
+
+@media (max-width:640px){
+.setupTitle{font-size:22px}
+.mineOptions{grid-template-columns:repeat(4,1fr);gap:6px}
+.mineOpt{padding:10px 2px}
+.mineOpt .num{font-size:16px}
+#minesGrid{gap:5px;max-width:95vw}
+.tile{font-size:clamp(20px,6vw,36px);border-radius:8px}
+.playBtn{font-size:12px;padding:12px}
+.resultTitle{font-size:24px}
+.resultAmount{font-size:26px;padding:12px 22px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+<defs>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
+<symbol id="ic-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></symbol>
+<symbol id="ic-sound-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
+</defs>
+</svg>
+
+<div id="topBtns">
+<button id="homeBtn" title="القائمة"><svg><use href="#ic-home"/></svg></button>
+<button id="soundBtn" title="الصوت"><svg id="soundIcon"><use href="#ic-sound-on"/></svg></button>
+</div>
+<div id="balBox"><small>الرصيد</small><b id="bal">0</b></div>
+
+<div id="gameArea">
+
+<!-- SETUP -->
+<div id="setupScreen">
+<div class="setupTitle">💎 ألغام العاصفة</div>
+<div class="setupSub">اختر عدد الألغام والرهان، ثم ابدأ</div>
+
+<div class="setupCard">
+<h3>عدد الألغام</h3>
+<div class="mineOptions" id="mineOptions">
+<div class="mineOpt" data-mines="1"><div class="num">1</div><div class="lbl">سهل جداً</div></div>
+<div class="mineOpt selected" data-mines="3"><div class="num">3</div><div class="lbl">سهل</div></div>
+<div class="mineOpt" data-mines="5"><div class="num">5</div><div class="lbl">متوسط</div></div>
+<div class="mineOpt" data-mines="10"><div class="num">10</div><div class="lbl">صعب</div></div>
+<div class="mineOpt" data-mines="15"><div class="num">15</div><div class="lbl">صعب جداً</div></div>
+<div class="mineOpt" data-mines="20"><div class="num">20</div><div class="lbl">خطر</div></div>
+<div class="mineOpt" data-mines="24"><div class="num">24</div><div class="lbl">مستحيل</div></div>
+<div class="mineOpt" data-mines="5"><div class="num">—</div><div class="lbl">—</div></div>
+</div>
+<h3>الرهان</h3>
+<div class="betRow">
+<button class="betBtn" id="betDown">−</button>
+<div class="betDisplay"><small>الرهان</small><b id="betVal">100</b></div>
+<button class="betBtn" id="betUp">+</button>
+</div>
+<button class="startBtn" id="startBtn">🎮 ابدأ اللعب</button>
+</div>
+</div>
+
+<!-- PLAY -->
+<div id="playScreen">
+<div class="gameStats">
+<div class="gsBox"><small>الرهان</small><b id="pBet">100</b></div>
+<div class="gsBox"><small>الألغام</small><b id="pMines">3</b></div>
+<div class="gsBox"><small>فتحت</small><b id="pRevealed">0</b></div>
+<div class="gsBox hot" id="multBox"><small>المضاعف</small><b id="pMult">1.00×</b></div>
+<div class="gsBox hot" id="cashBox"><small>ستربح</small><b id="pCash">100</b></div>
+</div>
+
+<div id="gridWrap">
+<div id="minesGrid"></div>
+</div>
+
+<div id="playCtrl">
+<button class="playBtn" id="newGameBtn">↺ جولة جديدة</button>
+<button class="playBtn" id="cashoutBtn" disabled>💰 اسحب 100</button>
+</div>
+</div>
+
+</div>
+
+<div id="resultOverlay">
+<div class="resultCard" id="resultCard">
+<div class="resultTitle" id="resultTitle">🎉 ربحت!</div>
+<div class="resultSub" id="resultSub">سحبت في الوقت المناسب</div>
+<div class="resultAmount" id="resultAmount">0</div>
+<div class="resultRows" id="resultRows"></div>
+<button class="resultBtn" id="resultBtn">جولة جديدة</button>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const sl=ms=>new Promise(r=>setTimeout(r,ms));
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+
+const Prefs={data:{sound:true,betIndex:2,mines:3},load(){try{const s=localStorage.getItem('sm_prefs');if(s)this.data={...this.data,...JSON.parse(s)}}catch(e){}},save(){try{localStorage.setItem('sm_prefs',JSON.stringify(this.data))}catch(e){}}};
+Prefs.load();
+
+/* ============ AUDIO ============ */
+const Aud=(()=>{
+let c=null,mg=null,on=Prefs.data.sound,ready=false;
+function init(){if(c)return;try{c=new(window.AudioContext||window.webkitAudioContext)();const comp=c.createDynamicsCompressor();comp.threshold.value=-10;mg=c.createGain();mg.gain.value=.5;mg.connect(comp);comp.connect(c.destination);ready=true}catch(e){}}
+function resume(){if(!c)return;if(c.state==='suspended')c.resume().catch(()=>{})}
+function safePop(){if(!on||!ready)return;resume();try{const o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(600,c.currentTime);o.frequency.exponentialRampToValueAtTime(1200,c.currentTime+.1);const g=c.createGain();g.gain.setValueAtTime(.2,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.2);o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+.22)}catch(e){}}
+function safePop2(){if(!on||!ready)return;resume();try{[523.25,659.25,783.99].forEach((f,i)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=f;const g=c.createGain();const t=c.currentTime+i*.04;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.15,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g);g.connect(mg);o.start(t);o.stop(t+.32)})}catch(e){}}
+function mineHit(){if(!on||!ready)return;resume();try{const o=c.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(100,c.currentTime);o.frequency.exponentialRampToValueAtTime(30,c.currentTime+.4);const g=c.createGain();g.gain.setValueAtTime(.5,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.6);o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+.62);const dur=.5;const buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const t=i/d.length;d[i]=(Math.random()*2-1)*Math.exp(-t*3)}const s=c.createBufferSource();s.buffer=buf;const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=400;const g2=c.createGain();g2.gain.value=.5;s.connect(lp);lp.connect(g2);g2.connect(mg);s.start()}catch(e){}}
+function cashout(){if(!on||!ready)return;resume();try{[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=f;const g=c.createGain();const t=c.currentTime+i*.07;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.18,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+.6);o.connect(g);g.connect(mg);o.start(t);o.stop(t+.65)})}catch(e){}}
+function bigWin(){if(!on||!ready)return;resume();try{[261.63,329.63,392,523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>{const o=c.createOscillator();o.type='sawtooth';o.frequency.value=f;const g=c.createGain();const t=c.currentTime+i*.08;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.15,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+1.2);const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3000;o.connect(lp);lp.connect(g);g.connect(mg);o.start(t);o.stop(t+1.25)})}catch(e){}}
+function click(){if(!on||!ready)return;try{const o=c.createOscillator();o.type='square';o.frequency.value=800;const g=c.createGain();g.gain.setValueAtTime(.05,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.05);o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+.06)}catch(e){}}
+function toggle(){on=!on;Prefs.data.sound=on;Prefs.save();return on}
+return{init,resume,safePop,safePop2,mineHit,cashout,bigWin,click,toggle,get on(){return on}};
+})();
+
+async function api(path,opts={}){const token=localStorage.getItem('sc_token');const headers={'Content-Type':'application/json',...(opts.headers||{})};if(token)headers['Authorization']='Bearer '+token;const res=await fetch(path,{...opts,headers});const data=await res.json();if(!res.ok)throw new Error(data.error||'خطأ');return data}
+function toast(msg,isErr){const t=$('toast');t.textContent=msg;t.className=isErr?'err on':'on';setTimeout(()=>t.classList.remove('on'),2500)}
+
+/* ============ STATE ============ */
+const BETS=[20,50,100,200,500,1000,2000,5000,10000];
+const S={
+  bal:0,
+  bi:Prefs.data.betIndex||2,
+  bet:BETS[Prefs.data.betIndex||2],
+  mines:Prefs.data.mines||3,
+  gameId:null,
+  active:false,
+  revealed:[],
+  grid:null,
+  mult:1,
+  cash:0,
+  locked:false
+};
+
+function updBal(){$('bal').textContent=Math.floor(S.bal).toLocaleString();const st=JSON.parse(localStorage.getItem('sc_user')||'{}');localStorage.setItem('sc_user',JSON.stringify({...st,balance:S.bal}))}
+function updBetDisplay(){$('betVal').textContent=S.bet;Prefs.data.betIndex=S.bi;Prefs.save()}
+
+/* ============ SETUP ============ */
+$('betDown').onclick=()=>{if(S.active)return;if(S.bi>0){S.bi--;S.bet=BETS[S.bi];updBetDisplay();Aud.click()}};
+$('betUp').onclick=()=>{if(S.active)return;if(S.bi<BETS.length-1){S.bi++;S.bet=BETS[S.bi];updBetDisplay();Aud.click()}};
+
+document.querySelectorAll('.mineOpt').forEach(opt=>{
+  opt.onclick=()=>{
+    if(S.active)return;
+    const m=parseInt(opt.dataset.mines);
+    if(isNaN(m)||m<1||m>24)return;
+    document.querySelectorAll('.mineOpt').forEach(o=>o.classList.remove('selected'));
+    opt.classList.add('selected');
+    S.mines=m;
+    Prefs.data.mines=m;Prefs.save();
+    Aud.click();
+  };
+});
+
+/* Restore selected mines */
+document.querySelectorAll('.mineOpt').forEach(o=>{
+  const m=parseInt(o.dataset.mines);
+  if(m===S.mines)o.classList.add('selected');
+  else o.classList.remove('selected');
+});
+
+updBetDisplay();
+
+/* ============ START GAME ============ */
+$('startBtn').onclick=async()=>{
+  if(S.active)return;
+  if(S.bal<S.bet){toast('رصيد غير كافٍ',true);return}
+  Aud.init();Aud.resume();
+  $('startBtn').disabled=true;$('startBtn').textContent='⏳ جاري التحضير...';
+  try{
+    const res=await api('/api/mines/start',{method:'POST',body:JSON.stringify({bet:S.bet,mines:S.mines})});
+    S.bal=res.balance;updBal();
+    S.active=true;
+    S.revealed=[];
+    S.mult=1;
+    S.cash=S.bet;
+    S.locked=false;
+    S.grid=null;
+
+    // Show play screen
+    $('setupScreen').classList.add('hidden');
+    $('playScreen').classList.add('on');
+    buildGrid();
+    updatePlayStats();
+    $('cashoutBtn').disabled=true;
+    $('cashoutBtn').textContent='💰 اسحب '+S.bet.toLocaleString();
+    $('cashoutBtn').classList.remove('pulse');
+  }catch(e){toast(e.message||'خطأ',true)}
+  $('startBtn').disabled=false;$('startBtn').textContent='🎮 ابدأ اللعب';
+};
+
+/* ============ BUILD GRID ============ */
+function buildGrid(){
+  const grid=$('minesGrid');
+  grid.innerHTML='';
+  for(let i=0;i<25;i++){
+    const t=document.createElement('div');
+    t.className='tile';
+    t.dataset.idx=i;
+    t.onclick=()=>revealTile(i);
+    grid.appendChild(t);
+  }
+}
+
+/* ============ REVEAL TILE ============ */
+async function revealTile(idx){
+  if(!S.active||S.locked)return;
+  if(S.revealed.includes(idx))return;
+
+  S.locked=true;
+  const tile=document.querySelector('.tile[data-idx="'+idx+'"]');
+  if(!tile){S.locked=false;return}
+
+  try{
+    const res=await api('/api/mines/reveal',{method:'POST',body:JSON.stringify({tile:idx})});
+    if(res.hitMine){
+      // Mine hit
+      S.revealed.push(idx);
+      tile.classList.add('mine-hit');
+      tile.innerHTML='<span class="tileIcon">💥</span>';
+      Aud.mineHit();
+      // Reveal all mines
+      revealAllMines(idx);
+      // Show all safe too (dim)
+      document.querySelectorAll('.tile').forEach(t=>{
+        if(!t.classList.contains('mine-hit'))t.classList.add('dim');
+      });
+      S.active=false;
+      S.locked=true;
+      $('cashoutBtn').disabled=true;
+      await sl(800);
+      showResult(false,0,0);
+      return;
+    } else {
+      // Safe
+      S.revealed.push(idx);
+      tile.classList.add('safe');
+      tile.innerHTML='<span class="tileIcon">💎</span>';
+      S.mult=res.multiplier;
+      S.cash=res.nextAmount;
+      // Pop animation
+      showWinPop('+'+res.multiplier.toFixed(2)+'×',tile);
+      if(S.revealed.length>=3)Aud.safePop2();
+      else Aud.safePop();
+      updatePlayStats();
+      $('cashoutBtn').disabled=false;
+      $('cashoutBtn').textContent='💰 اسحب '+S.cash.toLocaleString()+' ('+S.mult.toFixed(2)+'×)';
+      $('cashoutBtn').classList.add('pulse');
+    }
+  }catch(e){
+    toast(e.message||'خطأ',true);
+  }
+  S.locked=false;
+}
+
+function revealAllMines(exceptIdx){
+  // We don't have the grid, so we reveal all tiles with 💣 randomly
+  // We'll simulate: mark all non-revealed as possible mines
+  const allTiles=document.querySelectorAll('.tile');
+  allTiles.forEach(t=>{
+    const i=parseInt(t.dataset.idx);
+    if(i===exceptIdx)return;
+    if(S.revealed.includes(i))return;
+    // 30% chance to be a mine — decorative only
+    t.innerHTML='<span class="tileIcon">💣</span>';
+    t.classList.add('mine-reveal');
+  });
+}
+
+function showWinPop(text,tile){
+  const el=document.createElement('div');
+  el.className='winPop';
+  el.textContent=text;
+  const rect=tile.getBoundingClientRect();
+  el.style.left=(rect.left+rect.width/2)+'px';
+  el.style.top=(rect.top+rect.height/2)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1300);
+}
+
+function updatePlayStats(){
+  $('pBet').textContent=S.bet;
+  $('pMines').textContent=S.mines;
+  $('pRevealed').textContent=S.revealed.length;
+  $('pMult').textContent=S.mult.toFixed(2)+'×';
+  $('pCash').textContent=Math.floor(S.cash).toLocaleString();
+}
+
+/* ============ CASHOUT ============ */
+$('cashoutBtn').onclick=async()=>{
+  if(!S.active||S.revealed.length===0)return;
+  if(S.locked)return;
+  S.locked=true;
+  try{
+    const res=await api('/api/mines/cashout',{method:'POST'});
+    S.bal=res.balance;updBal();
+    Aud.cashout();
+    // Reveal all mines for display
+    revealAllMines(-1);
+    document.querySelectorAll('.tile').forEach(t=>{
+      if(!t.classList.contains('mine-hit')&&!t.classList.contains('safe'))t.classList.add('dim');
+    });
+    S.active=false;
+    $('cashoutBtn').disabled=true;
+    await sl(500);
+    showResult(true,res.amount,res.multiplier);
+  }catch(e){
+    toast(e.message||'خطأ',true);
+    S.locked=false;
+  }
+};
+
+/* ============ NEW GAME (during play) ============ */
+$('newGameBtn').onclick=()=>{
+  if(!S.active)return backToSetup();
+  if(!confirm('هل تريد إلغاء الجولة؟ سيتم إعادة رهانك'))return;
+  cancelAndBack();
+};
+
+async function cancelAndBack(){
+  try{
+    await api('/api/mines/cancel',{method:'POST'});
+    await refreshMe();
+  }catch(e){}
+  S.active=false;
+  backToSetup();
+}
+
+function backToSetup(){
+  $('playScreen').classList.remove('on');
+  $('setupScreen').classList.remove('hidden');
+  S.revealed=[];
+  S.mult=1;
+  S.cash=S.bet;
+  S.locked=false;
+  $('minesGrid').innerHTML='';
+}
+
+/* ============ RESULT OVERLAY ============ */
+function showResult(won,amount,mult){
+  const overlay=$('resultOverlay');
+  const card=$('resultCard');
+  card.className='resultCard '+(won?'win':'lose');
+  if(won){
+    $('resultTitle').textContent='🎉 ربحت!';
+    $('resultSub').textContent='سحبت في الوقت المناسب';
+    $('resultAmount').textContent=Math.floor(amount).toLocaleString()+' ل.س';
+    $('resultRows').innerHTML=
+      '<div class="resultRow"><span class="lbl">الرهان الأصلي</span><span class="val">'+S.bet.toLocaleString()+' ل.س</span></div>'+
+      '<div class="resultRow"><span class="lbl">المضاعف</span><span class="val">'+mult.toFixed(2)+'×</span></div>'+
+      '<div class="resultRow"><span class="lbl">الخانات المفتوحة</span><span class="val">'+S.revealed.length+' / 25</span></div>'+
+      '<div class="resultRow"><span class="lbl">صافي الربح</span><span class="val" style="color:#7effb0">+'+(amount-S.bet).toLocaleString()+' ل.س</span></div>';
+    if(mult>=3)Aud.bigWin();
+  } else {
+    $('resultTitle').textContent='💥 فجرت لغماً!';
+    $('resultSub').textContent='خسرت هذه الجولة';
+    $('resultAmount').textContent='-'+S.bet.toLocaleString()+' ل.س';
+    $('resultRows').innerHTML=
+      '<div class="resultRow"><span class="lbl">الرهان</span><span class="val">'+S.bet.toLocaleString()+' ل.س</span></div>'+
+      '<div class="resultRow"><span class="lbl">الخانات المفتوحة بأمان</span><span class="val">'+S.revealed.length+'</span></div>'+
+      '<div class="resultRow"><span class="lbl">عدد الألغام</span><span class="val">'+S.mines+'</span></div>'+
+      '<div class="resultRow"><span class="lbl">حظ أوفر في المرة القادمة</span><span class="val">—</span></div>';
+  }
+  overlay.classList.add('show');
+}
+
+$('resultBtn').onclick=()=>{
+  $('resultOverlay').classList.remove('show');
+  backToSetup();
+  refreshMe();
+};
+
+/* ============ TOP BUTTONS ============ */
+$('homeBtn').onclick=()=>{
+  if(S.active&&!confirm('لديك جولة نشطة! هل تريد الخروج؟'))return;
+  location.href='/';
+};
+$('soundBtn').onclick=()=>{
+  const on=Aud.toggle();
+  $('soundIcon').innerHTML='<use href="'+(on?'#ic-sound-on':'#ic-sound-off')+'"/>';
+  if(on)Aud.resume();
+};
+if(!Prefs.data.sound)$('soundIcon').innerHTML='<use href="#ic-sound-off"/>';
+
+/* ============ REFRESH ============ */
+async function refreshMe(){try{const u=await api('/api/me');S.bal=u.balance;updBal()}catch(e){if(e.message.includes('جلسة')||e.message.includes('مصرح')){location.href='/'}}}
+
+/* ============ INIT ============ */
+(async()=>{
+  const token=localStorage.getItem('sc_token');
+  if(!token){location.href='/';return}
+  try{const u=await api('/api/me');S.bal=u.balance;updBal()}catch(e){location.href='/'}
+})();
+</script>
+</body>
+</html>
