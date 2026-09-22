@@ -58,6 +58,26 @@ const JP_TIERS = [16000, 60000, 300000, 700000];
 const JP_CONTRIB = [0.001, 0.0005, 0.0002, 0.0001];
 const JP_WHEEL_WEIGHTS = [60, 25, 11, 4];
 
+// ============ CHICKEN ROAD ============
+const CHICKEN_RTP = 0.96;
+const CHICKEN_ROADS = new Map();
+
+// ============ PLINKO ============
+const PLINKO_RTP = 0.97;
+
+// ============ LIMBO ============
+const LIMBO_HOUSE_EDGE = 0.03;
+
+// ============ COINFLIP ============
+const COINFLIP_RTP = 0.96;
+
+// ============ TOWER ============
+const TOWER_RTP = 0.96;
+const TOWER_GAMES = new Map();
+
+// ============ DICE ============
+const DICE_RTP = 0.99;
+
 const COMPANY_WALLETS = {
   sham_syp: process.env.SHAM_SYP || '066f10afcd1b2d1a8f66dbe1a1eb3f17',
   sham_usd: process.env.SHAM_USD || '066f10afcd1b2d1a8f66dbe1a1eb3f17',
@@ -96,12 +116,20 @@ async function initDB() {
     CREATE TABLE IF NOT EXISTS daily_claims (id SERIAL PRIMARY KEY,uid VARCHAR(20),amount BIGINT,streak INT,created_at BIGINT);
     CREATE TABLE IF NOT EXISTS aviator_bets (id SERIAL PRIMARY KEY,round_id INT,uid VARCHAR(20),bet BIGINT,multiplier NUMERIC,cashout BIGINT,won BOOLEAN,created_at BIGINT);
     CREATE TABLE IF NOT EXISTS mines_games (id SERIAL PRIMARY KEY,uid VARCHAR(20),bet BIGINT,mines INT,revealed INT,cashout BIGINT,won BOOLEAN,created_at BIGINT);
+    CREATE TABLE IF NOT EXISTS chicken_games (id SERIAL PRIMARY KEY,uid VARCHAR(20),bet BIGINT,difficulty INT,steps INT,multiplier NUMERIC,cashout BIGINT,won BOOLEAN,created_at BIGINT);
+    CREATE TABLE IF NOT EXISTS plinko_games (id SERIAL PRIMARY KEY,uid VARCHAR(20),bet BIGINT,risk VARCHAR(20),rows_count INT,slot INT,multiplier NUMERIC,win BIGINT,path TEXT,created_at BIGINT);
+    CREATE TABLE IF NOT EXISTS dice_games (id SERIAL PRIMARY KEY,uid VARCHAR(20),bet BIGINT,target NUMERIC,direction VARCHAR(10),roll NUMERIC,won BOOLEAN,payout NUMERIC,created_at BIGINT);
+    CREATE TABLE IF NOT EXISTS limbo_games (id SERIAL PRIMARY KEY,uid VARCHAR(20),bet BIGINT,target NUMERIC,result NUMERIC,won BOOLEAN,payout NUMERIC,created_at BIGINT);
+    CREATE TABLE IF NOT EXISTS coinflip_games (id SERIAL PRIMARY KEY,uid VARCHAR(20),bet BIGINT,pick VARCHAR(10),result VARCHAR(10),won BOOLEAN,payout NUMERIC,created_at BIGINT);
+    CREATE TABLE IF NOT EXISTS tower_games (id SERIAL PRIMARY KEY,uid VARCHAR(20),bet BIGINT,difficulty INT,level INT,multiplier NUMERIC,cashout BIGINT,won BOOLEAN,created_at BIGINT);
     INSERT INTO jackpot (id,tier1,tier2,tier3,tier4) VALUES (1,16000,60000,300000,700000) ON CONFLICT (id) DO NOTHING;
     CREATE INDEX IF NOT EXISTS idx_users_uid ON users(uid);
     CREATE INDEX IF NOT EXISTS idx_spins_uid ON spins(uid);
     CREATE INDEX IF NOT EXISTS idx_daily_uid ON daily_claims(uid);
     CREATE INDEX IF NOT EXISTS idx_aviator_uid ON aviator_bets(uid);
     CREATE INDEX IF NOT EXISTS idx_mines_uid ON mines_games(uid);
+    CREATE INDEX IF NOT EXISTS idx_chicken_uid ON chicken_games(uid);
+    CREATE INDEX IF NOT EXISTS idx_plinko_uid ON plinko_games(uid);
   `);
   console.log('✅ DB ready');
 }
@@ -111,6 +139,16 @@ function rint(max) { return crypto.randomInt(0, max); }
 function genUID() { let u = ''; for (let i = 0; i < 15; i++) u += rint(10); while (u[0] === '0') u = u.slice(1) + rint(10); return u; }
 function genInviteCode() { const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = 'SC'; for (let i = 0; i < 8; i++) s += c[rint(c.length)]; return s; }
 function getClientIP(req) { return (req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || '').replace('::ffff:', ''); }
+
+async function addJackpotContribution(bet) {
+  for (let i = 0; i < 4; i++) {
+    const inc = Math.floor(bet * JP_CONTRIB[i]);
+    if (inc > 0) {
+      const col = 'tier' + (i + 1);
+      await pool.query(`UPDATE jackpot SET ${col}=${col}+$1 WHERE id=1`, [inc]);
+    }
+  }
+}
 
 // ============ MIDDLEWARE ============
 app.use(cors());
@@ -378,7 +416,7 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
       if (newBalance < 0) return res.status(400).json({ error: 'رصيد غير كافٍ' });
       await pool.query(`UPDATE users SET balance=$1, laps=laps+1, wagered=wagered+$2, won=won+$3, best_win=GREATEST(best_win,$4) WHERE uid=$5`, [newBalance, bet, totalWin, totalWin, u.uid]);
       await pool.query(`INSERT INTO spins (uid,bet,won,net,created_at,ip) VALUES ($1,$2,$3,$4,$5,$6)`, [u.uid, bet, totalWin, net, Date.now(), ip]);
-      for (let i = 0; i < 4; i++) { const inc = Math.floor(bet * JP_CONTRIB[i]); if (inc > 0) { const col = 'tier' + (i + 1); await pool.query(`UPDATE jackpot SET ${col}=${col}+$1 WHERE id=1`, [inc]); } }
+      await addJackpotContribution(bet);
       if (net < 0 && u.referred_by) {
         const refR = await pool.query('SELECT * FROM users WHERE uid = $1', [u.referred_by]);
         const ref = refR.rows[0];
@@ -554,7 +592,6 @@ function aviatorNewRound() {
       aviatorState.state = 'crashed';
       aviatorState.history.unshift(aviatorState.crashPoint);
       if (aviatorState.history.length > 20) aviatorState.history.pop();
-      // Log uncashed losses
       for (const [uid, p] of aviatorState.players) {
         if (!p.cashedOut) {
           pool.query(`INSERT INTO aviator_bets (round_id,uid,bet,multiplier,cashout,won,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
@@ -575,11 +612,6 @@ function aviatorCurrentMult() {
 app.get('/api/aviator/state', async (req, res) => {
   try {
     const now = Date.now();
-    let roundStart;
-    if (aviatorState.state === 'waiting') roundStart = aviatorState.startTime;
-    else if (aviatorState.state === 'flying') roundStart = aviatorState.startTime;
-    else roundStart = aviatorState.startTime;
-
     const currentMult = aviatorCurrentMult();
     const elapsed = aviatorState.state === 'flying' ? (now - aviatorState.startTime) / 1000 : 0;
 
@@ -608,7 +640,7 @@ app.post('/api/aviator/bet', authUser, rateLimit(30, 60000), async (req, res) =>
     const newBal = Number(u.balance) - amount;
     await pool.query('UPDATE users SET balance=$1, wagered=wagered+$2 WHERE uid=$3', [newBal, amount, u.uid]);
     aviatorState.players.set(u.uid, { bet: amount, cashedOut: false, cashoutMult: 0, cashoutAmount: 0 });
-    for (let i = 0; i < 4; i++) { const inc = Math.floor(amount * JP_CONTRIB[i]); if (inc > 0) { const col = 'tier' + (i + 1); await pool.query(`UPDATE jackpot SET ${col}=${col}+$1 WHERE id=1`, [inc]); } }
+    await addJackpotContribution(amount);
 
     res.json({ success: true, balance: newBal, bet: amount, roundId: aviatorState.roundId });
   } catch (e) { console.error('aviator bet:', e); res.status(500).json({ error: 'خطأ' }); }
@@ -683,7 +715,7 @@ app.post('/api/mines/start', authUser, rateLimit(30, 60000), async (req, res) =>
     const grid = minesGenerate(mines);
     const newBal = Number(u.balance) - bet;
     await pool.query('UPDATE users SET balance=$1, wagered=wagered+$2 WHERE uid=$3', [newBal, bet, u.uid]);
-    for (let i = 0; i < 4; i++) { const inc = Math.floor(bet * JP_CONTRIB[i]); if (inc > 0) { const col = 'tier' + (i + 1); await pool.query(`UPDATE jackpot SET ${col}=${col}+$1 WHERE id=1`, [inc]); } }
+    await addJackpotContribution(bet);
 
     minesGames.set(u.uid, { grid, mines, bet, revealed: [], cashout: 0, roundId: Date.now() });
     res.json({ success: true, balance: newBal, gameId: Date.now() });
@@ -700,7 +732,6 @@ app.post('/api/mines/reveal', authUser, rateLimit(120, 60000), async (req, res) 
     if (g.revealed.includes(tile)) return res.status(400).json({ error: 'فتحت هذه الخانة مسبقاً' });
 
     if (g.grid[tile] === 1) {
-      // Hit a mine - lose
       minesGames.delete(u.uid);
       await pool.query(`INSERT INTO mines_games (uid,bet,mines,revealed,cashout,won,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
         [u.uid, g.bet, g.mines, g.revealed.length, 0, false, Date.now()]);
@@ -749,7 +780,302 @@ app.post('/api/mines/cancel', authUser, async (req, res) => {
   res.status(400).json({ error: 'لا يمكن الإلغاء' });
 });
 
-// ============ WALLET (unchanged) ============
+// =====================================================
+// ============ CHICKEN ROAD ===========================
+// =====================================================
+function chickenMultiplier(step, difficulty) {
+  const lanes = { 1: 3, 2: 4, 3: 5, 4: 6 }[difficulty] || 3;
+  let prob = 1;
+  for (let i = 0; i < step; i++) prob *= (lanes - 1) / lanes;
+  return Math.max(1.00, Math.floor((CHICKEN_RTP / prob) * 100) / 100);
+}
+
+app.post('/api/chicken/start', authUser, rateLimit(30, 60000), async (req, res) => {
+  try {
+    const { bet, difficulty } = req.body;
+    const u = req.user;
+    if (typeof bet !== 'number' || bet < 20 || bet > 1000000) return res.status(400).json({ error: 'الرهان بين 20 و 1,000,000' });
+    const diff = parseInt(difficulty) || 1;
+    if (diff < 1 || diff > 4) return res.status(400).json({ error: 'صعوبة غير صحيحة' });
+    if (Number(u.balance) < bet) return res.status(400).json({ error: 'رصيد غير كافٍ' });
+    if (CHICKEN_ROADS.has(u.uid)) return res.status(400).json({ error: 'لديك لعبة نشطة' });
+
+    const newBal = Number(u.balance) - bet;
+    await pool.query('UPDATE users SET balance=$1, wagered=wagered+$2 WHERE uid=$3', [newBal, bet, u.uid]);
+    await addJackpotContribution(bet);
+
+    CHICKEN_ROADS.set(u.uid, { bet, difficulty: diff, step: 0, multiplier: 1, active: true });
+    res.json({ success: true, balance: newBal, nextMultiplier: chickenMultiplier(1, diff) });
+  } catch (e) { console.error('chicken start:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+app.post('/api/chicken/step', authUser, rateLimit(120, 60000), async (req, res) => {
+  try {
+    const u = req.user;
+    const g = CHICKEN_ROADS.get(u.uid);
+    if (!g || !g.active) return res.status(400).json({ error: 'لا توجد لعبة' });
+    if (g.step >= 24) return res.status(400).json({ error: 'وصلت النهاية!' });
+
+    const lanes = { 1: 3, 2: 4, 3: 5, 4: 6 }[g.difficulty];
+    const crashed = crypto.randomInt(0, lanes) === 0;
+
+    if (crashed) {
+      CHICKEN_ROADS.delete(u.uid);
+      const refR = await pool.query('SELECT balance FROM users WHERE uid=$1', [u.uid]);
+      await pool.query(`INSERT INTO chicken_games (uid,bet,difficulty,steps,multiplier,cashout,won,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+        [u.uid, g.bet, g.difficulty, g.step, g.multiplier, 0, false, Date.now()]).catch(() => {});
+      await pool.query(`INSERT INTO transactions (uid,type,amount,balance_after,note,admin,created_at) VALUES ($1,'chicken_loss',$2,$3,$4,NULL,$5)`,
+        [u.uid, -g.bet, Number(refR.rows[0].balance), 'خسارة تشكن روود', Date.now()]).catch(() => {});
+      return res.json({ success: true, crashed: true, step: g.step, multiplier: g.multiplier });
+    }
+
+    g.step++;
+    g.multiplier = chickenMultiplier(g.step, g.difficulty);
+    const nextMult = chickenMultiplier(g.step + 1, g.difficulty);
+    res.json({ success: true, crashed: false, step: g.step, multiplier: g.multiplier, nextMultiplier: nextMult });
+  } catch (e) { console.error('chicken step:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+app.post('/api/chicken/cashout', authUser, rateLimit(30, 60000), async (req, res) => {
+  try {
+    const u = req.user;
+    const g = CHICKEN_ROADS.get(u.uid);
+    if (!g || !g.active) return res.status(400).json({ error: 'لا توجد لعبة' });
+    if (g.step === 0) return res.status(400).json({ error: 'تقدّم خطوة أولاً' });
+
+    const amount = Math.floor(g.bet * g.multiplier);
+    CHICKEN_ROADS.delete(u.uid);
+    const refR = await pool.query('SELECT balance FROM users WHERE uid=$1', [u.uid]);
+    const newBal = Number(refR.rows[0].balance) + amount;
+    await pool.query('UPDATE users SET balance=$1, won=won+$2, best_win=GREATEST(best_win,$3) WHERE uid=$4', [newBal, amount, amount, u.uid]);
+    await pool.query(`INSERT INTO chicken_games (uid,bet,difficulty,steps,multiplier,cashout,won,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [u.uid, g.bet, g.difficulty, g.step, g.multiplier, amount, true, Date.now()]).catch(() => {});
+    await pool.query(`INSERT INTO transactions (uid,type,amount,balance_after,note,admin,created_at) VALUES ($1,'chicken_win',$2,$3,$4,NULL,$5)`,
+      [u.uid, amount, newBal, 'دجاجة x' + g.multiplier, Date.now()]);
+    res.json({ success: true, balance: newBal, amount, multiplier: g.multiplier, step: g.step });
+  } catch (e) { console.error('chicken cashout:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+// =====================================================
+// ============ PLINKO =================================
+// =====================================================
+app.post('/api/plinko/drop', authUser, rateLimit(60, 60000), async (req, res) => {
+  try {
+    const { bet, risk = 'medium', rows = 12 } = req.body;
+    const u = req.user;
+    if (typeof bet !== 'number' || bet < 20 || bet > 1000000) return res.status(400).json({ error: 'الرهان بين 20 و 1,000,000' });
+    const r = parseInt(rows);
+    if (r < 8 || r > 16) return res.status(400).json({ error: 'الصفوف بين 8 و 16' });
+    const riskKey = ['low', 'medium', 'high'].includes(risk) ? risk : 'medium';
+    if (Number(u.balance) < bet) return res.status(400).json({ error: 'رصيد غير كافٍ' });
+
+    const path = [];
+    let position = 0;
+    for (let i = 0; i < r; i++) {
+      const right = crypto.randomInt(0, 2) === 1;
+      path.push(right ? 'R' : 'L');
+      if (right) position++;
+    }
+
+    const PLINKO_PAYOUTS = {
+      low: [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6],
+      medium: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
+      high: [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29]
+    };
+    const basePayouts = PLINKO_PAYOUTS[riskKey];
+    const slotCount = r + 1;
+    const payouts = [];
+    for (let i = 0; i < slotCount; i++) {
+      const t = i / (slotCount - 1);
+      const mirrored = 1 - Math.abs(t - 0.5) * 2;
+      const idx = Math.min(basePayouts.length - 1, Math.floor(mirrored * basePayouts.length));
+      payouts.push(basePayouts[idx]);
+    }
+    const mult = payouts[position] || 1;
+    const win = Math.floor(bet * mult);
+    const net = win - bet;
+    const newBal = Number(u.balance) + net;
+
+    await pool.query('UPDATE users SET balance=$1, wagered=wagered+$2, won=won+$3, best_win=GREATEST(best_win,$4) WHERE uid=$5',
+      [newBal, bet, win, win, u.uid]);
+    await pool.query(`INSERT INTO transactions (uid,type,amount,balance_after,note,admin,created_at) VALUES ($1,'plinko',$2,$3,$4,NULL,$5)`,
+      [u.uid, net, newBal, 'plinko x' + mult, Date.now()]);
+    await pool.query(`INSERT INTO plinko_games (uid,bet,risk,rows_count,slot,multiplier,win,path,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [u.uid, bet, riskKey, r, position, mult, win, path.join(''), Date.now()]).catch(() => {});
+    await addJackpotContribution(bet);
+
+    res.json({ success: true, balance: newBal, path, slot: position, multiplier: mult, win, net, payouts });
+  } catch (e) { console.error('plinko:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+// =====================================================
+// ============ DICE ===================================
+// =====================================================
+app.post('/api/dice/roll', authUser, rateLimit(120, 60000), async (req, res) => {
+  try {
+    const { bet, target, direction } = req.body;
+    const u = req.user;
+    if (typeof bet !== 'number' || bet < 20 || bet > 1000000) return res.status(400).json({ error: 'الرهان بين 20 و 1,000,000' });
+    const t = parseFloat(target);
+    if (isNaN(t) || t < 2 || t > 98) return res.status(400).json({ error: 'الهدف بين 2 و 98' });
+    if (!['over', 'under'].includes(direction)) return res.status(400).json({ error: 'اتجاه غير صحيح' });
+    if (Number(u.balance) < bet) return res.status(400).json({ error: 'رصيد غير كافٍ' });
+
+    const roll = crypto.randomInt(0, 10000) / 100;
+    const won = direction === 'over' ? roll > t : roll < t;
+    const winChance = direction === 'over' ? (100 - t) : t;
+    const payout = won ? Math.floor(bet * (DICE_RTP * 100 / winChance)) : 0;
+    const net = payout - bet;
+    const newBal = Number(u.balance) + net;
+
+    await pool.query('UPDATE users SET balance=$1, wagered=wagered+$2, won=won+$3, best_win=GREATEST(best_win,$4) WHERE uid=$5',
+      [newBal, bet, payout, payout, u.uid]);
+    await pool.query(`INSERT INTO transactions (uid,type,amount,balance_after,note,admin,created_at) VALUES ($1,'dice',$2,$3,$4,NULL,$5)`,
+      [u.uid, net, newBal, 'نرد ' + roll + ' ' + direction + ' ' + t, Date.now()]);
+    await pool.query(`INSERT INTO dice_games (uid,bet,target,direction,roll,won,payout,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [u.uid, bet, t, direction, roll, won, payout, Date.now()]).catch(() => {});
+    await addJackpotContribution(bet);
+
+    res.json({ success: true, balance: newBal, roll, won, payout, net, target: t, direction });
+  } catch (e) { console.error('dice:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+// =====================================================
+// ============ LIMBO ==================================
+// =====================================================
+app.post('/api/limbo/play', authUser, rateLimit(120, 60000), async (req, res) => {
+  try {
+    const { bet, target } = req.body;
+    const u = req.user;
+    if (typeof bet !== 'number' || bet < 20 || bet > 1000000) return res.status(400).json({ error: 'الرهان بين 20 و 1,000,000' });
+    const t = parseFloat(target);
+    if (isNaN(t) || t < 1.01 || t > 1000) return res.status(400).json({ error: 'الهدف بين 1.01 و 1000' });
+    if (Number(u.balance) < bet) return res.status(400).json({ error: 'رصيد غير كافٍ' });
+
+    const r = Math.random();
+    const result = Math.max(1.00, Math.floor(((1 - LIMBO_HOUSE_EDGE) / (1 - r)) * 100) / 100);
+    const won = result >= t;
+    const payout = won ? Math.floor(bet * t) : 0;
+    const net = payout - bet;
+    const newBal = Number(u.balance) + net;
+
+    await pool.query('UPDATE users SET balance=$1, wagered=wagered+$2, won=won+$3, best_win=GREATEST(best_win,$4) WHERE uid=$5',
+      [newBal, bet, payout, payout, u.uid]);
+    await pool.query(`INSERT INTO transactions (uid,type,amount,balance_after,note,admin,created_at) VALUES ($1,'limbo',$2,$3,$4,NULL,$5)`,
+      [u.uid, net, newBal, 'ليمبو x' + result, Date.now()]);
+    await pool.query(`INSERT INTO limbo_games (uid,bet,target,result,won,payout,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [u.uid, bet, t, result, won, payout, Date.now()]).catch(() => {});
+    await addJackpotContribution(bet);
+
+    res.json({ success: true, balance: newBal, result, won, payout, net, target: t });
+  } catch (e) { console.error('limbo:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+// =====================================================
+// ============ COINFLIP ===============================
+// =====================================================
+app.post('/api/coinflip/play', authUser, rateLimit(120, 60000), async (req, res) => {
+  try {
+    const { bet, pick } = req.body;
+    const u = req.user;
+    if (typeof bet !== 'number' || bet < 20 || bet > 1000000) return res.status(400).json({ error: 'الرهان بين 20 و 1,000,000' });
+    if (!['heads', 'tails'].includes(pick)) return res.status(400).json({ error: 'اختر وجه أو كتابة' });
+    if (Number(u.balance) < bet) return res.status(400).json({ error: 'رصيد غير كافٍ' });
+
+    const result = crypto.randomInt(0, 2) === 0 ? 'heads' : 'tails';
+    const won = result === pick;
+    const payout = won ? Math.floor(bet * (COINFLIP_RTP * 2)) : 0;
+    const net = payout - bet;
+    const newBal = Number(u.balance) + net;
+
+    await pool.query('UPDATE users SET balance=$1, wagered=wagered+$2, won=won+$3, best_win=GREATEST(best_win,$4) WHERE uid=$5',
+      [newBal, bet, payout, payout, u.uid]);
+    await pool.query(`INSERT INTO transactions (uid,type,amount,balance_after,note,admin,created_at) VALUES ($1,'coinflip',$2,$3,$4,NULL,$5)`,
+      [u.uid, net, newBal, 'كوين فليب ' + result, Date.now()]);
+    await pool.query(`INSERT INTO coinflip_games (uid,bet,pick,result,won,payout,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [u.uid, bet, pick, result, won, payout, Date.now()]).catch(() => {});
+    await addJackpotContribution(bet);
+
+    res.json({ success: true, balance: newBal, result, won, payout, net, pick });
+  } catch (e) { console.error('coinflip:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+// =====================================================
+// ============ TOWER ==================================
+// =====================================================
+function towerMultiplier(level, difficulty) {
+  // difficulty 1=easy (4 tiles), 2=medium (3), 3=hard (2)
+  const tiles = { 1: 4, 2: 3, 3: 2 }[difficulty] || 4;
+  let prob = 1;
+  for (let i = 0; i < level; i++) prob *= 1 / tiles;
+  return Math.max(1.00, Math.floor((TOWER_RTP / prob) * 100) / 100);
+}
+
+app.post('/api/tower/start', authUser, rateLimit(30, 60000), async (req, res) => {
+  try {
+    const { bet, difficulty } = req.body;
+    const u = req.user;
+    if (typeof bet !== 'number' || bet < 20 || bet > 1000000) return res.status(400).json({ error: 'الرهان بين 20 و 1,000,000' });
+    const diff = parseInt(difficulty) || 1;
+    if (diff < 1 || diff > 3) return res.status(400).json({ error: 'صعوبة غير صحيحة' });
+    if (Number(u.balance) < bet) return res.status(400).json({ error: 'رصيد غير كافٍ' });
+    if (TOWER_GAMES.has(u.uid)) return res.status(400).json({ error: 'لديك لعبة نشطة' });
+
+    const newBal = Number(u.balance) - bet;
+    await pool.query('UPDATE users SET balance=$1, wagered=wagered+$2 WHERE uid=$3', [newBal, bet, u.uid]);
+    await addJackpotContribution(bet);
+    TOWER_GAMES.set(u.uid, { bet, difficulty: diff, level: 0, multiplier: 1, active: true });
+    res.json({ success: true, balance: newBal, nextMultiplier: towerMultiplier(1, diff) });
+  } catch (e) { console.error('tower start:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+app.post('/api/tower/pick', authUser, rateLimit(120, 60000), async (req, res) => {
+  try {
+    const { tile } = req.body;
+    const u = req.user;
+    const g = TOWER_GAMES.get(u.uid);
+    if (!g || !g.active) return res.status(400).json({ error: 'لا توجد لعبة' });
+    const tiles = { 1: 4, 2: 3, 3: 2 }[g.difficulty];
+    const t = parseInt(tile);
+    if (isNaN(t) || t < 0 || t >= tiles) return res.status(400).json({ error: 'خانة غير صحيحة' });
+
+    const safeTile = crypto.randomInt(0, tiles);
+    if (t !== safeTile) {
+      TOWER_GAMES.delete(u.uid);
+      const refR = await pool.query('SELECT balance FROM users WHERE uid=$1', [u.uid]);
+      await pool.query(`INSERT INTO tower_games (uid,bet,difficulty,level,multiplier,cashout,won,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+        [u.uid, g.bet, g.difficulty, g.level, g.multiplier, 0, false, Date.now()]).catch(() => {});
+      return res.json({ success: true, crashed: true, level: g.level, safeTile, multiplier: g.multiplier });
+    }
+
+    g.level++;
+    g.multiplier = towerMultiplier(g.level, g.difficulty);
+    const nextMult = towerMultiplier(g.level + 1, g.difficulty);
+    res.json({ success: true, crashed: false, level: g.level, safeTile, multiplier: g.multiplier, nextMultiplier: nextMult });
+  } catch (e) { console.error('tower pick:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+app.post('/api/tower/cashout', authUser, rateLimit(30, 60000), async (req, res) => {
+  try {
+    const u = req.user;
+    const g = TOWER_GAMES.get(u.uid);
+    if (!g || !g.active) return res.status(400).json({ error: 'لا توجد لعبة' });
+    if (g.level === 0) return res.status(400).json({ error: 'اصعد طابقاً واحداً أولاً' });
+
+    const amount = Math.floor(g.bet * g.multiplier);
+    TOWER_GAMES.delete(u.uid);
+    const refR = await pool.query('SELECT balance FROM users WHERE uid=$1', [u.uid]);
+    const newBal = Number(refR.rows[0].balance) + amount;
+    await pool.query('UPDATE users SET balance=$1, won=won+$2, best_win=GREATEST(best_win,$3) WHERE uid=$4', [newBal, amount, amount, u.uid]);
+    await pool.query(`INSERT INTO tower_games (uid,bet,difficulty,level,multiplier,cashout,won,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [u.uid, g.bet, g.difficulty, g.level, g.multiplier, amount, true, Date.now()]).catch(() => {});
+    await pool.query(`INSERT INTO transactions (uid,type,amount,balance_after,note,admin,created_at) VALUES ($1,'tower_win',$2,$3,$4,NULL,$5)`,
+      [u.uid, amount, newBal, 'برج x' + g.multiplier, Date.now()]);
+    res.json({ success: true, balance: newBal, amount, multiplier: g.multiplier, level: g.level });
+  } catch (e) { console.error('tower cashout:', e); res.status(500).json({ error: 'خطأ' }); }
+});
+
+// ============ WALLET ============
 app.get('/api/wallet/methods', (req, res) => {
   res.json({ methods: PAYMENT_METHODS.map(m => ({ ...m, company_wallet: COMPANY_WALLETS[m.code] || '' })) });
 });
@@ -826,7 +1152,7 @@ app.post('/api/agent/become', authUser, async (req, res) => {
 
 app.get('/api/rtp', (req, res) => res.json({ rtp: RTP, houseEdge: 1 - RTP, maxWinMult: MAX_WIN_MULT }));
 
-// ============ ADMIN (unchanged core) ============
+// ============ ADMIN ============
 app.post('/api/admin/login', rateLimit(5, 60000), (req, res) => {
   const { password } = req.body;
   if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'كلمة مرور خاطئة' });
@@ -1038,11 +1364,15 @@ app.use((req, res) => res.status(404).json({ error: 'Not found' }));
     await initDB();
     aviatorNewRound();
     app.listen(PORT, () => {
-      console.log('⚡ STORMGATE v1.0');
+      console.log('⚡ STORMGATE v2.0');
       console.log('Port:', PORT);
       console.log('RTP Slot:', (RTP * 100).toFixed(2) + '%');
       console.log('RTP Aviator:', (AVIATOR_RTP * 100).toFixed(2) + '%');
       console.log('RTP Mines:', (MINES_RTP * 100).toFixed(2) + '%');
+      console.log('RTP Chicken:', (CHICKEN_RTP * 100).toFixed(2) + '%');
+      console.log('RTP Plinko:', (PLINKO_RTP * 100).toFixed(2) + '%');
+      console.log('RTP Dice:', (DICE_RTP * 100).toFixed(2) + '%');
+      console.log('RTP Tower:', (TOWER_RTP * 100).toFixed(2) + '%');
       console.log('Daily:', DAILY_REWARDS.join('/'));
       console.log('Jackpot tiers:', JP_TIERS.join('/'));
     });
