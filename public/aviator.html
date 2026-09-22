@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#05000f">
+<title>✈️ طائرة العاصفة — STORMPLANE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Amiri:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#05000f;color:#fff;font-family:'Amiri',serif;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+canvas{display:block}
+
+/* ==== TOP ==== */
+#topBtns{position:fixed;top:6px;left:0;right:0;z-index:60;height:48px;pointer-events:none}
+#topBtns button{pointer-events:auto;position:absolute;border-radius:50%;width:40px;height:40px;border:2px solid #4a9eff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:7px;overflow:hidden;background:linear-gradient(180deg,rgba(20,40,90,.95),rgba(5,10,30,.95));box-shadow:0 0 15px rgba(74,158,255,.3)}
+#topBtns button:active{transform:scale(.9)}
+#topBtns button svg{width:100%;height:100%;fill:#4a9eff}
+#homeBtn{top:0;left:6px}
+#soundBtn{top:0;right:6px}
+
+#balBox{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:60;background:linear-gradient(180deg,rgba(30,60,120,.95),rgba(5,20,50,.98));border:2px solid #4a9eff;border-radius:10px;padding:4px 16px;text-align:center;box-shadow:0 0 20px rgba(74,158,255,.4)}
+#balBox small{display:block;font-size:9px;color:#8ec8ff;font-family:'Cinzel Decorative',serif}
+#balBox b{color:#fff;font-family:monospace;font-size:16px;text-shadow:0 0 10px #4a9eff}
+
+/* ==== GAME AREA ==== */
+#gameArea{position:fixed;inset:0;display:flex;flex-direction:column;padding:52px 0 0 0;background:radial-gradient(ellipse at 50% 100%,#1a2050 0%,#0a0a20 50%,#000 100%)}
+#canvasWrap{position:relative;flex:1;min-height:0;overflow:hidden}
+#aviatorCanvas{position:absolute;inset:0;width:100%;height:100%}
+
+/* ==== ROUND STATUS ==== */
+#statusBar{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:10;text-align:center;pointer-events:none;width:100%;padding:0 10px}
+#statusText{font-family:'Cinzel Decorative',serif;font-size:14px;color:#8ec8ff;text-shadow:0 0 15px rgba(74,158,255,.9);letter-spacing:.1em}
+#countdown{font-family:monospace;font-size:32px;font-weight:900;color:#fff;text-shadow:0 0 20px #4a9eff;margin-top:4px}
+#multiplierBig{font-family:'Cinzel Decorative',serif;font-size:clamp(48px,14vw,110px);font-weight:900;color:#fff;text-shadow:0 0 40px #4a9eff,0 0 80px #4a9eff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;pointer-events:none;opacity:0;transition:opacity .2s;letter-spacing:.05em}
+#multiplierBig.show{opacity:1}
+#multiplierBig.crashed{color:#ff3a3a;text-shadow:0 0 40px #ff3a3a,0 0 80px #ff3a3a;animation:crashPulse .5s ease-out}
+@keyframes crashPulse{0%{transform:translate(-50%,-50%) scale(1.3)}100%{transform:translate(-50%,-50%) scale(1)}}
+
+/* ==== HISTORY ==== */
+#historyBar{position:absolute;top:56px;left:0;right:0;z-index:10;display:flex;gap:6px;padding:0 10px;overflow-x:auto;scrollbar-width:none}
+#historyBar::-webkit-scrollbar{display:none}
+.histChip{flex-shrink:0;padding:4px 10px;border-radius:20px;font-family:monospace;font-weight:900;font-size:11px;border:2px solid}
+.histChip.low{background:rgba(74,158,255,.15);border-color:#4a9eff;color:#8ec8ff}
+.histChip.mid{background:rgba(155,89,255,.15);border-color:#9b59ff;color:#c89bff}
+.histChip.high{background:rgba(255,210,74,.15);border-color:#ffd24a;color:#ffe8a0}
+.histChip.jackpot{background:rgba(255,42,42,.2);border-color:#ff2a2a;color:#ff9090;animation:histPulse .8s ease-out}
+@keyframes histPulse{0%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+/* ==== LIVE BETS ==== */
+#liveBets{position:absolute;top:96px;right:8px;z-index:10;width:130px;max-height:200px;overflow-y:auto;background:rgba(5,15,30,.7);border:1px solid rgba(74,158,255,.3);border-radius:8px;padding:5px;font-family:monospace;font-size:10px}
+#liveBets::-webkit-scrollbar{width:3px}
+#liveBets::-webkit-scrollbar-thumb{background:#4a9eff;border-radius:3px}
+.lbRow{display:flex;justify-content:space-between;padding:2px 3px;border-bottom:1px solid rgba(74,158,255,.1);color:#8ec8ff}
+.lbRow.cashed{color:#2ecc71}
+.lbRow.lost{color:#ff6a6a;opacity:.6}
+.lbRow .lbName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.lbRow .lbAmt{font-weight:900;flex-shrink:0;margin-right:6px}
+
+/* ==== BOTTOM CONTROLS ==== */
+#ctrlBar{flex-shrink:0;background:linear-gradient(180deg,rgba(10,20,40,.98),rgba(5,10,25,.99));border-top:2px solid #4a9eff;padding:10px 12px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:0 -10px 40px rgba(74,158,255,.2)}
+#ctrlRow{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.betBtn{padding:8px 14px;font-family:'Amiri',serif;font-weight:700;font-size:14px;border-radius:9px;cursor:pointer;border:2px solid #4a9eff;background:linear-gradient(180deg,rgba(30,60,120,.95),rgba(5,20,50,.98));color:#8ec8ff;min-width:44px}
+.betBtn:active{transform:scale(.94)}
+.betBtn:disabled{opacity:.4;cursor:not-allowed}
+.betDisplay{background:rgba(5,15,30,.9);border:2px solid #4a9eff;padding:6px 16px;border-radius:10px;text-align:center;min-width:110px}
+.betDisplay small{display:block;font-size:9px;color:#8ec8ff;font-family:'Cinzel Decorative',serif;letter-spacing:.05em}
+.betDisplay b{color:#fff;font-family:monospace;font-size:16px;text-shadow:0 0 10px #4a9eff}
+#actionBtn{flex:1;max-width:280px;padding:16px;font-family:'Cinzel Decorative',serif;font-size:17px;font-weight:900;border-radius:12px;cursor:pointer;border:3px solid;letter-spacing:.05em;transition:all .15s;min-width:180px}
+#actionBtn:active{transform:scale(.97)}
+#actionBtn.bet{background:linear-gradient(180deg,#1a5a2a,#0a3015);border-color:#2ecc71;color:#d0ffe0;box-shadow:0 0 25px rgba(46,204,113,.5)}
+#actionBtn.wait{background:linear-gradient(180deg,#3a3a3a,#1a1a1a);border-color:#888;color:#aaa;cursor:not-allowed}
+#actionBtn.cashout{background:linear-gradient(180deg,#c94000,#6a1a00);border-color:#ff2a00;color:#fff;box-shadow:0 0 30px rgba(255,60,0,.6);animation:cashPulse 0.6s ease-in-out infinite alternate}
+@keyframes cashPulse{to{box-shadow:0 0 45px rgba(255,60,0,.9)}}
+#actionBtn.cashed{background:linear-gradient(180deg,#1a3a1a,#0a1a0a);border-color:#2ecc71;color:#2ecc71;cursor:not-allowed}
+
+/* ==== AUTO CASHOUT ==== */
+#autoBox{display:flex;gap:8px;align-items:center;justify-content:center;font-size:11px;color:#8ec8ff}
+#autoBox label{display:flex;align-items:center;gap:6px;cursor:pointer}
+#autoBox input[type=number]{width:70px;padding:5px 8px;background:rgba(5,15,30,.9);border:1px solid #4a9eff;border-radius:6px;color:#8ec8ff;font-family:monospace;text-align:center;font-size:12px}
+#autoBox input[type=checkbox]{width:16px;height:16px;accent-color:#4a9eff}
+
+/* ==== MY RESULT BADGE ==== */
+#myResult{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:15;padding:8px 20px;border-radius:12px;font-family:'Cinzel Decorative',serif;font-weight:900;font-size:14px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none}
+#myResult.win{background:linear-gradient(180deg,rgba(46,204,113,.95),rgba(10,80,40,.95));border:2px solid #2ecc71;color:#fff;box-shadow:0 0 30px rgba(46,204,113,.7)}
+#myResult.lose{background:linear-gradient(180deg,rgba(180,30,30,.95),rgba(60,10,10,.95));border:2px solid #ff2a00;color:#fff;box-shadow:0 0 30px rgba(255,42,0,.7)}
+#myResult.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+
+/* ==== TOAST ==== */
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;padding:10px 18px;border-radius:8px;font-weight:bold;z-index:9999;transition:transform .3s;font-size:12px;max-width:90vw;text-align:center}
+#toast.on{transform:translateX(-50%) translateY(0)}
+#toast.err{background:linear-gradient(180deg,#ff4a4a,#8b0000)}
+
+/* ==== GAME OVER OVERLAY ==== */
+#crashOverlay{position:absolute;inset:0;z-index:12;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .2s}
+#crashOverlay.show{opacity:1}
+#crashOverlay .crash-txt{font-family:'Cinzel Decorative',serif;font-size:clamp(32px,10vw,80px);font-weight:900;color:#ff3a3a;text-shadow:0 0 40px #ff3a3a,0 0 80px #ff0000;letter-spacing:.15em;animation:crashZoom .5s ease-out}
+@keyframes crashZoom{0%{transform:scale(.3) rotate(-5deg);opacity:0}60%{transform:scale(1.15) rotate(2deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+
+@media (max-width:640px){
+#liveBets{width:110px;font-size:9px;max-height:140px;top:90px}
+#actionBtn{font-size:15px;padding:14px}
+.betDisplay{min-width:90px}
+.betDisplay b{font-size:14px}
+#countdown{font-size:26px}
+.histChip{font-size:10px;padding:3px 8px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+<defs>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
+<symbol id="ic-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></symbol>
+<symbol id="ic-sound-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
+</defs>
+</svg>
+
+<div id="topBtns">
+<button id="homeBtn" title="القائمة"><svg><use href="#ic-home"/></svg></button>
+<button id="soundBtn" title="الصوت"><svg id="soundIcon"><use href="#ic-sound-on"/></svg></button>
+</div>
+<div id="balBox"><small>الرصيد</small><b id="bal">0</b></div>
+
+<div id="gameArea">
+<div id="canvasWrap">
+<canvas id="aviatorCanvas"></canvas>
+<div id="statusBar">
+<div id="statusText">⏳ انتظر الجولة القادمة</div>
+<div id="countdown">7.0</div>
+</div>
+<div id="multiplierBig">1.00×</div>
+<div id="crashOverlay"><div class="crash-txt">انفجرت!</div></div>
+<div id="historyBar"></div>
+<div id="liveBets"></div>
+<div id="myResult"></div>
+</div>
+
+<div id="ctrlBar">
+<div id="ctrlRow">
+<button class="betBtn" id="betDown">−</button>
+<div class="betDisplay"><small>الرهان</small><b id="betVal">100</b></div>
+<button class="betBtn" id="betUp">+</button>
+</div>
+<div id="ctrlRow">
+<div id="autoBox">
+<label><input type="checkbox" id="autoCashChk"> سحب تلقائي عند</label>
+<input type="number" id="autoCashMult" min="1.01" max="200" step="0.1" value="2.00">
+</div>
+</div>
+<button id="actionBtn" class="bet">✈️ راهن الآن</button>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const sl=ms=>new Promise(r=>setTimeout(r,ms));
+
+const Prefs={data:{sound:true,betIndex:2,autoCash:false,autoMult:2.00},load(){try{const s=localStorage.getItem('sp_prefs');if(s)this.data={...this.data,...JSON.parse(s)}}catch(e){}},save(){try{localStorage.setItem('sp_prefs',JSON.stringify(this.data))}catch(e){}}};
+Prefs.load();
+
+/* ============ AUDIO ============ */
+const Aud=(()=>{
+let c=null,mg=null,on=Prefs.data.sound,ready=false;
+function init(){if(c)return;try{c=new(window.AudioContext||window.webkitAudioContext)();const comp=c.createDynamicsCompressor();mg=c.createGain();mg.gain.value=.5;mg.connect(comp);comp.connect(c.destination);ready=true}catch(e){}}
+function resume(){if(!c)return;if(c.state==='suspended')c.resume().catch(()=>{})}
+function rising(){if(!on||!ready)return;resume();try{const o=c.createOscillator();o.type='triangle';o.frequency.setValueAtTime(120,c.currentTime);o.frequency.exponentialRampToValueAtTime(900,c.currentTime+2.5);const g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.04,c.currentTime+.2);g.gain.linearRampToValueAtTime(.02,c.currentTime+2.5);o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+2.6);return {stop(){try{o.stop()}catch(e){}}}}catch(e){return null}}
+function crash(){if(!on||!ready)return;resume();try{const dur=1.5;const buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const t=i/d.length;d[i]=(Math.random()*2-1)*Math.exp(-t*2.5)}const s=c.createBufferSource();s.buffer=buf;const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.setValueAtTime(2000,c.currentTime);lp.frequency.exponentialRampToValueAtTime(80,c.currentTime+1.2);const g=c.createGain();g.gain.value=.7;s.connect(lp);lp.connect(g);g.connect(mg);s.start()}catch(e){}}
+function cashout(){if(!on||!ready)return;resume();try{[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=f;const g=c.createGain();const t=c.currentTime+i*.06;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.5);o.connect(g);g.connect(mg);o.start(t);o.stop(t+.55)})}catch(e){}}
+function tick(){if(!on||!ready)return;try{const o=c.createOscillator();o.type='sine';o.frequency.value=1200;const g=c.createGain();g.gain.setValueAtTime(.06,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.08);o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+.09)}catch(e){}}
+function toggle(){on=!on;Prefs.data.sound=on;Prefs.save();return on}
+return{init,resume,rising,crash,cashout,tick,toggle,get on(){return on}};
+})();
+
+async function api(path,opts={}){const token=localStorage.getItem('sc_token');const headers={'Content-Type':'application/json',...(opts.headers||{})};if(token)headers['Authorization']='Bearer '+token;const res=await fetch(path,{...opts,headers});const data=await res.json();if(!res.ok)throw new Error(data.error||'خطأ');return data}
+function toast(msg,isErr){const t=$('toast');t.textContent=msg;t.className=isErr?'err on':'on';setTimeout(()=>t.classList.remove('on'),2500)}
+
+/* ============ STATE ============ */
+const BETS=[20,50,100,200,500,1000,2000,5000,10000];
+const S={
+  bal:0, bi:Prefs.data.betIndex||2, bet:BETS[Prefs.data.betIndex||2],
+  roundId:0, state:'waiting', currentMult:1, crashPoint:null,
+  myBet:0, hasBet:false, cashedOut:false, cashMult:0, cashAmount:0,
+  autoCashOn:Prefs.data.autoCash, autoCashMult:Prefs.data.autoMult,
+  waitingUntil:0,
+  liveBets:[], history:[],
+  risingAudio:null, tickTimer:null
+};
+
+/* ============ CANVAS ============ */
+const cvs=$('aviatorCanvas');const ctx=cvs.getContext('2d');
+let W=0,H=0,DPR=Math.min(2,window.devicePixelRatio||1);
+function resize(){const wrap=$('canvasWrap');W=wrap.clientWidth;H=wrap.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;cvs.style.width=W+'px';cvs.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0)}
+addEventListener('resize',()=>{resize()});
+setTimeout(resize,50);
+
+/* Stars background */
+const stars=[];for(let i=0;i<60;i++)stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.4+.2,a:Math.random(),sp:.005+Math.random()*.01});
+
+/* Plane trail points */
+let trailPoints=[];
+let planeX=0,planeY=0,planeAngle=0,planeVisible=false,crashFlash=0;
+let explosionParticles=[];
+let smokeParticles=[];
+
+function planeProgress(mult){return Math.min(1,Math.log(mult)/Math.log(30))}
+
+function drawScene(t){
+  ctx.clearRect(0,0,W,H);
+  // Background gradient
+  const bg=ctx.createRadialGradient(W/2,H,0,W/2,H,H);
+  bg.addColorStop(0,'rgba(40,20,80,.6)');
+  bg.addColorStop(.5,'rgba(10,10,30,.85)');
+  bg.addColorStop(1,'rgba(0,0,0,1)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  // Stars
+  for(const s of stars){
+    s.a+=s.sp;
+    const al=.3+Math.abs(Math.sin(s.a))*.7;
+    ctx.fillStyle='rgba(140,200,255,'+al+')';
+    ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);ctx.fill();
+  }
+
+  // Grid axes (subtle)
+  ctx.strokeStyle='rgba(74,158,255,.08)';ctx.lineWidth=1;
+  for(let i=1;i<5;i++){ctx.beginPath();ctx.moveTo(0,H*i/5);ctx.lineTo(W,H*i/5);ctx.stroke()}
+  for(let i=1;i<5;i++){ctx.beginPath();ctx.moveTo(W*i/5,0);ctx.lineTo(W*i/5,H);ctx.stroke()}
+
+  // Plane trail
+  if(S.state==='flying' && trailPoints.length>1){
+    ctx.save();
+    // Curve
+    ctx.beginPath();
+    ctx.moveTo(trailPoints[0].x,trailPoints[0].y);
+    for(let i=1;i<trailPoints.length;i++)ctx.lineTo(trailPoints[i].x,trailPoints[i].y);
+    // Fill under curve
+    ctx.lineTo(trailPoints[trailPoints.length-1].x,H);
+    ctx.lineTo(trailPoints[0].x,H);
+    ctx.closePath();
+    const fillGrad=ctx.createLinearGradient(0,0,0,H);
+    fillGrad.addColorStop(0,'rgba(74,158,255,.35)');
+    fillGrad.addColorStop(1,'rgba(74,158,255,0)');
+    ctx.fillStyle=fillGrad;ctx.fill();
+    // Stroke line
+    ctx.beginPath();
+    ctx.moveTo(trailPoints[0].x,trailPoints[0].y);
+    for(let i=1;i<trailPoints.length;i++)ctx.lineTo(trailPoints[i].x,trailPoints[i].y);
+    ctx.strokeStyle='#4a9eff';ctx.lineWidth=3;
+    ctx.shadowColor='#4a9eff';ctx.shadowBlur=20;
+    ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.restore();
+  }
+
+  // Smoke particles
+  for(let i=smokeParticles.length-1;i>=0;i--){
+    const p=smokeParticles[i];
+    p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;p.size+=.5;
+    if(p.life<=0){smokeParticles.splice(i,1);continue}
+    ctx.globalAlpha=p.life*.5;
+    ctx.fillStyle='rgba(200,200,220,.5)';
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+
+  // Explosion particles
+  for(let i=explosionParticles.length-1;i>=0;i--){
+    const p=explosionParticles[i];
+    p.x+=p.vx;p.y+=p.vy;p.vy+=.15;p.life-=p.decay;p.vx*=.97;
+    if(p.life<=0){explosionParticles.splice(i,1);continue}
+    ctx.globalAlpha=p.life;
+    ctx.fillStyle=p.col;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+
+  // Plane
+  if(planeVisible){
+    ctx.save();
+    ctx.translate(planeX,planeY);
+    ctx.rotate(planeAngle);
+    // Glow
+    const glowGrad=ctx.createRadialGradient(0,0,0,0,0,60);
+    glowGrad.addColorStop(0,'rgba(74,158,255,.5)');
+    glowGrad.addColorStop(1,'rgba(74,158,255,0)');
+    ctx.fillStyle=glowGrad;
+    ctx.beginPath();ctx.arc(0,0,60,0,Math.PI*2);ctx.fill();
+    // Plane body
+    ctx.fillStyle='#fff';
+    ctx.shadowColor='#4a9eff';ctx.shadowBlur=15;
+    ctx.beginPath();
+    ctx.moveTo(30,0);
+    ctx.lineTo(-10,-10);
+    ctx.lineTo(-5,0);
+    ctx.lineTo(-10,10);
+    ctx.closePath();ctx.fill();
+    // Cockpit
+    ctx.fillStyle='#4a9eff';
+    ctx.beginPath();ctx.ellipse(8,0,5,3,0,0,Math.PI*2);ctx.fill();
+    // Wing
+    ctx.fillStyle='#8ec8ff';
+    ctx.beginPath();
+    ctx.moveTo(-2,-2);
+    ctx.lineTo(-18,-16);
+    ctx.lineTo(-6,-8);
+    ctx.closePath();ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-2,2);
+    ctx.lineTo(-18,16);
+    ctx.lineTo(-6,8);
+    ctx.closePath();ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.restore();
+  }
+
+  requestAnimationFrame(drawScene);
+}
+requestAnimationFrame(drawScene);
+
+function spawnSmoke(){
+  if(!planeVisible)return;
+  smokeParticles.push({
+    x:planeX-20,y:planeY,
+    vx:-1-Math.random()*1.5,vy:(Math.random()-.5)*1,
+    life:1,decay:.02+Math.random()*.01,
+    size:4+Math.random()*3
+  });
+  if(smokeParticles.length>60)smokeParticles.shift();
+}
+
+function explodeAt(x,y){
+  const colors=['#ff3a3a','#ff8c00','#ffd24a','#fff8e0'];
+  for(let i=0;i<50;i++){
+    const a=Math.random()*Math.PI*2,s=3+Math.random()*8;
+    explosionParticles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,decay:.015+Math.random()*.015,size:2+Math.random()*4,col:colors[Math.floor(Math.random()*colors.length)]});
+  }
+}
+
+/* ============ HUD & CONTROLS ============ */
+function updBal(){$('bal').textContent=Math.floor(S.bal).toLocaleString();const st=JSON.parse(localStorage.getItem('sc_user')||'{}');localStorage.setItem('sc_user',JSON.stringify({...st,balance:S.bal}))}
+function updBetDisplay(){$('betVal').textContent=S.bet;Prefs.data.betIndex=S.bi;Prefs.save()}
+
+$('betDown').onclick=()=>{if(S.hasBet||S.state==='flying')return;if(S.bi>0){S.bi--;S.bet=BETS[S.bi];updBetDisplay()}};
+$('betUp').onclick=()=>{if(S.hasBet||S.state==='flying')return;if(S.bi<BETS.length-1){S.bi++;S.bet=BETS[S.bi];updBetDisplay()}};
+
+$('autoCashChk').checked=S.autoCashOn;
+$('autoCashMult').value=S.autoCashMult.toFixed(2);
+$('autoCashChk').onchange=e=>{S.autoCashOn=e.target.checked;Prefs.data.autoCash=S.autoCashOn;Prefs.save()};
+$('autoCashMult').onchange=e=>{const v=parseFloat(e.target.value);if(v>=1.01&&v<=200){S.autoCashMult=v;Prefs.data.autoMult=v;Prefs.save()}};
+
+function showMyResult(type,text){
+  const el=$('myResult');el.textContent=text;el.className=type+' show';setTimeout(()=>el.className=type,2500);
+}
+
+async function placeBet(){
+  if(S.state!=='waiting'||S.hasBet)return;
+  if(S.bal<S.bet){toast('رصيد غير كافٍ',true);return}
+  const amt=S.bet;
+  try{
+    const res=await api('/api/aviator/bet',{method:'POST',body:JSON.stringify({amount:amt})});
+    S.bal=res.balance;updBal();
+    S.hasBet=true;S.myBet=amt;S.cashedOut=false;
+    $('actionBtn').textContent='🎯 في الجولة — رهان '+amt;
+    $('actionBtn').className='wait';
+    toast('✅ تم الرهان في الجولة القادمة');
+  }catch(e){toast(e.message,true)}
+}
+
+async function cashout(){
+  if(!S.hasBet||S.cashedOut||S.state!=='flying')return;
+  try{
+    const res=await api('/api/aviator/cashout',{method:'POST'});
+    S.bal=res.balance;S.cashedOut=true;S.cashMult=res.multiplier;S.cashAmount=res.amount;
+    updBal();
+    Aud.cashout();
+    $('actionBtn').textContent='💰 سحبت عند '+res.multiplier+'× = '+res.amount.toLocaleString();
+    $('actionBtn').className='cashed';
+    showMyResult('win','🎉 ربحت '+res.amount.toLocaleString()+' ل.س');
+  }catch(e){toast(e.message,true)}
+}
+
+$('actionBtn').onclick=()=>{
+  if(S.state==='flying'&&S.hasBet&&!S.cashedOut){cashout()}
+  else if(S.state==='waiting'&&!S.hasBet){placeBet()}
+};
+
+$('homeBtn').onclick=()=>{location.href='/'};
+$('soundBtn').onclick=()=>{const on=Aud.toggle();$('soundIcon').innerHTML='<use href="'+(on?'#ic-sound-on':'#ic-sound-off')+'"/>';if(on)Aud.resume()};
+if(!Prefs.data.sound)$('soundIcon').innerHTML='<use href="#ic-sound-off"/>';
+
+/* ============ LIVE BETS & HISTORY UI ============ */
+function renderLiveBets(){
+  const box=$('liveBets');
+  if(!S.liveBets.length){box.innerHTML='<div style="text-align:center;color:#5a7a9a;padding:8px">لا يوجد لاعبون</div>';return}
+  box.innerHTML=S.liveBets.slice(0,15).map(b=>{
+    const cls=b.cashed?'cashed':b.lost?'lost':'';
+    const amt=b.cashed?(b.bet+'×'+b.mult+' = '+b.win):b.bet;
+    return '<div class="lbRow '+cls+'"><span class="lbName">'+b.name+'</span><span class="lbAmt">'+amt+'</span></div>';
+  }).join('');
+}
+
+function renderHistory(){
+  const box=$('historyBar');
+  box.innerHTML=S.history.slice(0,15).map(h=>{
+    let cls='low';if(h>=2&&h<5)cls='mid';else if(h>=5&&h<20)cls='high';else if(h>=20)cls='jackpot';
+    return '<div class="histChip '+cls+'">'+h.toFixed(2)+'×</div>';
+  }).join('');
+}
+
+/* ============ GAME LOOP (POLL STATE) ============ */
+let lastState='', lastRound=0, lastPollTime=0;
+let risingAudioRef=null, tickInterval=null;
+
+async function pollState(){
+  try{
+    const st=await api('/api/aviator/state');
+    // Detect new round
+    if(st.roundId!==S.roundId){
+      S.roundId=st.roundId;
+      trailPoints=[];
+      planeVisible=false;
+      explosionParticles=[];
+      smokeParticles=[];
+      crashFlash=0;
+      $('crashOverlay').classList.remove('show');
+      $('myResult').className='';
+      S.cashMult=0;S.cashAmount=0;
+      // reset previous bet
+      if(S.hasBet&&!S.cashedOut){S.hasBet=false}
+    }
+    // Detect state change
+    if(st.state!==S.state){
+      S.state=st.state;
+    }
+
+    // Waiting state
+    if(st.state==='waiting'){
+      S.waitingUntil=st.waitingUntil||Date.now()+5000;
+      const remain=Math.max(0,(S.waitingUntil-Date.now())/1000);
+      $('statusText').textContent='⏳ الجولة القادمة بعد';
+      $('countdown').style.display='block';
+      $('countdown').textContent=remain.toFixed(1);
+      $('multiplierBig').classList.remove('show');
+      planeVisible=false;
+      // action button
+      if(S.hasBet){
+        $('actionBtn').textContent='🎯 رهانك: '+S.myBet+' — انتظر';
+        $('actionBtn').className='wait';
+      } else {
+        $('actionBtn').textContent='✈️ راهن الآن';
+        $('actionBtn').className='bet';
+      }
+    }
+    // Flying state
+    else if(st.state==='flying'){
+      $('countdown').style.display='none';
+      $('statusText').textContent='✈️ الطائرة في الجو';
+      const m=st.currentMult||1;
+      S.currentMult=m;
+      $('multiplierBig').textContent=m.toFixed(2)+'×';
+      $('multiplierBig').classList.add('show');
+      $('multiplierBig').classList.remove('crashed');
+      // Plane position from progress
+      const progress=planeProgress(m);
+      planeX=80+progress*(W-160);
+      planeY=H-80-progress*(H-200);
+      planeAngle=Math.atan2(-(H-200),W-160);
+      planeVisible=true;
+      spawnSmoke();
+      // Add trail
+      if(trailPoints.length===0||Math.hypot(planeX-trailPoints[trailPoints.length-1].x,planeY-trailPoints[trailPoints.length-1].y)>5){
+        trailPoints.push({x:planeX,y:planeY});
+        if(trailPoints.length>200)trailPoints.shift();
+      }
+      // Audio
+      if(!risingAudioRef){risingAudioRef=Aud.rising()}
+      // Auto cashout
+      if(S.hasBet&&!S.cashedOut&&S.autoCashOn&&m>=S.autoCashMult){
+        cashout();
+      }
+      // action button
+      if(S.hasBet&&!S.cashedOut){
+        const cur=Math.floor(S.myBet*m);
+        $('actionBtn').textContent='💰 اسحب '+cur.toLocaleString()+' ('+m.toFixed(2)+'×)';
+        $('actionBtn').className='cashout';
+      } else if(S.hasBet&&S.cashedOut){
+        $('actionBtn').textContent='✅ سحبت عند '+S.cashMult+'×';
+        $('actionBtn').className='cashed';
+      } else {
+        $('actionBtn').textContent='انتظر الجولة القادمة...';
+        $('actionBtn').className='wait';
+      }
+    }
+    // Crashed state
+    else if(st.state==='crashed'){
+      const cp=st.crashPoint||S.crashPoint||1;
+      S.crashPoint=cp;
+      $('countdown').style.display='none';
+      $('statusText').textContent='💥 انفجرت';
+      $('multiplierBig').textContent=cp.toFixed(2)+'×';
+      $('multiplierBig').classList.add('show','crashed');
+      // Explode
+      if(!crashFlash){
+        crashFlash=1;
+        explodeAt(planeX,planeY);
+        planeVisible=false;
+        Aud.crash();
+        if(risingAudioRef){try{risingAudioRef.stop()}catch(e){};risingAudioRef=null}
+        $('crashOverlay').classList.add('show');
+        setTimeout(()=>$('crashOverlay').classList.remove('show'),900);
+      }
+      // Add history
+      if(!S.history.includes(cp)||S.history[0]!==cp){
+        S.history.unshift(cp);
+        if(S.history.length>20)S.history.pop();
+        renderHistory();
+      }
+      // My result
+      if(S.hasBet&&!S.cashedOut){
+        showMyResult('lose','💥 خسرت '+S.myBet.toLocaleString()+' ل.س');
+        S.hasBet=false;
+      } else if(S.hasBet&&S.cashedOut){
+        // already shown
+        S.hasBet=false;
+      }
+      $('actionBtn').textContent='⏳ الجولة القادمة...';
+      $('actionBtn').className='wait';
+    }
+
+    renderLiveBets();
+  }catch(e){/* silent */}
+}
+
+/* Fetch live bets every 1.2s */
+async function pollLive(){
+  try{
+    // Use leaderboard-like data from server side if available - fallback to random
+    // The server doesn't have this endpoint; we'll fake it client-side for demo purposes
+  }catch(e){}
+}
+
+/* Poll server state */
+setInterval(pollState, 250);
+pollState();
+
+/* Refresh balance every 5s */
+async function refreshMe(){try{const u=await api('/api/me');S.bal=u.balance;updBal()}catch(e){if(e.message.includes('جلسة')||e.message.includes('مصرح')){location.href='/'}}}
+setInterval(refreshMe,5000);
+
+/* Initial */
+(async()=>{
+  const token=localStorage.getItem('sc_token');
+  if(!token){location.href='/';return}
+  try{const u=await api('/api/me');S.bal=u.balance;updBal()}catch(e){location.href='/'}
+})();
+
+/* ============ SIMULATED LIVE BETS (client-side decoration) ============ */
+const NAMES=['أحمد','محمد','سامر','يوسف','ليلى','نور','رامي','كرم','هبة','زين','عمر','خالد','سارة','منى','بشار','طلال'];
+setInterval(()=>{
+  if(S.state!=='flying'&&S.state!=='waiting')return;
+  // Add new bets randomly
+  if(Math.random()<0.4&&S.liveBets.length<12){
+    const name=NAMES[Math.floor(Math.random()*NAMES.length)]+'***';
+    const bet=BETS[Math.floor(Math.random()*5)];
+    S.liveBets.push({name,bet,cashed:false,lost:false,mult:0,win:0});
+  }
+  // Update existing
+  for(const b of S.liveBets){
+    if(S.state==='flying'&&!b.cashed&&!b.lost){
+      if(Math.random()<0.08){
+        const m=S.currentMult;
+        if(m>=1.5){
+          b.cashed=true;b.mult=m;b.win=Math.floor(b.bet*m);
+        }
+      }
+    }
+  }
+  // Cleanup
+  if(S.state==='crashed'){
+    S.liveBets.forEach(b=>{if(!b.cashed&&!b.lost)b.lost=true});
+  }
+  if(S.liveBets.length>15)S.liveBets.shift();
+},800);
+
+renderHistory();
+renderLiveBets();
+</script>
+</body>
+</html>
