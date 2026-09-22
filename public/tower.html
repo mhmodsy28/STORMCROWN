@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#0a0510">
+<title>🏗️ برج العاصفة — STORMTOWER</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Amiri:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#0a0510;color:#fff;font-family:'Amiri',serif;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+
+#topBtns{position:fixed;top:6px;left:0;right:0;z-index:60;height:48px;pointer-events:none}
+#topBtns button{pointer-events:auto;position:absolute;width:40px;height:40px;border-radius:50%;border:2px solid #c89bff;background:linear-gradient(180deg,rgba(60,20,120,.95),rgba(20,5,40,.95));cursor:pointer;display:flex;align-items:center;justify-content:center;padding:7px;box-shadow:0 0 15px rgba(200,155,255,.4)}
+#topBtns button:active{transform:scale(.9)}
+#topBtns button svg{width:100%;height:100%;fill:#c89bff}
+#homeBtn{top:0;left:6px}
+#soundBtn{top:0;right:6px}
+
+#balBox{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:60;background:linear-gradient(180deg,rgba(60,20,120,.95),rgba(20,5,40,.98));border:2px solid #c89bff;border-radius:10px;padding:4px 16px;text-align:center;box-shadow:0 0 20px rgba(200,155,255,.5)}
+#balBox small{display:block;font-size:9px;color:#e0d0ff;font-family:'Cinzel Decorative',serif}
+#balBox b{color:#fff;font-family:monospace;font-size:16px;text-shadow:0 0 10px #c89bff}
+
+#game{position:fixed;inset:0;display:flex;flex-direction:column;padding:52px 0 0 0;background:radial-gradient(ellipse at 50% 0%,#3a1a6a 0%,transparent 50%),radial-gradient(ellipse at 50% 100%,#1a0a3a 0%,transparent 50%),linear-gradient(180deg,#0a0510 0%,#150830 50%,#0a0510 100%)}
+
+#stats{display:flex;gap:6px;justify-content:center;padding:8px 10px;flex-shrink:0;flex-wrap:wrap}
+.statBox{background:linear-gradient(180deg,rgba(60,20,120,.5),rgba(20,5,40,.85));border:2px solid #c89bff;border-radius:9px;padding:5px 12px;text-align:center;min-width:78px}
+.statBox small{display:block;font-size:8px;color:#e0d0ff;font-family:'Cinzel Decorative',serif;letter-spacing:.05em}
+.statBox b{color:#fff;font-family:monospace;font-size:14px;text-shadow:0 0 10px #c89bff}
+.statBox.hot{border-color:#ffd24a;box-shadow:0 0 15px rgba(255,210,74,.5)}
+.statBox.hot b{color:#ffd24a;text-shadow:0 0 10px #ffd24a}
+
+#towerWrap{flex:1;position:relative;display:flex;align-items:flex-end;justify-content:center;padding:8px 12px;min-height:0;overflow:hidden}
+#towerScroll{width:100%;max-width:520px;height:100%;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column-reverse;gap:5px;scrollbar-width:thin;scrollbar-color:#c89bff rgba(20,5,40,.5);padding:4px 0}
+#towerScroll::-webkit-scrollbar{width:5px}
+#towerScroll::-webkit-scrollbar-track{background:rgba(20,5,40,.5)}
+#towerScroll::-webkit-scrollbar-thumb{background:#c89bff;border-radius:3px}
+
+.floor{display:flex;gap:5px;justify-content:center;align-items:stretch;min-height:52px;flex-shrink:0;position:relative;padding:3px;border-radius:11px;transition:all .3s}
+.floor.active{background:linear-gradient(180deg,rgba(255,210,74,.1),rgba(255,210,74,.05));box-shadow:inset 0 0 20px rgba(255,210,74,.2),0 0 15px rgba(255,210,74,.3);border:2px solid rgba(255,210,74,.4)}
+.floor.passed{background:linear-gradient(180deg,rgba(46,204,113,.15),rgba(46,204,113,.05));border:2px solid rgba(46,204,113,.4)}
+.floor.passed::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background-image:linear-gradient(90deg,rgba(46,204,113,.1) 1px,transparent 1px),linear-gradient(rgba(46,204,113,.1) 1px,transparent 1px);background-size:12px 12px;border-radius:9px;pointer-events:none}
+.floor.failed{background:linear-gradient(180deg,rgba(255,58,58,.2),rgba(255,58,58,.05));border:2px solid rgba(255,58,58,.5);animation:floorFail .5s}
+@keyframes floorFail{0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}100%{transform:translateX(0)}}
+
+.floorNum{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-family:monospace;font-size:10px;color:rgba(200,155,255,.5);font-weight:900;z-index:3}
+.floor.passed .floorNum{color:rgba(126,255,176,.7)}
+.floor.failed .floorNum{color:rgba(255,128,128,.7)}
+
+.tile{flex:1;min-height:46px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;overflow:hidden;transition:all .18s;border:2px solid}
+.tile.waiting{background:linear-gradient(180deg,#2a1a4a,#150830);border-color:#3a2a5a;color:#c89bff;cursor:default}
+.tile.waiting::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(200,155,255,.15),transparent 60%);pointer-events:none}
+.floor.active .tile.waiting{cursor:pointer;background:linear-gradient(180deg,#3a2a5a,#2a1a4a);border-color:#c89bff;box-shadow:0 0 10px rgba(200,155,255,.3)}
+.floor.active .tile.waiting:hover{background:linear-gradient(180deg,#4a3a7a,#3a2a5a);box-shadow:0 0 18px rgba(200,155,255,.6);transform:translateY(-2px)}
+.floor.active .tile.waiting:active{transform:scale(.95)}
+
+.tile.safe{background:linear-gradient(180deg,#3a8a50,#1a5a2a);border-color:#7effb0;box-shadow:inset 0 0 15px rgba(126,255,176,.3);animation:tilePop .4s ease-out}
+.tile.mine-hit{background:linear-gradient(180deg,#a01010,#4a0000);border-color:#ff3a3a;box-shadow:inset 0 0 25px rgba(255,58,58,.5);animation:tileHit .5s ease-out}
+.tile.mine-reveal{background:linear-gradient(180deg,#3a1010,#1a0000);border-color:#7a2020;opacity:.75}
+.tile.dim{opacity:.35;cursor:default;pointer-events:none}
+
+.tileIcon{position:relative;z-index:2;font-size:26px;filter:drop-shadow(0 0 6px rgba(255,255,255,.4))}
+@keyframes tilePop{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes tileHit{0%{transform:scale(1)}30%{transform:scale(1.22) rotate(6deg)}60%{transform:scale(.9) rotate(-4deg)}100%{transform:scale(1) rotate(0)}}
+
+.tile.safe .tileIcon{animation:gemSpin .6s}
+@keyframes gemSpin{0%{transform:rotate(0) scale(.5);opacity:0}100%{transform:rotate(360deg) scale(1);opacity:1}}
+
+.ladderFx{position:absolute;left:50%;top:-10px;transform:translateX(-50%);font-size:14px;color:#7effb0;animation:ladderUp 1.2s ease-out forwards;pointer-events:none;z-index:10;font-weight:900;text-shadow:0 0 10px #2ecc71}
+@keyframes ladderUp{0%{transform:translate(-50%,0) scale(.3);opacity:0}20%{transform:translate(-50%,-20px) scale(1.3);opacity:1}100%{transform:translate(-50%,-70px) scale(1);opacity:0}}
+
+#ctrlBar{flex-shrink:0;background:linear-gradient(180deg,rgba(20,10,40,.98),rgba(10,5,25,.99));border-top:2px solid #c89bff;padding:10px 12px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:0 -10px 40px rgba(200,155,255,.2)}
+
+.diffRow{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
+.diffBtn{padding:7px 12px;font-family:'Amiri',serif;font-weight:700;font-size:11px;border-radius:8px;cursor:pointer;border:2px solid #c89bff;background:linear-gradient(180deg,rgba(60,20,120,.5),rgba(20,5,40,.85));color:#e0d0ff;transition:all .15s}
+.diffBtn.active{background:linear-gradient(180deg,#c89bff,#4a1080);color:#fff;box-shadow:0 0 18px rgba(200,155,255,.7);border-color:#fff}
+.diffBtn:active{transform:scale(.94)}
+.diffBtn:disabled{opacity:.5;cursor:not-allowed}
+
+.betRow{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.betBtn{padding:8px 14px;font-family:'Amiri',serif;font-weight:700;font-size:14px;border-radius:9px;cursor:pointer;border:2px solid #c89bff;background:linear-gradient(180deg,rgba(60,20,120,.95),rgba(20,5,40,.98));color:#e0d0ff;min-width:44px}
+.betBtn:active{transform:scale(.94)}
+.betBtn:disabled{opacity:.4;cursor:not-allowed}
+.betDisplay{background:rgba(10,5,25,.9);border:2px solid #c89bff;padding:6px 16px;border-radius:10px;text-align:center;min-width:120px}
+.betDisplay small{display:block;font-size:9px;color:#e0d0ff;font-family:'Cinzel Decorative',serif}
+.betDisplay b{color:#fff;font-family:monospace;font-size:16px;text-shadow:0 0 10px #c89bff}
+
+.actionRow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.actionBtn{flex:1;max-width:280px;padding:15px;font-family:'Cinzel Decorative',serif;font-size:15px;font-weight:900;border-radius:12px;cursor:pointer;border:3px solid;letter-spacing:.05em;transition:all .15s;min-width:130px}
+.actionBtn:active{transform:scale(.97)}
+.actionBtn:disabled{opacity:.5;cursor:not-allowed}
+#startBtn{background:linear-gradient(180deg,#4a1080,#2a0850);border-color:#c89bff;color:#e0d0ff;box-shadow:0 0 25px rgba(200,155,255,.5)}
+#cashBtn{background:linear-gradient(180deg,#c94000,#6a1a00);border-color:#ff8c00;color:#fff;box-shadow:0 0 30px rgba(255,140,0,.6);animation:cashPulse .7s ease-in-out infinite alternate}
+@keyframes cashPulse{to{box-shadow:0 0 45px rgba(255,140,0,.9)}}
+
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;padding:10px 18px;border-radius:8px;font-weight:bold;z-index:9999;transition:transform .3s;font-size:12px;max-width:90vw;text-align:center}
+#toast.on{transform:translateX(-50%) translateY(0)}
+#toast.err{background:linear-gradient(180deg,#ff4a4a,#8b0000)}
+
+#overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.92);backdrop-filter:blur(6px)}
+#overlay.show{display:flex;animation:fade .3s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.resCard{width:100%;max-width:420px;padding:26px;border-radius:18px;text-align:center;animation:pop .5s cubic-bezier(.19,1.6,.3,1)}
+@keyframes pop{0%{transform:scale(.4) rotate(-6deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.resCard.win{background:linear-gradient(180deg,#1a5a3a,#0a2015);border:3px solid #2ecc71;box-shadow:0 0 80px rgba(46,204,113,.7)}
+.resCard.lose{background:linear-gradient(180deg,#5a0a0a,#1a0000);border:3px solid #ff3a3a;box-shadow:0 0 80px rgba(255,58,58,.7)}
+.resTitle{font-family:'Cinzel Decorative',serif;font-size:28px;font-weight:900;margin-bottom:6px}
+.resCard.win .resTitle{color:#7effb0;text-shadow:0 0 25px rgba(46,204,113,.9)}
+.resCard.lose .resTitle{color:#ff8080;text-shadow:0 0 25px rgba(255,58,58,.9)}
+.resAmount{display:inline-block;padding:14px 28px;border-radius:12px;font-family:monospace;font-size:30px;font-weight:900;margin:14px 0;min-width:200px;background:rgba(0,0,0,.5);border:2px solid #c89bff;color:#fff;text-shadow:0 0 20px #c89bff}
+.resBtn{width:100%;padding:14px;font-family:'Cinzel Decorative',serif;font-size:15px;font-weight:900;border-radius:11px;cursor:pointer;border:3px solid #c89bff;background:linear-gradient(180deg,#c89bff,#4a1080);color:#fff;margin-top:10px}
+
+@media (max-width:640px){
+.statBox{min-width:66px;padding:4px 8px}
+.statBox b{font-size:12px}
+.betDisplay{min-width:100px}
+.actionBtn{font-size:13px;padding:13px}
+.tile{min-height:42px;font-size:22px}
+.tileIcon{font-size:22px}
+.floor{min-height:46px;gap:4px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
+<symbol id="ic-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></symbol>
+<symbol id="ic-sound-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
+</defs></svg>
+
+<div id="topBtns">
+<button id="homeBtn"><svg><use href="#ic-home"/></svg></button>
+<button id="soundBtn"><svg id="soundIcon"><use href="#ic-sound-on"/></svg></button>
+</div>
+<div id="balBox"><small>الرصيد</small><b id="bal">0</b></div>
+
+<div id="game">
+<div id="stats">
+<div class="statBox"><small>الرهان</small><b id="sBet">100</b></div>
+<div class="statBox hot"><small>المضاعف</small><b id="sMult">1.00×</b></div>
+<div class="statBox"><small>الطابق</small><b id="sLevel">0</b></div>
+<div class="statBox hot"><small>الجائزة</small><b id="sCash">0</b></div>
+</div>
+
+<div id="towerWrap">
+<div id="towerScroll"></div>
+</div>
+
+<div id="ctrlBar">
+<div class="diffRow" id="diffRow">
+<div class="diffBtn active" data-d="1">🟢 سهل (4 خانات)</div>
+<div class="diffBtn" data-d="2">🟡 متوسط (3 خانات)</div>
+<div class="diffBtn" data-d="3">🔴 صعب (خانتان)</div>
+</div>
+<div class="betRow">
+<button class="betBtn" id="betDown">−</button>
+<div class="betDisplay"><small>الرهان</small><b id="betVal">100</b></div>
+<button class="betBtn" id="betUp">+</button>
+</div>
+<div class="actionRow">
+<button class="actionBtn" id="startBtn">🏗️ ابدأ الصعود</button>
+<button class="actionBtn" id="cashBtn" style="display:none">💰 اسحب</button>
+</div>
+</div>
+</div>
+
+<div id="overlay"><div class="resCard" id="resCard">
+<div class="resTitle" id="resTitle">🎉</div>
+<div class="resAmount" id="resAmount">0</div>
+<button class="resBtn" id="resBtn">جولة جديدة</button>
+</div></div>
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const sl=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ============ AUDIO ============ */
+const Aud=(()=>{
+let c=null,mg=null,on=true,ready=false;
+function init(){if(c)return;try{c=new(window.AudioContext||window.webkitAudioContext)();mg=c.createGain();mg.gain.value=.4;mg.connect(c.destination);ready=true}catch(e){}}
+function resume(){if(!c)return;if(c.state==='suspended')c.resume().catch(()=>{})}
+function tone(f,dur=.1,type='sine',vol=.2){if(!on||!ready)return;resume();try{const o=c.createOscillator();o.type=type;o.frequency.value=f;const g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(vol,c.currentTime+.01);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+dur+.02)}catch(e){}}
+function stepUp(level){if(!on||!ready)return;resume();const f=400+level*40;tone(f,.1,'square',.12);setTimeout(()=>tone(f*1.5,.12,'sine',.14),60)}
+function crash(){if(!on||!ready)return;resume();try{const o=c.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(180,c.currentTime);o.frequency.exponentialRampToValueAtTime(30,c.currentTime+.5);const g=c.createGain();g.gain.setValueAtTime(.4,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.6);o.connect(g);g.connect(mg);o.start();o.stop(c.currentTime+.62);const dur=.4;const buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/d.length*3);const s=c.createBufferSource();s.buffer=buf;const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=500;const g2=c.createGain();g2.gain.value=.4;s.connect(lp);lp.connect(g2);g2.connect(mg);s.start()}catch(e){}}
+function cashout(){if(!on||!ready)return;resume();[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>{setTimeout(()=>tone(f,.25,'sine',.18),i*70)})}
+function bigWin(){if(!on||!ready)return;resume();[261.63,329.63,392,523.25,659.25,783.99,1046.5,1318.5,1567.98].forEach((f,i)=>{setTimeout(()=>tone(f,.4,'sawtooth',.14),i*80)})}
+function start(){if(!on||!ready)return;resume();tone(300,.1,'sine',.15);setTimeout(()=>tone(500,.15,'sine',.18),90)}
+function toggle(){on=!on;return on}
+return{init,resume,tone,stepUp,crash,cashout,bigWin,start,toggle,get on(){return on},get ready(){return ready}};
+})();
+
+async function api(path,opts={}){const token=localStorage.getItem('sc_token');const headers={'Content-Type':'application/json',...(opts.headers||{})};if(token)headers['Authorization']='Bearer '+token;const res=await fetch(path,{...opts,headers});const data=await res.json();if(!res.ok)throw new Error(data.error||'خطأ');return data}
+function toast(msg,isErr){const t=$('toast');t.textContent=msg;t.className=isErr?'err on':'on';setTimeout(()=>t.classList.remove('on'),2500)}
+
+const BETS=[20,50,100,200,500,1000,2000,5000,10000];
+const S={bal:0,bi:2,bet:100,difficulty:1,active:false,level:0,mult:1,nextMult:1,maxLevels:8};
+const GEMS=['💎','💠','🔶','🔷','💚','💜'];
+
+function getTilesForDiff(diff){return {1:4,2:3,3:2}[diff]||4}
+
+function computeMultiplier(level,diff){
+  const tiles=getTilesForDiff(diff);
+  let prob=1;
+  for(let i=0;i<level;i++) prob*=1/tiles;
+  return Math.max(1,Math.floor((0.96/prob)*100)/100);
+}
+
+function updBal(){$('bal').textContent=Math.floor(S.bal).toLocaleString();const st=JSON.parse(localStorage.getItem('sc_user')||'{}');localStorage.setItem('sc_user',JSON.stringify({...st,balance:S.bal}))}
+function updStats(){
+  $('sBet').textContent=S.bet;
+  $('betVal').textContent=S.bet;
+  $('sMult').textContent=S.mult.toFixed(2)+'×';
+  $('sLevel').textContent=S.level;
+  $('sCash').textContent=Math.floor(S.bet*S.mult).toLocaleString();
+}
+
+function buildTower(){
+  const box=$('towerScroll');
+  box.innerHTML='';
+  const tiles=getTilesForDiff(S.difficulty);
+  // level 1 at bottom, level maxLevels at top
+  for(let lvl=1;lvl<=S.maxLevels;lvl++){
+    const floor=document.createElement('div');
+    floor.className='floor';
+    floor.dataset.level=lvl;
+    const mult=computeMultiplier(lvl,S.difficulty);
+    floor.innerHTML='<span class="floorNum">'+lvl+'</span>';
+    for(let i=0;i<tiles;i++){
+      const t=document.createElement('div');
+      t.className='tile waiting';
+      t.dataset.level=lvl;
+      t.dataset.idx=i;
+      t.innerHTML='<span class="tileIcon">❓</span>';
+      t.onclick=()=>pickTile(lvl,i);
+      floor.appendChild(t);
+    }
+    box.appendChild(floor);
+  }
+  // after building, highlight active level
+  highlightActive();
+  // scroll to bottom
+  box.scrollTop=box.scrollHeight;
+}
+
+function highlightActive(){
+  document.querySelectorAll('.floor').forEach(f=>{
+    f.classList.remove('active');
+    const lvl=parseInt(f.dataset.level);
+    if(S.active&&lvl===S.level+1) f.classList.add('active');
+  });
+}
+
+function revealFloor(level,safeIdx,hitIdx){
+  const floor=document.querySelector('.floor[data-level="'+level+'"]');
+  if(!floor) return;
+  const tiles=floor.querySelectorAll('.tile');
+  tiles.forEach((t,i)=>{
+    if(i===safeIdx){
+      // the safe one
+      // if this is what player picked, mark safe green
+    }
+  });
+}
+
+async function startGame(){
+  if(S.active) return;
+  if(S.bal<S.bet){toast('رصيد غير كافٍ',true);return}
+  Aud.init();Aud.resume();Aud.start();
+  $('startBtn').disabled=true;
+  try{
+    const res=await api('/api/tower/start',{method:'POST',body:JSON.stringify({bet:S.bet,difficulty:S.difficulty})});
+    S.bal=res.balance;updBal();
+    S.active=true;S.level=0;S.mult=1;S.nextMult=res.nextMultiplier||computeMultiplier(1,S.difficulty);
+    $('startBtn').style.display='none';
+    $('cashBtn').style.display='block';
+    $('cashBtn').disabled=true;
+    document.querySelectorAll('.diffBtn').forEach(b=>b.disabled=true);
+    $('betDown').disabled=true;$('betUp').disabled=true;
+    buildTower();
+    updStats();
+    toast('🏗️ اصعد الطوابق!');
+  }catch(e){toast(e.message,true);$('startBtn').disabled=false}
+}
+
+async function pickTile(level,idx){
+  if(!S.active) return;
+  if(level!==S.level+1) return;
+  const tile=document.querySelector('.floor[data-level="'+level+'"] .tile[data-idx="'+idx+'"]');
+  if(!tile||tile.classList.contains('safe')||tile.classList.contains('mine-hit')) return;
+  tile.style.pointerEvents='none';
+
+  try{
+    const res=await api('/api/tower/pick',{method:'POST',body:JSON.stringify({tile:idx})});
+
+    const floor=document.querySelector('.floor[data-level="'+level+'"]');
+    const tiles=floor.querySelectorAll('.tile');
+
+    if(res.crashed){
+      // hit a mine
+      tile.classList.remove('waiting');
+      tile.classList.add('mine-hit');
+      tile.innerHTML='<span class="tileIcon">💥</span>';
+      // reveal safe tile
+      tiles.forEach((t,i)=>{
+        if(i!==idx&&!t.classList.contains('mine-hit')){
+          t.classList.remove('waiting');
+          t.classList.add('mine-reveal');
+          if(i===res.safeTile) t.innerHTML='<span class="tileIcon">💎</span>';
+          else t.innerHTML='<span class="tileIcon">💣</span>';
+        }
+      });
+      floor.classList.add('failed');
+      floor.classList.remove('active');
+      Aud.crash();
+      S.active=false;
+      await sl(900);
+      showResult(false,0,S.level,S.mult);
+      resetAfterResult();
+      return;
+    }
+
+    // safe!
+    tile.classList.remove('waiting');
+    tile.classList.add('safe');
+    const gem=GEMS[Math.floor(Math.random()*GEMS.length)];
+    tile.innerHTML='<span class="tileIcon">'+gem+'</span>';
+    // reveal other tiles as dim
+    tiles.forEach((t,i)=>{
+      if(i!==idx){
+        t.classList.remove('waiting');
+        t.classList.add('dim','mine-reveal');
+        t.innerHTML='<span class="tileIcon">💣</span>';
+      }
+    });
+    floor.classList.remove('active');
+    floor.classList.add('passed');
+    // ladder fx
+    const fx=document.createElement('div');
+    fx.className='ladderFx';
+    fx.textContent='⬆ +'+res.multiplier.toFixed(2)+'×';
+    floor.appendChild(fx);
+    setTimeout(()=>fx.remove(),1200);
+
+    S.level=res.level;
+    S.mult=res.multiplier;
+    S.nextMult=res.nextMultiplier||computeMultiplier(S.level+1,S.difficulty);
+    Aud.stepUp(S.level);
+    updStats();
+    $('cashBtn').disabled=false;
+    $('cashBtn').textContent='💰 اسحب '+Math.floor(S.bet*S.mult).toLocaleString();
+
+    if(S.level>=S.maxLevels){
+      await sl(400);
+      doCashout();
+      return;
+    }
+    highlightActive();
+  }catch(e){
+    toast(e.message,true);
+    tile.style.pointerEvents='';
+  }
+}
+
+async function doCashout(){
+  if(!S.active||S.level===0) return;
+  $('cashBtn').disabled=true;
+  try{
+    const res=await api('/api/tower/cashout',{method:'POST'});
+    S.bal=res.balance;updBal();
+    Aud.cashout();
+    if(res.multiplier>=5) Aud.bigWin();
+    S.active=false;
+    showResult(true,res.amount,res.level,res.multiplier);
+    resetAfterResult();
+  }catch(e){toast(e.message,true);$('cashBtn').disabled=false}
+}
+
+function resetAfterResult(){
+  S.active=false;S.level=0;S.mult=1;
+  $('startBtn').style.display='block';
+  $('cashBtn').style.display='none';
+  $('cashBtn').disabled=false;
+  document.querySelectorAll('.diffBtn').forEach(b=>b.disabled=false);
+  $('betDown').disabled=false;$('betUp').disabled=false;
+  buildTower();
+  updStats();
+}
+
+function showResult(won,amount,level,mult){
+  const o=$('overlay');const card=$('resCard');
+  card.className='resCard '+(won?'win':'lose');
+  if(won){
+    $('resTitle').textContent='🎉 وصلت الطابق '+level+'!';
+    $('resAmount').textContent=Math.floor(amount).toLocaleString()+' ل.س';
+  } else {
+    $('resTitle').textContent='💥 انفجرت في الطابق '+level;
+    $('resAmount').textContent='-'+S.bet.toLocaleString()+' ل.س';
+  }
+  o.classList.add('show');
+}
+
+$('resBtn').onclick=()=>{$('overlay').classList.remove('show');refreshMe()};
+$('startBtn').onclick=startGame;
+$('cashBtn').onclick=doCashout;
+
+$('betDown').onclick=()=>{if(S.active)return;if(S.bi>0){S.bi--;S.bet=BETS[S.bi];updStats()}};
+$('betUp').onclick=()=>{if(S.active)return;if(S.bi<BETS.length-1){S.bi++;S.bet=BETS[S.bi];updStats()}};
+
+document.querySelectorAll('.diffBtn').forEach(b=>{
+  b.onclick=()=>{
+    if(S.active)return;
+    document.querySelectorAll('.diffBtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    S.difficulty=parseInt(b.dataset.d);
+    buildTower();
+    updStats();
+  };
+});
+
+$('homeBtn').onclick=()=>{if(S.active&&!confirm('لديك لعبة نشطة!'))return;location.href='/'};
+$('soundBtn').onclick=()=>{const on=Aud.toggle();$('soundIcon').innerHTML='<use href="'+(on?'#ic-sound-on':'#ic-sound-off')+'"/>';if(on){Aud.init();Aud.resume()}};
+
+async function refreshMe(){try{const u=await api('/api/me');S.bal=u.balance;updBal()}catch(e){if(e.message.includes('جلسة')||e.message.includes('مصرح'))location.href='/'}}
+
+['click','touchstart','keydown'].forEach(ev=>{
+  document.addEventListener(ev,()=>{Aud.init();Aud.resume()},{once:true});
+});
+
+(async()=>{
+  const token=localStorage.getItem('sc_token');
+  if(!token){location.href='/';return}
+  try{
+    const u=await api('/api/me');
+    S.bal=u.balance;updBal();
+    buildTower();
+    updStats();
+  }catch(e){location.href='/'}
+})();
+</script>
+</body>
+</html>
