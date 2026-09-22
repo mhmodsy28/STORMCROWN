@@ -1,8 +1,10 @@
 /* ============================================================
-   STORMCROWN — server.js v12
-   - المضاعف التراكمي في البونص (يستمر بين 15 لفة)
-   - مضاعفات زيوس تتجمع مثل Gates of Olympus
-   - تحسينات عامة
+   STORMCROWN — server.js v13
+   - جاكبوت تراكمي
+   - مكافأة يومية (7 أيام)
+   - Streak Bonus
+   - بونص 15 لفة
+   - المضاعف التراكمي في البونص
    ============================================================ */
 
 const express = require('express');
@@ -14,32 +16,60 @@ const crypto = require('crypto');
 const { Pool } = require('pg');
 
 const app = express();
-process.on('uncaughtException', (e) => console.error('💥', e && e.stack ? e.stack : e));
-process.on('unhandledRejection', (e) => console.error('💥', e && e.stack ? e.stack : e));
+
+process.on('uncaughtException', (e) => {
+  console.error('💥 UNCAUGHT:', e && e.stack ? e.stack : e);
+});
+process.on('unhandledRejection', (e) => {
+  console.error('💥 UNHANDLED:', e && e.stack ? e.stack : e);
+});
 
 const PORT = process.env.PORT || 3000;
+
 const JWT_SECRET = process.env.JWT_SECRET;
 const DATABASE_URL = process.env.DATABASE_URL;
-if (!JWT_SECRET) { console.error('❌ JWT_SECRET'); process.exit(1); }
-if (!DATABASE_URL) { console.error('❌ DATABASE_URL'); process.exit(1); }
+
+if (!JWT_SECRET) {
+  console.error('❌ JWT_SECRET مفقود');
+  process.exit(1);
+}
+if (!DATABASE_URL) {
+  console.error('❌ DATABASE_URL مفقود');
+  process.exit(1);
+}
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change-me-now';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || crypto.randomBytes(24).toString('hex');
 
-const USDT_TO_SYP = 15000, USD_TO_SYP = 15000;
+const USDT_TO_SYP = 15000;
+const USD_TO_SYP = 15000;
+
 const RTP = Math.min(0.97, Math.max(0.85, parseFloat(process.env.RTP || '0.94')));
 const MAX_WIN_MULT = 5000;
 const FREE_SPINS_COUNT = 15;
 
 /* ============================================================
-   🎯 نظام البونص النشط — في الذاكرة
-   المفتاح: uid
-   القيمة: { spinsLeft, cumulativeMult, totalWonInBonus, initialBet, bestWin, startBalance }
+   🎰 الجاكبوت
    ============================================================ */
-const activeBonuses = new Map();
+const JACKPOT_CONTRIBUTION = 0.005;       /* 0.5% من كل رهان */
+const JACKPOT_WIN_CHANCE = 1 / 800;       /* فرصة 1 من 800 */
+const JACKPOT_START = 100000;             /* الحد الابتدائي */
 
+/* ============================================================
+   🎁 المكافأة اليومية
+   ============================================================ */
+const DAILY_REWARDS = [500, 1000, 2500, 5000, 10000, 25000, 50000];
+
+/* ============================================================
+   🎰 عجلة الحظ
+   ============================================================ */
 const WHEEL_VALUES = [0, 100, 500, 1000, 2000, 5000, 10000, 25000];
 const WHEEL_WEIGHTS = [40, 25, 15, 10, 5, 3, 1.5, 0.5];
+
+/* ============================================================
+   البونصات النشطة (في الذاكرة)
+   ============================================================ */
+const activeBonuses = new Map();
 
 const COMPANY_WALLETS = {
   sham_syp:   '066f10afcd1b2d1a8f66dbe1a1eb3f17',
@@ -55,6 +85,9 @@ const PAYMENT_METHODS = [
   { code: 'usdt_trc20', name: 'USDT (TRC20)',          currency: 'USDT', min: 5,   max: 5000,    rate: USDT_TO_SYP }
 ];
 
+/* ============================================================
+   📦 قاعدة البيانات
+   ============================================================ */
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
@@ -62,73 +95,156 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000
 });
 
-pool.on('error', (e) => console.error('💥 pool:', e));
+pool.on('error', (e) => console.error('💥 pool error:', e));
 
 async function initDB() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       uid VARCHAR(20) UNIQUE NOT NULL,
-      first_name VARCHAR(100), last_name VARCHAR(100),
-      phone VARCHAR(50) UNIQUE, email VARCHAR(200) UNIQUE,
+      first_name VARCHAR(100),
+      last_name VARCHAR(100),
+      phone VARCHAR(50) UNIQUE,
+      email VARCHAR(200) UNIQUE,
       password_hash VARCHAR(200),
-      balance BIGINT DEFAULT 0, laps INT DEFAULT 0,
-      best_win BIGINT DEFAULT 0, wagered BIGINT DEFAULT 0, won BIGINT DEFAULT 0,
-      banned INT DEFAULT 0, referred_by VARCHAR(20),
-      agent_level INT DEFAULT 0, invite_code VARCHAR(20) UNIQUE,
-      total_commission BIGINT DEFAULT 0, notes TEXT DEFAULT '',
-      created_at BIGINT, last_login BIGINT, last_ip VARCHAR(50),
-      last_wheel BIGINT DEFAULT 0
+      balance BIGINT DEFAULT 0,
+      laps INT DEFAULT 0,
+      best_win BIGINT DEFAULT 0,
+      wagered BIGINT DEFAULT 0,
+      won BIGINT DEFAULT 0,
+      banned INT DEFAULT 0,
+      referred_by VARCHAR(20),
+      agent_level INT DEFAULT 0,
+      invite_code VARCHAR(20) UNIQUE,
+      total_commission BIGINT DEFAULT 0,
+      notes TEXT DEFAULT '',
+      created_at BIGINT,
+      last_login BIGINT,
+      last_ip VARCHAR(50),
+      last_wheel BIGINT DEFAULT 0,
+      last_daily BIGINT DEFAULT 0,
+      daily_streak INT DEFAULT 0
     );
+
     CREATE TABLE IF NOT EXISTS spins (
-      id SERIAL PRIMARY KEY, uid VARCHAR(20), bet BIGINT, won BIGINT,
-      net BIGINT, created_at BIGINT, ip VARCHAR(50)
+      id SERIAL PRIMARY KEY,
+      uid VARCHAR(20),
+      bet BIGINT,
+      won BIGINT,
+      net BIGINT,
+      created_at BIGINT,
+      ip VARCHAR(50)
     );
+
     CREATE TABLE IF NOT EXISTS login_log (
-      id SERIAL PRIMARY KEY, uid VARCHAR(20), phone VARCHAR(100),
-      success INT, ip VARCHAR(50), user_agent TEXT, created_at BIGINT
+      id SERIAL PRIMARY KEY,
+      uid VARCHAR(20),
+      phone VARCHAR(100),
+      success INT,
+      ip VARCHAR(50),
+      user_agent TEXT,
+      created_at BIGINT
     );
+
     CREATE TABLE IF NOT EXISTS transactions (
-      id SERIAL PRIMARY KEY, uid VARCHAR(20), type VARCHAR(50),
-      amount BIGINT, balance_after BIGINT, note TEXT,
-      admin VARCHAR(50), created_at BIGINT
+      id SERIAL PRIMARY KEY,
+      uid VARCHAR(20),
+      type VARCHAR(50),
+      amount BIGINT,
+      balance_after BIGINT,
+      note TEXT,
+      admin VARCHAR(50),
+      created_at BIGINT
     );
+
     CREATE TABLE IF NOT EXISTS user_wallets (
       uid VARCHAR(20) PRIMARY KEY,
-      sham_syp VARCHAR(200) DEFAULT '', sham_usd VARCHAR(200) DEFAULT '',
-      usdt_bep20 VARCHAR(200) DEFAULT '', usdt_trc20 VARCHAR(200) DEFAULT '',
+      sham_syp VARCHAR(200) DEFAULT '',
+      sham_usd VARCHAR(200) DEFAULT '',
+      usdt_bep20 VARCHAR(200) DEFAULT '',
+      usdt_trc20 VARCHAR(200) DEFAULT '',
       updated_at BIGINT
     );
+
     CREATE TABLE IF NOT EXISTS deposit_requests (
-      id SERIAL PRIMARY KEY, uid VARCHAR(20), method_code VARCHAR(50),
-      amount NUMERIC, amount_syp BIGINT, tx_hash VARCHAR(200),
-      status VARCHAR(20) DEFAULT 'pending', admin_note TEXT DEFAULT '',
-      created_at BIGINT, processed_at BIGINT, processed_by VARCHAR(50)
+      id SERIAL PRIMARY KEY,
+      uid VARCHAR(20),
+      method_code VARCHAR(50),
+      amount NUMERIC,
+      amount_syp BIGINT,
+      tx_hash VARCHAR(200),
+      status VARCHAR(20) DEFAULT 'pending',
+      admin_note TEXT DEFAULT '',
+      created_at BIGINT,
+      processed_at BIGINT,
+      processed_by VARCHAR(50)
     );
+
     CREATE TABLE IF NOT EXISTS withdraw_requests (
-      id SERIAL PRIMARY KEY, uid VARCHAR(20), method_code VARCHAR(50),
-      amount NUMERIC, amount_syp BIGINT, wallet_to VARCHAR(300),
-      status VARCHAR(20) DEFAULT 'pending', admin_note TEXT DEFAULT '',
-      created_at BIGINT, processed_at BIGINT, processed_by VARCHAR(50)
+      id SERIAL PRIMARY KEY,
+      uid VARCHAR(20),
+      method_code VARCHAR(50),
+      amount NUMERIC,
+      amount_syp BIGINT,
+      wallet_to VARCHAR(300),
+      status VARCHAR(20) DEFAULT 'pending',
+      admin_note TEXT DEFAULT '',
+      created_at BIGINT,
+      processed_at BIGINT,
+      processed_by VARCHAR(50)
     );
+
     CREATE TABLE IF NOT EXISTS commissions (
-      id SERIAL PRIMARY KEY, agent_uid VARCHAR(20), source_uid VARCHAR(20),
-      amount BIGINT, type VARCHAR(50), note TEXT, created_at BIGINT
+      id SERIAL PRIMARY KEY,
+      agent_uid VARCHAR(20),
+      source_uid VARCHAR(20),
+      amount BIGINT,
+      type VARCHAR(50),
+      note TEXT,
+      created_at BIGINT
     );
+
     CREATE TABLE IF NOT EXISTS wheel_spins (
-      id SERIAL PRIMARY KEY, uid VARCHAR(20), amount BIGINT, created_at BIGINT
+      id SERIAL PRIMARY KEY,
+      uid VARCHAR(20),
+      amount BIGINT,
+      created_at BIGINT
     );
+
+    CREATE TABLE IF NOT EXISTS jackpot (
+      id INT PRIMARY KEY DEFAULT 1,
+      amount BIGINT DEFAULT 100000,
+      last_winner VARCHAR(20),
+      last_win_amount BIGINT,
+      last_win_at BIGINT
+    );
+
+    CREATE TABLE IF NOT EXISTS daily_claims (
+      id SERIAL PRIMARY KEY,
+      uid VARCHAR(20),
+      amount BIGINT,
+      streak INT,
+      created_at BIGINT
+    );
+
+    INSERT INTO jackpot (id, amount) VALUES (1, 100000) ON CONFLICT (id) DO NOTHING;
+
     CREATE INDEX IF NOT EXISTS idx_users_uid ON users(uid);
     CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
     CREATE INDEX IF NOT EXISTS idx_spins_uid ON spins(uid);
     CREATE INDEX IF NOT EXISTS idx_deposits_status ON deposit_requests(status);
     CREATE INDEX IF NOT EXISTS idx_withdraws_status ON withdraw_requests(status);
     CREATE INDEX IF NOT EXISTS idx_commissions_agent ON commissions(agent_uid);
+    CREATE INDEX IF NOT EXISTS idx_daily_uid ON daily_claims(uid);
   `);
   console.log('✅ قاعدة البيانات جاهزة');
 }
 
-const COLS = 6, ROWS = 5;
+/* ============================================================
+   🎰 منطق اللعبة
+   ============================================================ */
+const COLS = 6;
+const ROWS = 5;
 
 const SYM = {
   zeusFist:  { pay: 2.0  },
@@ -143,19 +259,17 @@ const SYM = {
   gem_purple:{ pay: 0.07 }
 };
 
-/* المضاعفات في اللفات العادية */
-const ZEUS_MAIN    = [2, 3, 5, 10, 15, 25];
-/* المضاعفات في البونص — قيم أعلى مثل GoO */
+const ZEUS_MAIN = [2, 3, 5, 10, 15, 25];
 const ZEUS_PREMIUM = [2, 3, 5, 10, 15, 25, 50, 100];
 
-function rint(max) { return crypto.randomInt(0, max); }
+function rint(max) {
+  return crypto.randomInt(0, max);
+}
 
-/* اللفات العادية: زيوس نادر */
 function pickZeusValue(pool) {
   const r = rint(1000);
-  const isPremium = Array.isArray(pool) && pool[0] >= 2 && pool.length > 6;
+  const isPremium = Array.isArray(pool) && pool.length > 6;
   if (isPremium) {
-    /* في البونص: قيم متنوعة تتراكم */
     if (r < 350) return 2;
     if (r < 550) return 3;
     if (r < 700) return 5;
@@ -165,7 +279,6 @@ function pickZeusValue(pool) {
     if (r < 985) return 50;
     return 100;
   } else {
-    /* في اللفات العادية: قيم صغيرة */
     if (r < 500) return 2;
     if (r < 780) return 3;
     if (r < 920) return 5;
@@ -195,17 +308,21 @@ function genGrid(zeusPool) {
   const g = [];
   for (let x = 0; x < COLS; x++) {
     g[x] = [];
-    for (let y = 0; y < ROWS; y++) g[x][y] = rSym(zeusPool);
+    for (let y = 0; y < ROWS; y++) {
+      g[x][y] = rSym(zeusPool);
+    }
   }
   return g;
 }
 
 function chkWins(g, bet) {
   const c = {};
-  for (let x = 0; x < COLS; x++) for (let y = 0; y < ROWS; y++) {
-    const s = g[x][y];
-    if (!s || s.type === 'zeus' || s.type === 'scatter') continue;
-    c[s.type] = (c[s.type] || 0) + 1;
+  for (let x = 0; x < COLS; x++) {
+    for (let y = 0; y < ROWS; y++) {
+      const s = g[x][y];
+      if (!s || s.type === 'zeus' || s.type === 'scatter') continue;
+      c[s.type] = (c[s.type] || 0) + 1;
+    }
   }
   const wins = [];
   for (const [sym, n] of Object.entries(c)) {
@@ -225,30 +342,30 @@ function chkWins(g, bet) {
 
 function zeusSum(g) {
   let s = 0;
-  for (let x = 0; x < COLS; x++) for (let y = 0; y < ROWS; y++)
-    if (g[x][y] && g[x][y].type === 'zeus') s += g[x][y].v;
+  for (let x = 0; x < COLS; x++) {
+    for (let y = 0; y < ROWS; y++) {
+      if (g[x][y] && g[x][y].type === 'zeus') s += g[x][y].v;
+    }
+  }
   return s;
 }
 
 function cntSc(g) {
   let n = 0;
-  for (let x = 0; x < COLS; x++) for (let y = 0; y < ROWS; y++)
-    if (g[x][y] && g[x][y].type === 'scatter') n++;
+  for (let x = 0; x < COLS; x++) {
+    for (let y = 0; y < ROWS; y++) {
+      if (g[x][y] && g[x][y].type === 'scatter') n++;
+    }
+  }
   return n;
 }
 
-/* ============================================================
-   🎯 runSpin — مع دعم المضاعف التراكمي المستمر
-   إذا كان freeSpinsActive:
-     - cumulativeMultValue = المضاعف المتراكم حتى الآن
-     - المضاعفات الجديدة تُضاف إليه
-   ============================================================ */
-function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMultValue) {
+function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMult) {
   const MAX_CHAINS = 5;
   const chains = [];
   let grid = genGrid(zeusPool);
   let totalWin = 0;
-  let cumMult = cumulativeMultValue || 0;
+  let cumMult = cumulativeMult || 0;
 
   for (let chain = 0; chain < MAX_CHAINS; chain++) {
     const wins = chkWins(grid, bet);
@@ -256,23 +373,18 @@ function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMultValue) {
     if (wins.length === 0) break;
 
     let chainWin = wins.reduce((a, w) => a + w.amount, 0);
-
-    /* في البونص: المضاعف التراكمي يُطبق */
-    /* في اللفات العادية: مضاعفات زيوس في هذه الشبكة تُجمع وتُطبق */
     let appliedMult;
     if (freeSpinsActive) {
-      /* إضافة مضاعفات هذه الجولة إلى المضاعف التراكمي */
       cumMult += zs;
       appliedMult = cumMult;
     } else {
       appliedMult = zs;
     }
-
     if (appliedMult > 0) chainWin *= appliedMult;
 
     chains.push({
       grid: JSON.parse(JSON.stringify(grid)),
-      wins: wins,
+      wins,
       zeusSum: zs,
       multiplier: appliedMult,
       cumulativeMult: cumMult,
@@ -281,12 +393,16 @@ function runSpin(bet, zeusPool, freeSpinsActive, cumulativeMultValue) {
     totalWin += chainWin;
 
     const winningSymbols = [...new Set(wins.map(w => w.symbol))];
-    for (let x = 0; x < COLS; x++) for (let y = 0; y < ROWS; y++) {
-      if (grid[x][y] && winningSymbols.includes(grid[x][y].type)) grid[x][y] = null;
+    for (let x = 0; x < COLS; x++) {
+      for (let y = 0; y < ROWS; y++) {
+        if (grid[x][y] && winningSymbols.includes(grid[x][y].type)) grid[x][y] = null;
+      }
     }
     for (let x = 0; x < COLS; x++) {
       const kept = [];
-      for (let y = ROWS - 1; y >= 0; y--) if (grid[x][y]) kept.push(grid[x][y]);
+      for (let y = ROWS - 1; y >= 0; y--) {
+        if (grid[x][y]) kept.push(grid[x][y]);
+      }
       while (kept.length < ROWS) kept.push(rSym(zeusPool));
       grid[x] = kept.reverse();
     }
@@ -301,22 +417,28 @@ function genUID() {
   while (uid[0] === '0') uid = uid.slice(1) + rint(10);
   return uid;
 }
+
 function genInviteCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = 'SC';
   for (let i = 0; i < 8; i++) code += chars[rint(chars.length)];
   return code;
 }
+
 function getClientIP(req) {
   return (req.headers['x-forwarded-for']?.split(',')[0] ||
           req.socket.remoteAddress || '').replace('::ffff:', '');
 }
 
+/* ============================================================
+   🛡️ Middleware
+   ============================================================ */
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const rateLimits = new Map();
+
 function rateLimit(maxReq, windowMs) {
   return (req, res, next) => {
     const key = getClientIP(req) + ':' + req.path;
@@ -341,7 +463,9 @@ async function authUser(req, res, next) {
     if (user.banned) return res.status(403).json({ error: 'الحساب محظور' });
     req.user = user;
     next();
-  } catch (e) { return res.status(401).json({ error: 'جلسة منتهية' }); }
+  } catch (e) {
+    return res.status(401).json({ error: 'جلسة منتهية' });
+  }
 }
 
 function authAdmin(req, res, next) {
@@ -350,11 +474,14 @@ function authAdmin(req, res, next) {
   next();
 }
 
-/* ==================== AUTH ==================== */
+/* ============================================================
+   🔐 المصادقة
+   ============================================================ */
 app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
   try {
     const { first, last, phone, email, password, inviteCode } = req.body;
     const ip = getClientIP(req);
+
     if (!first || first.length < 2) return res.status(400).json({ error: 'الاسم مطلوب' });
     if (!last || last.length < 2) return res.status(400).json({ error: 'الكنية مطلوبة' });
     if (!phone || phone.length < 8) return res.status(400).json({ error: 'رقم الهاتف غير صحيح' });
@@ -362,7 +489,9 @@ app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
     if (!password || password.length < 4) return res.status(400).json({ error: 'كلمة المرور قصيرة' });
 
     const exists = await pool.query(
-      'SELECT uid FROM users WHERE phone = $1 OR email = $2 LIMIT 1', [phone, email]);
+      'SELECT uid FROM users WHERE phone = $1 OR email = $2 LIMIT 1',
+      [phone, email]
+    );
     if (exists.rows.length) return res.status(409).json({ error: 'الرقم أو البريد مسجل مسبقاً' });
 
     let referrerUid = null;
@@ -391,8 +520,8 @@ app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
       INSERT INTO users (uid, first_name, last_name, phone, email, password_hash,
                          balance, laps, best_win, wagered, won, banned,
                          referred_by, agent_level, invite_code, total_commission,
-                         created_at, last_login, last_ip, last_wheel)
-      VALUES ($1,$2,$3,$4,$5,$6,0,0,0,0,0,0,$7,0,$8,0,$9,$9,$10,0)
+                         created_at, last_login, last_ip, last_wheel, last_daily, daily_streak)
+      VALUES ($1,$2,$3,$4,$5,$6,0,0,0,0,0,0,$7,0,$8,0,$9,$9,$10,0,0,0)
     `, [uid, first, last, phone, email, hash, referrerUid, code, now, ip]);
 
     await pool.query(`
@@ -403,10 +532,15 @@ app.post('/api/register', rateLimit(10, 60000), async (req, res) => {
     const token = jwt.sign({ uid }, JWT_SECRET, { expiresIn: '30d' });
     res.json({
       success: true, token,
-      user: { uid, first, last, phone, email, balance: 0, laps: 0, best: 0,
-              wagered: 0, won: 0, invite_code: code, agent_level: 0, total_commission: 0 }
+      user: {
+        uid, first, last, phone, email, balance: 0, laps: 0, best: 0,
+        wagered: 0, won: 0, invite_code: code, agent_level: 0, total_commission: 0
+      }
     });
-  } catch (e) { console.error('register:', e); res.status(500).json({ error: 'خطأ' }); }
+  } catch (e) {
+    console.error('register:', e);
+    res.status(500).json({ error: 'خطأ في السيرفر' });
+  }
 });
 
 app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
@@ -416,7 +550,9 @@ app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
     if (!id || !password) return res.status(400).json({ error: 'أدخل البيانات' });
 
     const r = await pool.query(
-      'SELECT * FROM users WHERE phone = $1 OR email = $1 OR uid = $1 LIMIT 1', [id]);
+      'SELECT * FROM users WHERE phone = $1 OR email = $1 OR uid = $1 LIMIT 1',
+      [id]
+    );
     const user = r.rows[0];
 
     if (!user) {
@@ -426,6 +562,7 @@ app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
       `, [id, ip, req.headers['user-agent'] || '', Date.now()]);
       return res.status(401).json({ error: 'الحساب غير موجود' });
     }
+
     if (!bcrypt.compareSync(password, user.password_hash)) {
       await pool.query(`
         INSERT INTO login_log (uid, phone, success, ip, user_agent, created_at)
@@ -433,10 +570,13 @@ app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
       `, [user.uid, id, ip, req.headers['user-agent'] || '', Date.now()]);
       return res.status(401).json({ error: 'كلمة المرور خاطئة' });
     }
+
     if (user.banned) return res.status(403).json({ error: 'الحساب محظور' });
 
-    await pool.query('UPDATE users SET last_login = $1, last_ip = $2 WHERE uid = $3',
-      [Date.now(), ip, user.uid]);
+    await pool.query(
+      'UPDATE users SET last_login = $1, last_ip = $2 WHERE uid = $3',
+      [Date.now(), ip, user.uid]
+    );
     await pool.query(`
       INSERT INTO login_log (uid, phone, success, ip, user_agent, created_at)
       VALUES ($1,$2,1,$3,$4,$5)
@@ -446,14 +586,25 @@ app.post('/api/login', rateLimit(10, 60000), async (req, res) => {
     res.json({
       success: true, token,
       user: {
-        uid: user.uid, first: user.first_name, last: user.last_name,
-        phone: user.phone, email: user.email, balance: Number(user.balance),
-        laps: user.laps, best: Number(user.best_win), wagered: Number(user.wagered),
-        won: Number(user.won), invite_code: user.invite_code,
-        agent_level: user.agent_level, total_commission: Number(user.total_commission)
+        uid: user.uid,
+        first: user.first_name,
+        last: user.last_name,
+        phone: user.phone,
+        email: user.email,
+        balance: Number(user.balance),
+        laps: user.laps,
+        best: Number(user.best_win),
+        wagered: Number(user.wagered),
+        won: Number(user.won),
+        invite_code: user.invite_code,
+        agent_level: user.agent_level,
+        total_commission: Number(user.total_commission)
       }
     });
-  } catch (e) { console.error('login:', e); res.status(500).json({ error: 'خطأ' }); }
+  } catch (e) {
+    console.error('login:', e);
+    res.status(500).json({ error: 'خطأ في السيرفر' });
+  }
 });
 
 app.get('/api/me', authUser, async (req, res) => {
@@ -461,53 +612,186 @@ app.get('/api/me', authUser, async (req, res) => {
     const u = req.user;
     const w = await pool.query('SELECT * FROM user_wallets WHERE uid = $1', [u.uid]);
     const wallet = w.rows[0] || {};
+    const jp = await pool.query('SELECT amount FROM jackpot WHERE id = 1');
     const bonus = activeBonuses.get(u.uid);
+
+    const now = Date.now();
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    const canDaily = (now - Number(u.last_daily || 0)) >= ONE_DAY;
+    const nextDaily = canDaily ? now : Number(u.last_daily || 0) + ONE_DAY;
+
     res.json({
-      uid: u.uid, first: u.first_name, last: u.last_name,
-      phone: u.phone, email: u.email,
-      balance: Number(u.balance), laps: u.laps, best: Number(u.best_win),
-      wagered: Number(u.wagered), won: Number(u.won),
-      invite_code: u.invite_code, agent_level: u.agent_level,
+      uid: u.uid,
+      first: u.first_name,
+      last: u.last_name,
+      phone: u.phone,
+      email: u.email,
+      balance: Number(u.balance),
+      laps: u.laps,
+      best: Number(u.best_win),
+      wagered: Number(u.wagered),
+      won: Number(u.won),
+      invite_code: u.invite_code,
+      agent_level: u.agent_level,
       total_commission: Number(u.total_commission),
-      created: Number(u.created_at), lastLogin: Number(u.last_login),
+      created: Number(u.created_at),
+      lastLogin: Number(u.last_login),
       lastWheel: Number(u.last_wheel || 0),
+      jackpot: Number(jp.rows[0]?.amount || 0),
+      daily: {
+        canClaim: canDaily,
+        nextAvailable: nextDaily,
+        streak: Number(u.daily_streak || 0)
+      },
       activeBonus: bonus ? {
         spinsLeft: bonus.spinsLeft,
         cumulativeMult: bonus.cumulativeMult,
         totalWonInBonus: bonus.totalWonInBonus
       } : null,
       wallets: {
-        sham_syp: wallet.sham_syp || '', sham_usd: wallet.sham_usd || '',
-        usdt_bep20: wallet.usdt_bep20 || '', usdt_trc20: wallet.usdt_trc20 || ''
+        sham_syp: wallet.sham_syp || '',
+        sham_usd: wallet.sham_usd || '',
+        usdt_bep20: wallet.usdt_bep20 || '',
+        usdt_trc20: wallet.usdt_trc20 || ''
       }
     });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'خطأ' });
+  }
 });
 
-/* ==================== SPIN ==================== */
+/* ============================================================
+   🎰 الجاكبوت
+   ============================================================ */
+app.get('/api/jackpot', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM jackpot WHERE id = 1');
+    const j = r.rows[0];
+    res.json({
+      amount: Number(j.amount),
+      lastWinner: j.last_winner,
+      lastWinAmount: Number(j.last_win_amount || 0),
+      lastWinAt: Number(j.last_win_at || 0)
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'خطأ' });
+  }
+});
+
+/* ============================================================
+   🎁 المكافأة اليومية
+   ============================================================ */
+app.get('/api/daily/status', authUser, async (req, res) => {
+  const u = req.user;
+  const now = Date.now();
+  const ONE_DAY = 24 * 60 * 60 * 1000;
+  const canClaim = (now - Number(u.last_daily || 0)) >= ONE_DAY;
+  const nextAvailable = canClaim ? now : Number(u.last_daily || 0) + ONE_DAY;
+
+  let streak = Number(u.daily_streak || 0);
+  if (now - Number(u.last_daily || 0) > ONE_DAY * 2) streak = 0;
+
+  res.json({
+    canClaim,
+    nextAvailable,
+    streak,
+    nextReward: DAILY_REWARDS[Math.min(streak, DAILY_REWARDS.length - 1)]
+  });
+});
+
+app.post('/api/daily/claim', authUser, async (req, res) => {
+  try {
+    const u = req.user;
+    const now = Date.now();
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+
+    if (now - Number(u.last_daily || 0) < ONE_DAY) {
+      return res.status(400).json({ error: 'المكافأة متاحة مرة كل 24 ساعة' });
+    }
+
+    let streak = Number(u.daily_streak || 0);
+    if (now - Number(u.last_daily || 0) > ONE_DAY * 2) streak = 0;
+
+    const reward = DAILY_REWARDS[Math.min(streak, DAILY_REWARDS.length - 1)];
+    const newBal = Number(u.balance) + reward;
+    const newStreak = streak + 1;
+
+    await pool.query(
+      'UPDATE users SET balance=$1, last_daily=$2, daily_streak=$3, won=won+$4 WHERE uid=$5',
+      [newBal, now, newStreak, reward, u.uid]
+    );
+    await pool.query(
+      'INSERT INTO daily_claims (uid, amount, streak, created_at) VALUES ($1,$2,$3,$4)',
+      [u.uid, reward, newStreak, now]
+    );
+    await pool.query(`
+      INSERT INTO transactions (uid, type, amount, balance_after, note, admin, created_at)
+      VALUES ($1,'daily_bonus',$2,$3,$4,NULL,$5)
+    `, [u.uid, reward, newBal, 'مكافأة يومية يوم ' + newStreak, now]);
+
+    res.json({ success: true, amount: reward, streak: newStreak, newBalance: newBal });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'خطأ' });
+  }
+});
+
+/* ============================================================
+   🏆 لوحة المتصدرين اليومية
+   ============================================================ */
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startOfDay = today.getTime();
+
+    const r = await pool.query(`
+      SELECT u.uid, u.first_name, u.last_name, COALESCE(SUM(s.won),0)::bigint AS total_won
+      FROM users u
+      LEFT JOIN spins s ON s.uid = u.uid AND s.created_at >= $1
+      GROUP BY u.uid, u.first_name, u.last_name
+      ORDER BY total_won DESC
+      LIMIT 10
+    `, [startOfDay]);
+
+    const list = r.rows.map((x, i) => ({
+      rank: i + 1,
+      uid: x.uid,
+      mask: x.first_name ? x.first_name.charAt(0) + '***' : 'مجهول',
+      won: Number(x.total_won)
+    }));
+
+    res.json({ leaderboard: list });
+  } catch (e) {
+    res.status(500).json({ error: 'خطأ' });
+  }
+});
+
+/* ============================================================
+   🎰 /api/spin
+   ============================================================ */
 app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
   const u = req.user;
   const ip = getClientIP(req);
+
   try {
     const { bet } = req.body;
-    if (typeof bet !== 'number' || bet <= 0 || bet > 1000000)
+    if (typeof bet !== 'number' || bet <= 0 || bet > 1000000) {
       return res.status(400).json({ error: 'رهان غير صحيح' });
+    }
 
-    /* هل يوجد بونص نشط؟ */
     const activeBonus = activeBonuses.get(u.uid);
     const isFree = !!activeBonus;
 
-    if (!isFree && u.balance < bet)
+    if (!isFree && u.balance < bet) {
       return res.status(400).json({ error: 'رصيد غير كافٍ' });
+    }
 
-    /* الرهان المُستخدم */
     const betUsed = isFree ? activeBonus.initialBet : bet;
-
-    /* المضاعف التراكمي حتى الآن */
     const startCumMult = isFree ? activeBonus.cumulativeMult : 0;
-
-    /* تنفيذ اللفة */
     const zeusPool = isFree ? ZEUS_PREMIUM : ZEUS_MAIN;
+
     const result = runSpin(betUsed, zeusPool, isFree, startCumMult);
 
     let totalWin = result.totalWin;
@@ -520,22 +804,21 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
     let bonusSummary = null;
 
     if (isFree) {
-      /* في البونص: لا خصم، فقط إضافة الربح */
+      /* لفة مجانية: لا خصم */
       net = totalWin;
       newBalance = Number(u.balance) + totalWin;
 
-      /* تحديث البونص */
       activeBonus.spinsLeft -= 1;
       activeBonus.cumulativeMult = result.cumulativeMult;
       activeBonus.totalWonInBonus += totalWin;
       if (totalWin > activeBonus.bestWin) activeBonus.bestWin = totalWin;
 
-      /* هل انتهى البونص؟ */
       if (activeBonus.spinsLeft <= 0) {
         bonusEnded = true;
         bonusSummary = {
           spins: FREE_SPINS_COUNT,
           initialBet: activeBonus.initialBet,
+          bonusPrice: activeBonus.bonusPrice || 0,
           totalWon: activeBonus.totalWonInBonus,
           bestWin: activeBonus.bestWin,
           finalMultiplier: result.cumulativeMult
@@ -543,12 +826,11 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
         activeBonuses.delete(u.uid);
       }
 
-      /* نستخدم الرهان الأصلي للرهان */
       await pool.query(`
         UPDATE users
-           SET balance = $1, laps = laps + 1,
-               won = won + $2, best_win = GREATEST(best_win, $3)
-         WHERE uid = $4
+        SET balance = $1, laps = laps + 1, won = won + $2,
+            best_win = GREATEST(best_win, $3)
+        WHERE uid = $4
       `, [newBalance, totalWin, totalWin, u.uid]);
 
       await pool.query(`
@@ -564,15 +846,21 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
 
       await pool.query(`
         UPDATE users
-           SET balance = $1, laps = laps + 1, wagered = wagered + $2,
-               won = won + $3, best_win = GREATEST(best_win, $4)
-         WHERE uid = $5
+        SET balance = $1, laps = laps + 1, wagered = wagered + $2,
+            won = won + $3, best_win = GREATEST(best_win, $4)
+        WHERE uid = $5
       `, [newBalance, bet, totalWin, totalWin, u.uid]);
 
       await pool.query(`
         INSERT INTO spins (uid, bet, won, net, created_at, ip)
         VALUES ($1,$2,$3,$4,$5,$6)
       `, [u.uid, bet, totalWin, net, Date.now(), ip]);
+
+      /* مساهمة الجاكبوت */
+      const jpContribution = Math.floor(bet * JACKPOT_CONTRIBUTION);
+      if (jpContribution > 0) {
+        await pool.query('UPDATE jackpot SET amount = amount + $1 WHERE id = 1', [jpContribution]);
+      }
 
       /* عمولة الوكيل */
       if (net < 0 && u.referred_by) {
@@ -584,7 +872,8 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
           if (commission > 0) {
             await pool.query(
               'UPDATE users SET balance = balance + $1, total_commission = total_commission + $1 WHERE uid = $2',
-              [commission, ref.uid]);
+              [commission, ref.uid]
+            );
             await pool.query(`
               INSERT INTO commissions (agent_uid, source_uid, amount, type, note, created_at)
               VALUES ($1,$2,$3,'loss_commission',$4,$5)
@@ -594,15 +883,43 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
       }
     }
 
-    /* هل ظهرت 4+ موزعات؟ (فقط في اللفات العادية) */
+    /* فحص فوز الجاكبوت (لفات عادية فقط) */
+    let jackpotWon = 0;
+    if (!isFree) {
+      if (Math.random() < JACKPOT_WIN_CHANCE) {
+        const jr = await pool.query('SELECT amount FROM jackpot WHERE id = 1');
+        const jpAmount = Number(jr.rows[0].amount);
+        if (jpAmount > 0) {
+          jackpotWon = jpAmount;
+          newBalance += jpAmount;
+
+          await pool.query(
+            'UPDATE users SET balance = $1, won = won + $2 WHERE uid = $3',
+            [newBalance, jpAmount, u.uid]
+          );
+          await pool.query(
+            'UPDATE jackpot SET amount = 100000, last_winner = $1, last_win_amount = $2, last_win_at = $3 WHERE id = 1',
+            [u.uid, jpAmount, Date.now()]
+          );
+          await pool.query(`
+            INSERT INTO transactions (uid, type, amount, balance_after, note, admin, created_at)
+            VALUES ($1,'jackpot',$2,$3,$4,NULL,$5)
+          `, [u.uid, jpAmount, newBalance, '🎰 جاكبوت', Date.now()]);
+        }
+      }
+    }
+
+    /* فحص الموزعات */
     const scatterCount = cntSc(result.finalGrid);
     let freeSpinsTriggered = false;
+
     if (scatterCount >= 4 && !isFree && !activeBonuses.has(u.uid)) {
       activeBonuses.set(u.uid, {
         spinsLeft: FREE_SPINS_COUNT,
         cumulativeMult: 0,
         totalWonInBonus: 0,
         initialBet: bet,
+        bonusPrice: 0,
         bestWin: 0,
         startBalance: newBalance
       });
@@ -615,6 +932,7 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
       bet: isFree ? 0 : bet,
       betUsed,
       isFree,
+      isFreeNow: isFree,
       totalWin,
       net,
       chains: result.chains,
@@ -623,28 +941,32 @@ app.post('/api/spin', authUser, rateLimit(180, 60000), async (req, res) => {
       freeSpinsTriggered,
       bonusEnded,
       bonusSummary,
+      jackpotWon,
       activeBonus: activeBonuses.has(u.uid) ? {
         spinsLeft: activeBonuses.get(u.uid).spinsLeft,
         cumulativeMult: activeBonuses.get(u.uid).cumulativeMult,
         totalWonInBonus: activeBonuses.get(u.uid).totalWonInBonus
       } : null
     });
-
   } catch (e) {
     console.error('spin:', e);
-    res.status(500).json({ error: 'خطأ' });
+    res.status(500).json({ error: 'خطأ في السيرفر' });
   }
 });
 
-/* ==================== GAMBLE ==================== */
+/* ============================================================
+   🎲 الضاعف (Gamble)
+   ============================================================ */
 app.post('/api/gamble', authUser, rateLimit(30, 60000), async (req, res) => {
   try {
     const { amount } = req.body;
     const u = req.user;
-    if (typeof amount !== 'number' || amount <= 0)
+    if (typeof amount !== 'number' || amount <= 0) {
       return res.status(400).json({ error: 'مبلغ غير صحيح' });
-    if (amount > 10000000)
+    }
+    if (amount > 10000000) {
       return res.status(400).json({ error: 'الحد الأقصى للضاعف' });
+    }
 
     const isWin = crypto.randomInt(0, 2) === 0;
     if (isWin) {
@@ -659,10 +981,15 @@ app.post('/api/gamble', authUser, rateLimit(30, 60000), async (req, res) => {
     } else {
       return res.json({ success: true, won: false, awarded: 0 });
     }
-  } catch (e) { console.error('gamble:', e); res.status(500).json({ error: 'خطأ' }); }
+  } catch (e) {
+    console.error('gamble:', e);
+    res.status(500).json({ error: 'خطأ' });
+  }
 });
 
-/* ==================== WHEEL ==================== */
+/* ============================================================
+   🎡 عجلة الحظ
+   ============================================================ */
 app.get('/api/wheel/status', authUser, async (req, res) => {
   const u = req.user;
   const last = Number(u.last_wheel || 0);
@@ -679,8 +1006,9 @@ app.post('/api/wheel/spin', authUser, rateLimit(5, 60000), async (req, res) => {
     const last = Number(u.last_wheel || 0);
     const now = Date.now();
     const ONE_DAY = 24 * 60 * 60 * 1000;
-    if (now - last < ONE_DAY)
+    if (now - last < ONE_DAY) {
       return res.status(400).json({ error: 'العجلة متاحة مرة واحدة كل 24 ساعة' });
+    }
 
     const total = WHEEL_WEIGHTS.reduce((a, b) => a + b, 0);
     let r = Math.random() * total;
@@ -702,20 +1030,28 @@ app.post('/api/wheel/spin', authUser, rateLimit(5, 60000), async (req, res) => {
     `, [u.uid, amount, newBal, 'عجلة الحظ — ربح ' + amount, Date.now()]);
 
     res.json({ success: true, amount, index: idx, newBalance: newBal });
-  } catch (e) { console.error('wheel:', e); res.status(500).json({ error: 'خطأ' }); }
+  } catch (e) {
+    console.error('wheel:', e);
+    res.status(500).json({ error: 'خطأ' });
+  }
 });
 
-/* ==================== BUY BONUS ==================== */
+/* ============================================================
+   💰 شراء البونص
+   ============================================================ */
 app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
   try {
     const { price, type } = req.body;
     const u = req.user;
-    if (typeof price !== 'number' || price <= 0)
+    if (typeof price !== 'number' || price <= 0) {
       return res.status(400).json({ error: 'سعر غير صحيح' });
-    if (Number(u.balance) < price)
+    }
+    if (Number(u.balance) < price) {
       return res.status(400).json({ error: 'رصيد غير كافٍ' });
-    if (activeBonuses.has(u.uid))
+    }
+    if (activeBonuses.has(u.uid)) {
       return res.status(400).json({ error: 'لديك بونص نشط' });
+    }
 
     const newBalance = Number(u.balance) - price;
     await pool.query('UPDATE users SET balance = $1 WHERE uid = $2', [newBalance, u.uid]);
@@ -724,13 +1060,14 @@ app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
       VALUES ($1,'bonus_buy',$2,$3,$4,NULL,$5)
     `, [u.uid, -price, newBalance, 'بونص ' + type, Date.now()]);
 
-    /* تفعيل البونص */
     const bet = type === 'premium' ? Math.floor(price / 200) : Math.floor(price / 50);
+
     activeBonuses.set(u.uid, {
       spinsLeft: FREE_SPINS_COUNT,
       cumulativeMult: 0,
       totalWonInBonus: 0,
       initialBet: bet,
+      bonusPrice: price,
       bestWin: 0,
       startBalance: newBalance
     });
@@ -739,26 +1076,39 @@ app.post('/api/buy-bonus', authUser, rateLimit(30, 60000), async (req, res) => {
       success: true,
       balance: newBalance,
       bet,
+      bonusPrice: price,
       activeBonus: {
         spinsLeft: FREE_SPINS_COUNT,
         cumulativeMult: 0,
         totalWonInBonus: 0
       }
     });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'خطأ' });
+  }
 });
 
-/* ==================== WALLET ==================== */
+/* ============================================================
+   💳 المحفظة
+   ============================================================ */
 app.get('/api/wallet/methods', (req, res) => {
-  res.json({ methods: PAYMENT_METHODS.map(m => ({ ...m, company_wallet: COMPANY_WALLETS[m.code] || '' })) });
+  res.json({
+    methods: PAYMENT_METHODS.map(m => ({
+      ...m,
+      company_wallet: COMPANY_WALLETS[m.code] || ''
+    }))
+  });
 });
 
 app.get('/api/wallet/my-addresses', authUser, async (req, res) => {
   const w = await pool.query('SELECT * FROM user_wallets WHERE uid = $1', [req.user.uid]);
   const r = w.rows[0] || {};
   res.json({
-    sham_syp: r.sham_syp || '', sham_usd: r.sham_usd || '',
-    usdt_bep20: r.usdt_bep20 || '', usdt_trc20: r.usdt_trc20 || ''
+    sham_syp: r.sham_syp || '',
+    sham_usd: r.sham_usd || '',
+    usdt_bep20: r.usdt_bep20 || '',
+    usdt_trc20: r.usdt_trc20 || ''
   });
 });
 
@@ -768,8 +1118,10 @@ app.post('/api/wallet/save-address', authUser, async (req, res) => {
     INSERT INTO user_wallets (uid, sham_syp, sham_usd, usdt_bep20, usdt_trc20, updated_at)
     VALUES ($1,$2,$3,$4,$5,$6)
     ON CONFLICT (uid) DO UPDATE SET
-      sham_syp = EXCLUDED.sham_syp, sham_usd = EXCLUDED.sham_usd,
-      usdt_bep20 = EXCLUDED.usdt_bep20, usdt_trc20 = EXCLUDED.usdt_trc20,
+      sham_syp = EXCLUDED.sham_syp,
+      sham_usd = EXCLUDED.sham_usd,
+      usdt_bep20 = EXCLUDED.usdt_bep20,
+      usdt_trc20 = EXCLUDED.usdt_trc20,
       updated_at = EXCLUDED.updated_at
   `, [req.user.uid, sham_syp || '', sham_usd || '', usdt_bep20 || '', usdt_trc20 || '', Date.now()]);
   res.json({ success: true });
@@ -780,20 +1132,30 @@ app.post('/api/wallet/deposit', authUser, rateLimit(15, 60000), async (req, res)
     const { method_code, amount, tx_hash } = req.body;
     const method = PAYMENT_METHODS.find(m => m.code === method_code);
     if (!method) return res.status(400).json({ error: 'وسيلة غير صحيحة' });
+
     const amountNum = parseFloat(amount);
-    if (isNaN(amountNum) || amountNum < method.min || amountNum > method.max)
+    if (isNaN(amountNum) || amountNum < method.min || amountNum > method.max) {
       return res.status(400).json({ error: 'المبلغ بين ' + method.min + ' و ' + method.max });
+    }
+
     const amountSyp = Math.floor(amountNum * method.rate);
+
     const pending = await pool.query(
       "SELECT id FROM deposit_requests WHERE uid = $1 AND status = 'pending' LIMIT 1",
-      [req.user.uid]);
+      [req.user.uid]
+    );
     if (pending.rows.length) return res.status(400).json({ error: 'لديك طلب إيداع معلق' });
+
     await pool.query(`
       INSERT INTO deposit_requests (uid, method_code, amount, amount_syp, tx_hash, status, created_at)
       VALUES ($1,$2,$3,$4,$5,'pending',$6)
     `, [req.user.uid, method_code, amountNum, amountSyp, tx_hash || '', Date.now()]);
+
     res.json({ success: true, message: 'تم استلام الطلب', amount_syp: amountSyp });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'خطأ' });
+  }
 });
 
 app.post('/api/wallet/withdraw', authUser, rateLimit(5, 60000), async (req, res) => {
@@ -802,55 +1164,95 @@ app.post('/api/wallet/withdraw', authUser, rateLimit(5, 60000), async (req, res)
     const method = PAYMENT_METHODS.find(m => m.code === method_code);
     if (!method) return res.status(400).json({ error: 'وسيلة غير صحيحة' });
     if (!wallet_to || wallet_to.length < 5) return res.status(400).json({ error: 'أدخل عنوان المحفظة' });
+
     const amountNum = parseFloat(amount);
-    if (isNaN(amountNum) || amountNum < method.min || amountNum > method.max)
+    if (isNaN(amountNum) || amountNum < method.min || amountNum > method.max) {
       return res.status(400).json({ error: 'المبلغ بين ' + method.min + ' و ' + method.max });
+    }
+
     const amountSyp = Math.floor(amountNum * method.rate);
-    if (Number(req.user.balance) < amountSyp) return res.status(400).json({ error: 'رصيد غير كافٍ' });
+    if (Number(req.user.balance) < amountSyp) {
+      return res.status(400).json({ error: 'رصيد غير كافٍ' });
+    }
+
     const pending = await pool.query(
       "SELECT id FROM withdraw_requests WHERE uid = $1 AND status = 'pending' LIMIT 1",
-      [req.user.uid]);
+      [req.user.uid]
+    );
     if (pending.rows.length) return res.status(400).json({ error: 'لديك طلب سحب معلق' });
+
     const newBal = Number(req.user.balance) - amountSyp;
     await pool.query('UPDATE users SET balance = $1 WHERE uid = $2', [newBal, req.user.uid]);
     await pool.query(`
       INSERT INTO withdraw_requests (uid, method_code, amount, amount_syp, wallet_to, status, created_at)
       VALUES ($1,$2,$3,$4,$5,'pending',$6)
     `, [req.user.uid, method_code, amountNum, amountSyp, wallet_to, Date.now()]);
+
     res.json({ success: true, message: 'تم استلام الطلب', amount_syp: amountSyp });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'خطأ' });
+  }
 });
 
 app.get('/api/wallet/history', authUser, async (req, res) => {
   const deposits = await pool.query(
-    'SELECT * FROM deposit_requests WHERE uid = $1 ORDER BY id DESC LIMIT 30', [req.user.uid]);
+    'SELECT * FROM deposit_requests WHERE uid = $1 ORDER BY id DESC LIMIT 30',
+    [req.user.uid]
+  );
   const withdraws = await pool.query(
-    'SELECT * FROM withdraw_requests WHERE uid = $1 ORDER BY id DESC LIMIT 30', [req.user.uid]);
+    'SELECT * FROM withdraw_requests WHERE uid = $1 ORDER BY id DESC LIMIT 30',
+    [req.user.uid]
+  );
   res.json({ deposits: deposits.rows, withdraws: withdraws.rows });
 });
 
-/* ==================== AGENT ==================== */
+/* ============================================================
+   👥 الوكالة
+   ============================================================ */
 app.get('/api/agent/info', authUser, async (req, res) => {
   const u = req.user;
   const referrals = await pool.query(
     'SELECT uid, first_name, last_name, balance, laps, wagered, won, created_at, last_login FROM users WHERE referred_by = $1 ORDER BY created_at DESC',
-    [u.uid]);
+    [u.uid]
+  );
   const commissions = await pool.query(
-    'SELECT * FROM commissions WHERE agent_uid = $1 ORDER BY id DESC LIMIT 100', [u.uid]);
+    'SELECT * FROM commissions WHERE agent_uid = $1 ORDER BY id DESC LIMIT 100',
+    [u.uid]
+  );
+
   const refs = referrals.rows.map(r => ({
-    uid: r.uid, first_name: r.first_name, last_name: r.last_name,
-    balance: Number(r.balance), laps: r.laps, wagered: Number(r.wagered),
-    won: Number(r.won), created_at: Number(r.created_at), last_login: Number(r.last_login)
+    uid: r.uid,
+    first_name: r.first_name,
+    last_name: r.last_name,
+    balance: Number(r.balance),
+    laps: r.laps,
+    wagered: Number(r.wagered),
+    won: Number(r.won),
+    created_at: Number(r.created_at),
+    last_login: Number(r.last_login)
   }));
+
   const totalRefWagered = refs.reduce((s, r) => s + r.wagered, 0);
   const totalRefWon = refs.reduce((s, r) => s + r.won, 0);
   const totalRefLost = Math.max(0, totalRefWagered - totalRefWon);
+
   res.json({
-    invite_code: u.invite_code, agent_level: u.agent_level,
+    invite_code: u.invite_code,
+    agent_level: u.agent_level,
     total_commission: Number(u.total_commission),
-    referrals_count: refs.length, referrals: refs,
-    commissions: commissions.rows.map(c => ({ ...c, amount: Number(c.amount), created_at: Number(c.created_at) })),
-    stats: { total_ref_wagered: totalRefWagered, total_ref_won: totalRefWon, total_ref_lost: totalRefLost }
+    referrals_count: refs.length,
+    referrals: refs,
+    commissions: commissions.rows.map(c => ({
+      ...c,
+      amount: Number(c.amount),
+      created_at: Number(c.created_at)
+    })),
+    stats: {
+      total_ref_wagered: totalRefWagered,
+      total_ref_won: totalRefWon,
+      total_ref_lost: totalRefLost
+    }
   });
 });
 
@@ -864,7 +1266,9 @@ app.get('/api/rtp', (req, res) => {
   res.json({ rtp: RTP, houseEdge: 1 - RTP, maxWinMult: MAX_WIN_MULT });
 });
 
-/* ==================== ADMIN ==================== */
+/* ============================================================
+   🔒 Admin
+   ============================================================ */
 app.post('/api/admin/login', rateLimit(5, 60000), (req, res) => {
   const { password } = req.body;
   if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'كلمة مرور خاطئة' });
@@ -884,18 +1288,31 @@ app.get('/api/admin/stats', authAdmin, async (req, res) => {
     const pendingWithdraws = await pool.query("SELECT COUNT(*)::int AS c FROM withdraw_requests WHERE status='pending'");
     const agents = await pool.query('SELECT COUNT(*)::int AS c FROM users WHERE agent_level > 0');
     const totalCommission = await pool.query('SELECT COALESCE(SUM(amount),0)::bigint AS s FROM commissions');
+    const jackpotR = await pool.query('SELECT amount FROM jackpot WHERE id = 1');
+
     const tw = Number(totalWagered.rows[0].s);
     const wn = Number(totalWon.rows[0].s);
+
     res.json({
-      totalUsers: users.rows[0].c, totalBalance: Number(totalBalance.rows[0].s),
-      totalWagered: tw, totalWon: wn, totalSpins: spins.rows[0].c,
-      activeToday: activeToday.rows[0].c, banned: banned.rows[0].c,
-      pendingDeposits: pendingDeposits.rows[0].c, pendingWithdraws: pendingWithdraws.rows[0].c,
-      agents: agents.rows[0].c, totalCommission: Number(totalCommission.rows[0].s),
+      totalUsers: users.rows[0].c,
+      totalBalance: Number(totalBalance.rows[0].s),
+      totalWagered: tw,
+      totalWon: wn,
+      totalSpins: spins.rows[0].c,
+      activeToday: activeToday.rows[0].c,
+      banned: banned.rows[0].c,
+      pendingDeposits: pendingDeposits.rows[0].c,
+      pendingWithdraws: pendingWithdraws.rows[0].c,
+      agents: agents.rows[0].c,
+      totalCommission: Number(totalCommission.rows[0].s),
+      jackpot: Number(jackpotR.rows[0]?.amount || 0),
       houseProfit: tw - wn,
       rtp: tw > 0 ? (wn / tw * 100).toFixed(2) + '%' : '—'
     });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'خطأ' });
+  }
 });
 
 app.get('/api/admin/users', authAdmin, async (req, res) => {
@@ -903,33 +1320,61 @@ app.get('/api/admin/users', authAdmin, async (req, res) => {
     const { search, sort, limit = 100, offset = 0 } = req.query;
     let whereSql = '';
     const params = [];
+
     if (search) {
       params.push('%' + search.toLowerCase() + '%');
       whereSql = `WHERE LOWER(uid) LIKE $1 OR LOWER(phone) LIKE $1 OR LOWER(email) LIKE $1
-                       OR LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1 OR LOWER(invite_code) LIKE $1`;
+                  OR LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1 OR LOWER(invite_code) LIKE $1`;
     }
+
     const sortMap = {
-      balance: 'balance DESC', balance_asc: 'balance ASC', laps: 'laps DESC',
-      best: 'best_win DESC', recent: 'last_login DESC', created: 'created_at DESC',
+      balance: 'balance DESC',
+      balance_asc: 'balance ASC',
+      laps: 'laps DESC',
+      best: 'best_win DESC',
+      recent: 'last_login DESC',
+      created: 'created_at DESC',
       commission: 'total_commission DESC'
     };
     const orderBy = sortMap[sort] || sortMap.created;
+
     const total = await pool.query(`SELECT COUNT(*)::int AS c FROM users ${whereSql}`, params);
-    params.push(parseInt(limit)); params.push(parseInt(offset));
+    params.push(parseInt(limit));
+    params.push(parseInt(offset));
+
     const users = await pool.query(
       `SELECT * FROM users ${whereSql} ORDER BY ${orderBy} LIMIT $${params.length - 1} OFFSET $${params.length}`,
-      params);
+      params
+    );
+
     const mapped = users.rows.map(u => ({
-      id: u.id, uid: u.uid, first_name: u.first_name, last_name: u.last_name,
-      phone: u.phone, email: u.email, balance: Number(u.balance), laps: u.laps,
-      best_win: Number(u.best_win), wagered: Number(u.wagered), won: Number(u.won),
-      banned: u.banned, referred_by: u.referred_by, agent_level: u.agent_level,
-      invite_code: u.invite_code, total_commission: Number(u.total_commission),
-      notes: u.notes, created_at: Number(u.created_at), last_login: Number(u.last_login),
+      id: u.id,
+      uid: u.uid,
+      first_name: u.first_name,
+      last_name: u.last_name,
+      phone: u.phone,
+      email: u.email,
+      balance: Number(u.balance),
+      laps: u.laps,
+      best_win: Number(u.best_win),
+      wagered: Number(u.wagered),
+      won: Number(u.won),
+      banned: u.banned,
+      referred_by: u.referred_by,
+      agent_level: u.agent_level,
+      invite_code: u.invite_code,
+      total_commission: Number(u.total_commission),
+      notes: u.notes,
+      created_at: Number(u.created_at),
+      last_login: Number(u.last_login),
       last_ip: u.last_ip
     }));
+
     res.json({ users: mapped, total: total.rows[0].c });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'خطأ' });
+  }
 });
 
 app.get('/api/admin/user/:uid', authAdmin, async (req, res) => {
@@ -937,6 +1382,7 @@ app.get('/api/admin/user/:uid', authAdmin, async (req, res) => {
     const r = await pool.query('SELECT * FROM users WHERE uid = $1 OR phone = $1 LIMIT 1', [req.params.uid]);
     if (!r.rows.length) return res.status(404).json({ error: 'غير موجود' });
     const user = r.rows[0];
+
     const spins = await pool.query('SELECT * FROM spins WHERE uid = $1 ORDER BY id DESC LIMIT 100', [user.uid]);
     const transactions = await pool.query('SELECT * FROM transactions WHERE uid = $1 ORDER BY id DESC LIMIT 100', [user.uid]);
     const logins = await pool.query('SELECT * FROM login_log WHERE uid = $1 ORDER BY id DESC LIMIT 50', [user.uid]);
@@ -944,10 +1390,21 @@ app.get('/api/admin/user/:uid', authAdmin, async (req, res) => {
     const withdraws = await pool.query('SELECT * FROM withdraw_requests WHERE uid = $1 ORDER BY id DESC LIMIT 50', [user.uid]);
     const referrals = await pool.query('SELECT uid, first_name, last_name, created_at FROM users WHERE referred_by = $1', [user.uid]);
     const commissions = await pool.query('SELECT * FROM commissions WHERE agent_uid = $1 ORDER BY id DESC LIMIT 50', [user.uid]);
-    res.json({ user, spins: spins.rows, transactions: transactions.rows,
-      logins: logins.rows, deposits: deposits.rows, withdraws: withdraws.rows,
-      referrals: referrals.rows, commissions: commissions.rows });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'خطأ' }); }
+
+    res.json({
+      user,
+      spins: spins.rows,
+      transactions: transactions.rows,
+      logins: logins.rows,
+      deposits: deposits.rows,
+      withdraws: withdraws.rows,
+      referrals: referrals.rows,
+      commissions: commissions.rows
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'خطأ' });
+  }
 });
 
 app.post('/api/admin/update-balance', authAdmin, async (req, res) => {
@@ -955,12 +1412,14 @@ app.post('/api/admin/update-balance', authAdmin, async (req, res) => {
   if (typeof newBalance !== 'number') return res.status(400).json({ error: 'قيمة غير صحيحة' });
   const r = await pool.query('SELECT balance FROM users WHERE uid = $1', [uid]);
   if (!r.rows.length) return res.status(404).json({ error: 'غير موجود' });
+
   const diff = newBalance - Number(r.rows[0].balance);
   await pool.query('UPDATE users SET balance = $1 WHERE uid = $2', [newBalance, uid]);
   await pool.query(`
     INSERT INTO transactions (uid, type, amount, balance_after, note, admin, created_at)
     VALUES ($1,$2,$3,$4,$5,'admin',$6)
   `, [uid, diff >= 0 ? 'admin_credit' : 'admin_debit', diff, newBalance, note || '', Date.now()]);
+
   res.json({ success: true, newBalance });
 });
 
@@ -969,12 +1428,14 @@ app.post('/api/admin/adjust-balance', authAdmin, async (req, res) => {
   if (typeof amount !== 'number') return res.status(400).json({ error: 'قيمة غير صحيحة' });
   const r = await pool.query('SELECT balance FROM users WHERE uid = $1', [uid]);
   if (!r.rows.length) return res.status(404).json({ error: 'غير موجود' });
+
   const newBal = Math.max(0, Number(r.rows[0].balance) + amount);
   await pool.query('UPDATE users SET balance = $1 WHERE uid = $2', [newBal, uid]);
   await pool.query(`
     INSERT INTO transactions (uid, type, amount, balance_after, note, admin, created_at)
     VALUES ($1,$2,$3,$4,$5,'admin',$6)
   `, [uid, amount >= 0 ? 'admin_credit' : 'admin_debit', amount, newBal, note || '', Date.now()]);
+
   res.json({ success: true, newBalance: newBal });
 });
 
@@ -1000,12 +1461,22 @@ app.post('/api/admin/set-agent-level', authAdmin, async (req, res) => {
   res.json({ success: true, level: lvl });
 });
 
+app.post('/api/admin/set-jackpot', authAdmin, async (req, res) => {
+  const { amount } = req.body;
+  if (typeof amount !== 'number' || amount < 0) return res.status(400).json({ error: 'قيمة غير صحيحة' });
+  await pool.query('UPDATE jackpot SET amount = $1 WHERE id = 1', [amount]);
+  res.json({ success: true, amount });
+});
+
 app.get('/api/admin/deposits', authAdmin, async (req, res) => {
   const { status = 'pending' } = req.query;
   const r = await pool.query(`
     SELECT d.*, u.first_name, u.last_name, u.phone
-      FROM deposit_requests d LEFT JOIN users u ON u.uid = d.uid
-     WHERE d.status = $1 ORDER BY d.id DESC LIMIT 200
+    FROM deposit_requests d
+    LEFT JOIN users u ON u.uid = d.uid
+    WHERE d.status = $1
+    ORDER BY d.id DESC
+    LIMIT 200
   `, [status]);
   res.json({ deposits: r.rows });
 });
@@ -1016,12 +1487,22 @@ app.post('/api/admin/deposits/process', authAdmin, async (req, res) => {
     await client.query('BEGIN');
     const { id, action, admin_note } = req.body;
     const dr = await client.query('SELECT * FROM deposit_requests WHERE id = $1 FOR UPDATE', [id]);
-    if (!dr.rows.length) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'غير موجود' }); }
+    if (!dr.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'غير موجود' });
+    }
     const deposit = dr.rows[0];
-    if (deposit.status !== 'pending') { await client.query('ROLLBACK'); return res.status(400).json({ error: 'تمت معالجته' }); }
+    if (deposit.status !== 'pending') {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'تمت معالجته' });
+    }
+
     if (action === 'approve') {
       const ur = await client.query('SELECT balance FROM users WHERE uid = $1 FOR UPDATE', [deposit.uid]);
-      if (!ur.rows.length) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'المستخدم غير موجود' }); }
+      if (!ur.rows.length) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'المستخدم غير موجود' });
+      }
       const newBal = Number(ur.rows[0].balance) + Number(deposit.amount_syp);
       await client.query('UPDATE users SET balance = $1 WHERE uid = $2', [newBal, deposit.uid]);
       await client.query(`
@@ -1030,24 +1511,31 @@ app.post('/api/admin/deposits/process', authAdmin, async (req, res) => {
       `, [deposit.uid, deposit.amount_syp, newBal,
           'إيداع ' + deposit.method_code + ' — ' + deposit.amount, Date.now()]);
     }
+
     await client.query(
       'UPDATE deposit_requests SET status = $1, admin_note = $2, processed_at = $3, processed_by = $4 WHERE id = $5',
-      [action === 'approve' ? 'approved' : 'rejected', admin_note || '', Date.now(), 'admin', id]);
+      [action === 'approve' ? 'approved' : 'rejected', admin_note || '', Date.now(), 'admin', id]
+    );
     await client.query('COMMIT');
     res.json({ success: true });
   } catch (e) {
     await client.query('ROLLBACK');
     console.error(e);
     res.status(500).json({ error: 'خطأ' });
-  } finally { client.release(); }
+  } finally {
+    client.release();
+  }
 });
 
 app.get('/api/admin/withdraws', authAdmin, async (req, res) => {
   const { status = 'pending' } = req.query;
   const r = await pool.query(`
     SELECT w.*, u.first_name, u.last_name, u.phone, u.balance AS user_balance
-      FROM withdraw_requests w LEFT JOIN users u ON u.uid = w.uid
-     WHERE w.status = $1 ORDER BY w.id DESC LIMIT 200
+    FROM withdraw_requests w
+    LEFT JOIN users u ON u.uid = w.uid
+    WHERE w.status = $1
+    ORDER BY w.id DESC
+    LIMIT 200
   `, [status]);
   res.json({ withdraws: r.rows });
 });
@@ -1058,9 +1546,16 @@ app.post('/api/admin/withdraws/process', authAdmin, async (req, res) => {
     await client.query('BEGIN');
     const { id, action, admin_note } = req.body;
     const wr = await client.query('SELECT * FROM withdraw_requests WHERE id = $1 FOR UPDATE', [id]);
-    if (!wr.rows.length) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'غير موجود' }); }
+    if (!wr.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'غير موجود' });
+    }
     const withdraw = wr.rows[0];
-    if (withdraw.status !== 'pending') { await client.query('ROLLBACK'); return res.status(400).json({ error: 'تمت معالجته' }); }
+    if (withdraw.status !== 'pending') {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'تمت معالجته' });
+    }
+
     if (action === 'reject') {
       const ur = await client.query('SELECT balance FROM users WHERE uid = $1 FOR UPDATE', [withdraw.uid]);
       if (ur.rows.length) {
@@ -1072,29 +1567,41 @@ app.post('/api/admin/withdraws/process', authAdmin, async (req, res) => {
         `, [withdraw.uid, withdraw.amount_syp, newBal, 'إعادة رصيد سحب مرفوض', Date.now()]);
       }
     }
+
     await client.query(
       'UPDATE withdraw_requests SET status = $1, admin_note = $2, processed_at = $3, processed_by = $4 WHERE id = $5',
-      [action === 'approve' ? 'approved' : 'rejected', admin_note || '', Date.now(), 'admin', id]);
+      [action === 'approve' ? 'approved' : 'rejected', admin_note || '', Date.now(), 'admin', id]
+    );
     await client.query('COMMIT');
     res.json({ success: true });
   } catch (e) {
     await client.query('ROLLBACK');
     console.error(e);
     res.status(500).json({ error: 'خطأ' });
-  } finally { client.release(); }
+  } finally {
+    client.release();
+  }
 });
 
 app.get('/api/admin/recent-spins', authAdmin, async (req, res) => {
   const r = await pool.query(`
-    SELECT s.*, u.first_name, u.last_name FROM spins s
-    LEFT JOIN users u ON u.uid = s.uid ORDER BY s.id DESC LIMIT 100`);
+    SELECT s.*, u.first_name, u.last_name
+    FROM spins s
+    LEFT JOIN users u ON u.uid = s.uid
+    ORDER BY s.id DESC
+    LIMIT 100
+  `);
   res.json({ spins: r.rows });
 });
 
 app.get('/api/admin/recent-logins', authAdmin, async (req, res) => {
   const r = await pool.query(`
-    SELECT l.*, u.first_name, u.last_name FROM login_log l
-    LEFT JOIN users u ON u.uid = l.uid ORDER BY l.id DESC LIMIT 100`);
+    SELECT l.*, u.first_name, u.last_name
+    FROM login_log l
+    LEFT JOIN users u ON u.uid = l.uid
+    ORDER BY l.id DESC
+    LIMIT 100
+  `);
   res.json({ logins: r.rows });
 });
 
@@ -1103,24 +1610,35 @@ app.get('/api/admin/agents', authAdmin, async (req, res) => {
     SELECT u.uid, u.first_name, u.last_name, u.phone, u.agent_level,
            u.total_commission, u.balance, u.created_at,
            (SELECT COUNT(*)::int FROM users x WHERE x.referred_by = u.uid) AS referrals
-      FROM users u WHERE u.agent_level > 0
-      ORDER BY u.total_commission DESC LIMIT 200`);
+    FROM users u
+    WHERE u.agent_level > 0
+    ORDER BY u.total_commission DESC
+    LIMIT 200
+  `);
   res.json({ agents: r.rows });
 });
 
+/* ============================================================
+   Routes
+   ============================================================ */
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 
+/* ============================================================
+   Startup
+   ============================================================ */
 (async () => {
   try {
     console.log('🚀 بدء التشغيل...');
     await initDB();
     app.listen(PORT, () => {
-      console.log('⚡ STORMCROWN SERVER v12');
+      console.log('⚡ STORMCROWN SERVER v13');
       console.log('Port:', PORT);
       console.log('RTP:', (RTP * 100).toFixed(2) + '%');
       console.log('FreeSpins:', FREE_SPINS_COUNT);
-      console.log('🎯 Cumulative Multiplier: ON');
+      console.log('MaxWin:', MAX_WIN_MULT + 'x');
+      console.log('Jackpot chance: 1/' + Math.round(1 / JACKPOT_WIN_CHANCE));
+      console.log('Daily bonuses:', DAILY_REWARDS.join(', '));
     });
   } catch (e) {
     console.error('❌ فشل التشغيل:');
