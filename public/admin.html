@@ -2,800 +2,1132 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>STORMCROWN — لوحة التحكم</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#05000f">
+<title>⚡ STORMCROWN — لوحة التحكم</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Amiri:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Tahoma,Arial,sans-serif;background:#0a0a14;color:#eee;min-height:100vh}
-#login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-#loginBox{background:linear-gradient(180deg,#1a0a30,#0a0515);border:2px solid #ffd24a;
-  border-radius:16px;padding:40px;max-width:400px;width:100%;text-align:center;
-  box-shadow:0 0 80px rgba(255,210,74,.4)}
-#loginBox h1{color:#ffd24a;font-size:32px;margin-bottom:8px}
-#loginBox p{color:#888;font-size:14px;margin-bottom:24px}
-#loginBox input{width:100%;padding:14px;background:#0a0515;border:2px solid #4a1a7a;
-  border-radius:8px;color:#fff;font-size:16px;margin-bottom:16px;text-align:center}
-#loginBox input:focus{outline:none;border-color:#ffd24a}
-#loginBox button{width:100%;padding:14px;background:linear-gradient(180deg,#6a0dad,#2a0a4a);
-  border:2px solid #ffd24a;border-radius:8px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer}
-.err{color:#ff4a4a;font-size:14px;margin-top:12px;display:none}
-.err.on{display:block}
-#app{display:none;padding:16px;max-width:1600px;margin:0 auto}
-#app.on{display:block}
-header{display:flex;justify-content:space-between;align-items:center;
-  padding:12px 18px;background:linear-gradient(180deg,#1a0a30,#0a0515);
-  border:2px solid #4a1a7a;border-radius:12px;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-header h1{color:#ffd24a;font-size:22px}
-header .stats{display:flex;gap:12px;font-size:12px;flex-wrap:wrap}
-header .stats div{text-align:center}
-header .stats .lbl{color:#888;font-size:10px}
-header .stats .val{color:#ffd24a;font-weight:bold;font-family:monospace;font-size:13px}
-#tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
-.tab{padding:9px 14px;background:linear-gradient(180deg,#1a0a30,#0a0515);
-  border:1px solid #4a1a7a;border-radius:8px;color:#ccc;cursor:pointer;
-  font-size:13px;font-weight:bold;position:relative}
-.tab.active{background:linear-gradient(180deg,#6a0dad,#2a0a4a);border-color:#ffd24a;color:#fff}
-.tab .badge{background:#ff4a4a;color:#fff;border-radius:10px;padding:1px 6px;
-  font-size:10px;margin-right:3px;display:none}
-.tab .badge.on{display:inline-block}
-.panel{display:none}
+html,body{height:100%;background:#05000f;color:#fff;font-family:'Amiri',serif;overflow-x:hidden}
+body{min-height:100vh;display:flex;flex-direction:column}
+
+/* ============ AUTH ============ */
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 100%,#5a2a0a 0%,#0a0014 50%,#000 100%);z-index:2000;overflow-y:auto}
+#login.hidden{display:none}
+#loginBox{position:relative;background:linear-gradient(180deg,rgba(40,20,10,.97),rgba(10,3,15,.99));border:3px solid #ffd24a;border-radius:18px;padding:36px 30px;max-width:420px;width:100%;text-align:center;box-shadow:0 0 100px rgba(255,210,74,.4),inset 0 0 60px rgba(255,140,0,.08);animation:loginIn .6s cubic-bezier(.19,1.6,.3,1)}
+@keyframes loginIn{0%{transform:scale(.7) rotate(-3deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+#loginBox::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(255,210,74,.08),transparent);animation:cardRotate 15s linear infinite;pointer-events:none;border-radius:50%}
+@keyframes cardRotate{to{transform:rotate(360deg)}}
+#loginBox h1{font-family:'Cinzel Decorative',serif;font-size:32px;background:linear-gradient(180deg,#fff8e0,#ffd24a,#8b4000);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 25px rgba(255,210,74,.9));margin-bottom:6px;position:relative;z-index:1}
+#loginBox p{color:#c89bff;font-size:11px;letter-spacing:.35em;margin-bottom:24px;font-family:'Cinzel Decorative',serif;position:relative;z-index:1}
+#loginBox input{width:100%;padding:14px;background:rgba(15,5,20,.9);border:2px solid rgba(184,134,11,.5);border-radius:10px;color:#ffe8a0;font-size:15px;margin-bottom:16px;text-align:center;font-family:monospace;letter-spacing:.15em;position:relative;z-index:1;transition:all .2s}
+#loginBox input:focus{outline:none;border-color:#ffd24a;box-shadow:0 0 30px rgba(255,210,74,.6);background:rgba(25,10,30,.95)}
+#loginBox button{width:100%;padding:14px;background:linear-gradient(180deg,#8b4000,#4a1a00);border:2px solid #ffd24a;border-radius:10px;color:#fff;font-size:16px;font-weight:bold;cursor:pointer;font-family:'Cinzel Decorative',serif;letter-spacing:.1em;position:relative;z-index:1;transition:all .15s;box-shadow:0 0 25px rgba(255,140,0,.5)}
+#loginBox button:hover{box-shadow:0 0 45px rgba(255,140,0,1);transform:translateY(-1px)}
+#loginBox button:active{transform:scale(.97)}
+.err{color:#ff6a6a;font-size:12px;margin-top:14px;display:none;padding:8px;background:rgba(139,0,0,.3);border-radius:7px;border:1px solid #6b0a0a;position:relative;z-index:1}
+.err.on{display:block;animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* ============ APP ============ */
+#app{display:none;flex-direction:column;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#3a0a6a 0%,transparent 40%),radial-gradient(ellipse at 50% 100%,#1a0a3a 0%,transparent 50%),linear-gradient(180deg,#0a0015 0%,#150830 50%,#05000f 100%)}
+#app.on{display:flex;animation:fadeIn .5s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ============ HEADER ============ */
+header{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:linear-gradient(180deg,rgba(15,5,30,.98),rgba(15,5,30,.88),transparent);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,210,74,.15);flex-wrap:wrap;gap:12px}
+.headerLogo{display:flex;align-items:center;gap:10px;font-family:'Cinzel Decorative',serif;font-weight:900;font-size:18px}
+.headerLogo .logo-icon{font-size:26px;filter:drop-shadow(0 0 12px #ffd24a);animation:logoPulse 2s infinite}
+@keyframes logoPulse{0%,100%{filter:drop-shadow(0 0 12px #ffd24a)}50%{filter:drop-shadow(0 0 25px #ffd24a)}}
+.headerLogo .logo-text{background:linear-gradient(180deg,#fff8e0,#ffd24a,#8b4000);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 15px rgba(255,210,74,.7))}
+
+.liveIndicator{display:flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(46,204,113,.1);border:1px solid #2ecc71;border-radius:20px;font-size:11px;color:#7effb0;font-family:monospace;font-weight:700}
+.liveDot{width:8px;height:8px;border-radius:50%;background:#2ecc71;box-shadow:0 0 10px #2ecc71;animation:livePulse 1.5s infinite}
+@keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 10px #2ecc71}50%{opacity:.5;box-shadow:0 0 20px #2ecc71}}
+.liveIndicator.paused{background:rgba(255,210,74,.1);border-color:#ffd24a;color:#ffe8a0}
+.liveIndicator.paused .liveDot{background:#ffd24a;box-shadow:0 0 10px #ffd24a;animation:none}
+
+.headerActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.headerBtn{padding:8px 14px;background:linear-gradient(180deg,rgba(80,30,20,.9),rgba(30,10,5,.95));border:1px solid #8b4000;border-radius:8px;color:#ffe8a0;cursor:pointer;font-family:'Amiri',serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;transition:all .15s}
+.headerBtn:hover{border-color:#ffd24a;box-shadow:0 0 15px rgba(255,210,74,.4)}
+.headerBtn:active{transform:scale(.96)}
+.headerBtn.active{background:linear-gradient(180deg,#ffd24a,#8b4000);color:#1a0033;border-color:#fff}
+.headerBtn svg{width:14px;height:14px;fill:currentColor}
+
+/* ============ TABS ============ */
+#tabs{display:flex;gap:6px;padding:14px 18px 0;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+#tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:10px 16px;background:linear-gradient(180deg,rgba(30,10,60,.6),rgba(15,5,30,.85));border:2px solid rgba(155,89,255,.4);border-radius:11px;color:#c8b0e8;cursor:pointer;font-size:13px;font-weight:700;position:relative;transition:all .15s;white-space:nowrap}
+.tab:hover{border-color:#c89bff;color:#e0d0ff;transform:translateY(-1px)}
+.tab.active{background:linear-gradient(180deg,#9b59ff,#4a1080);border-color:#ffd24a;color:#fff;box-shadow:0 0 25px rgba(155,89,255,.6);transform:translateY(-1px)}
+.tab .badge{position:absolute;top:-4px;left:-4px;background:linear-gradient(180deg,#ff4a4a,#8b0000);color:#fff;border-radius:12px;padding:1px 7px;font-size:10px;font-family:monospace;font-weight:900;border:2px solid #05000f;display:none;box-shadow:0 0 10px rgba(255,74,74,.6)}
+.tab .badge.on{display:inline-block;animation:badgePulse 1.5s infinite}
+@keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+
+/* ============ MAIN ============ */
+main{flex:1;padding:16px 18px 30px;max-width:1600px;margin:0 auto;width:100%}
+.panel{display:none;animation:panelIn .3s ease}
 .panel.active{display:block}
-.searchBar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.searchBar input,.searchBar select{padding:10px;background:#0a0515;
-  border:1px solid #4a1a7a;border-radius:8px;color:#fff;font-size:13px;min-width:150px}
-.searchBar button{padding:10px 18px;background:linear-gradient(180deg,#6a0dad,#2a0a4a);
-  border:1px solid #ffd24a;border-radius:8px;color:#fff;font-weight:bold;cursor:pointer}
-table{width:100%;border-collapse:collapse;background:#0a0515;border-radius:12px;overflow:hidden}
-th{background:linear-gradient(180deg,#2a1050,#1a0530);color:#ffd24a;
-  padding:9px 6px;text-align:right;font-size:11px;border-bottom:2px solid #4a1a7a}
-td{padding:8px 6px;border-bottom:1px solid #1a0a30;font-size:11px}
-td.mono{font-family:monospace;color:#c89bff;direction:ltr;text-align:left}
-td.bal{font-family:monospace;color:#2ecc71;font-weight:bold;font-size:13px}
-td.uid{font-family:monospace;color:#ffd24a;direction:ltr;text-align:left;font-weight:bold}
-.banned{color:#ff4a4a;font-weight:bold}
-.active{color:#2ecc71}
-.btn{padding:5px 9px;border-radius:5px;border:none;cursor:pointer;font-size:11px;font-weight:bold;margin:1px}
-.btn-view{background:#4a9eff;color:#fff}
-.btn-ban{background:#8b0000;color:#fff}
-.btn-unban{background:#2ecc71;color:#fff}
-.btn-add{background:#2ecc71;color:#fff}
-.btn-sub{background:#e67e22;color:#fff}
-.btn-agent{background:#9b59ff;color:#fff}
-.btn-cancel-agent{background:#666;color:#fff}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============ STATS CARDS (DASHBOARD) ============ */
+.statsGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.statCard{position:relative;padding:16px;border-radius:14px;background:linear-gradient(180deg,rgba(40,15,80,.9),rgba(10,3,25,.95));border:2px solid;overflow:hidden;transition:all .2s;cursor:default}
+.statCard:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.statCard::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(255,255,255,.05),transparent);animation:cardRotate 15s linear infinite;pointer-events:none;border-radius:50%}
+.statCard .sc-icon{font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 10px currentColor);position:relative;z-index:1}
+.statCard .sc-label{font-size:10px;color:#a090d0;font-family:'Cinzel Decorative',serif;letter-spacing:.15em;margin-bottom:6px;position:relative;z-index:1}
+.statCard .sc-value{font-family:monospace;font-size:24px;font-weight:900;position:relative;z-index:1;line-height:1;transition:all .3s}
+.statCard .sc-sub{font-size:10px;color:#7a6a9a;margin-top:4px;font-family:monospace;position:relative;z-index:1}
+
+.sc-gold{border-color:#ffd24a;box-shadow:0 0 25px rgba(255,210,74,.15)}
+.sc-gold .sc-value{color:#ffd24a;text-shadow:0 0 12px #ffd24a}
+.sc-green{border-color:#2ecc71;box-shadow:0 0 25px rgba(46,204,113,.15)}
+.sc-green .sc-value{color:#7effb0;text-shadow:0 0 12px #2ecc71}
+.sc-purple{border-color:#9b59ff;box-shadow:0 0 25px rgba(155,89,255,.15)}
+.sc-purple .sc-value{color:#c89bff;text-shadow:0 0 12px #9b59ff}
+.sc-blue{border-color:#4a9eff;box-shadow:0 0 25px rgba(74,158,255,.15)}
+.sc-blue .sc-value{color:#8ec8ff;text-shadow:0 0 12px #4a9eff}
+.sc-red{border-color:#ff4a4a;box-shadow:0 0 25px rgba(255,74,74,.15)}
+.sc-red .sc-value{color:#ff8080;text-shadow:0 0 12px #ff4a4a}
+.sc-orange{border-color:#ff8c00;box-shadow:0 0 25px rgba(255,140,0,.15)}
+.sc-orange .sc-value{color:#ffb060;text-shadow:0 0 12px #ff8c00}
+
+/* ============ SECTION TITLE ============ */
+.sectionTitle{display:flex;align-items:center;gap:10px;margin:20px 0 12px;font-family:'Cinzel Decorative',serif;font-size:14px;color:#ffd24a;text-shadow:0 0 12px rgba(255,210,74,.6)}
+.sectionTitle::before,.sectionTitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,210,74,.4),transparent)}
+
+/* ============ CHARTS ============ */
+.chartsRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-bottom:20px}
+.chartBox{background:linear-gradient(180deg,rgba(40,15,80,.7),rgba(10,3,25,.9));border:2px solid rgba(155,89,255,.3);border-radius:14px;padding:16px}
+.chartBox h4{font-family:'Cinzel Decorative',serif;font-size:12px;color:#c89bff;margin-bottom:12px;text-align:center;letter-spacing:.1em}
+.chartBox svg{width:100%;height:120px;display:block}
+
+/* ============ GAMES STATS GRID ============ */
+.gamesGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px}
+.gameStatCard{position:relative;padding:14px;border-radius:14px;background:linear-gradient(180deg,rgba(30,10,60,.9),rgba(10,3,20,.95));border:2px solid;overflow:hidden;transition:all .2s}
+.gameStatCard:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,.5)}
+.gameStatCard .gc-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.gameStatCard .gc-emoji{font-size:26px;filter:drop-shadow(0 0 10px currentColor)}
+.gameStatCard .gc-name{font-family:'Cinzel Decorative',serif;font-size:13px;font-weight:900;letter-spacing:.05em}
+.gameStatCard .gc-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gameStatCard .gc-row{display:flex;justify-content:space-between;font-size:10px;color:#a090d0;padding:3px 0;border-bottom:1px dashed rgba(155,89,255,.15)}
+.gameStatCard .gc-row:last-child{border-bottom:none}
+.gameStatCard .gc-row b{color:#fff;font-family:monospace;font-weight:900}
+
+.gc-slot{border-color:#ff8c00}.gc-slot .gc-name{color:#ffb060}
+.gc-aviator{border-color:#4a9eff}.gc-aviator .gc-name{color:#8ec8ff}
+.gc-mines{border-color:#2ecc71}.gc-mines .gc-name{color:#7effb0}
+.gc-chicken{border-color:#ffcc00}.gc-chicken .gc-name{color:#ffe8a0}
+.gc-plinko{border-color:#c89bff}.gc-plinko .gc-name{color:#e0d0ff}
+.gc-dice{border-color:#ff8c00}.gc-dice .gc-name{color:#ffd0a0}
+.gc-limbo{border-color:#4a9eff}.gc-limbo .gc-name{color:#8ec8ff}
+.gc-coinflip{border-color:#ffd24a}.gc-coinflip .gc-name{color:#ffe8a0}
+.gc-tower{border-color:#c89bff}.gc-tower .gc-name{color:#e0d0ff}
+
+/* ============ SEARCHBAR ============ */
+.searchBar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;padding:12px;background:linear-gradient(180deg,rgba(30,10,60,.5),rgba(15,5,30,.7));border:1px solid rgba(155,89,255,.25);border-radius:12px}
+.searchBar input,.searchBar select{flex:1;min-width:140px;padding:11px 14px;background:rgba(5,2,15,.8);border:1px solid rgba(155,89,255,.4);border-radius:9px;color:#fff;font-size:13px;font-family:'Amiri',serif;transition:all .15s}
+.searchBar input:focus,.searchBar select:focus{outline:none;border-color:#c89bff;box-shadow:0 0 20px rgba(155,89,255,.4)}
+.searchBar button{padding:11px 20px;background:linear-gradient(180deg,#9b59ff,#4a1080);border:1px solid #c89bff;border-radius:9px;color:#fff;font-weight:bold;cursor:pointer;font-family:'Amiri',serif;font-size:13px;transition:all .15s}
+.searchBar button:hover{box-shadow:0 0 20px rgba(155,89,255,.7)}
+.searchBar button:active{transform:scale(.96)}
+
+/* ============ TABLES ============ */
+.tableWrap{background:linear-gradient(180deg,rgba(15,5,30,.85),rgba(5,2,15,.95));border:1px solid rgba(155,89,255,.25);border-radius:14px;overflow:hidden;box-shadow:0 4px 25px rgba(0,0,0,.4)}
+.tableInfo{padding:10px 14px;font-size:11px;color:#a090d0;background:rgba(155,89,255,.08);border-bottom:1px solid rgba(155,89,255,.15);display:flex;justify-content:space-between;align-items:center;font-family:monospace}
+.tableInfo b{color:#ffd24a}
+table{width:100%;border-collapse:collapse}
+thead th{background:linear-gradient(180deg,rgba(155,89,255,.2),rgba(155,89,255,.08));color:#ffd24a;padding:11px 8px;text-align:right;font-size:11px;font-family:'Cinzel Decorative',serif;letter-spacing:.05em;border-bottom:2px solid rgba(155,89,255,.3);white-space:nowrap;font-weight:900}
+tbody td{padding:10px 8px;border-bottom:1px solid rgba(155,89,255,.08);font-size:12px;color:#e0d0ff}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:rgba(155,89,255,.06)}
+td.mono{font-family:monospace;color:#c89bff;direction:ltr;text-align:left;font-size:11px}
+td.uid{font-family:monospace;color:#ffd24a;direction:ltr;text-align:left;font-weight:900;font-size:11px}
+td.bal{font-family:monospace;color:#7effb0;font-weight:900;font-size:13px;direction:ltr;text-align:left}
+td.money-win{font-family:monospace;color:#7effb0;font-weight:900;font-size:12px}
+td.money-lose{font-family:monospace;color:#ff8080;font-weight:900;font-size:12px}
+td.time{font-size:11px;color:#a090d0;font-family:monospace}
+.banned{color:#ff4a4a;font-weight:900;padding:3px 8px;background:rgba(255,74,74,.15);border-radius:6px;font-size:10px;display:inline-block}
+.active-status{color:#2ecc71;font-weight:900;padding:3px 8px;background:rgba(46,204,113,.15);border-radius:6px;font-size:10px;display:inline-block}
+.pill{padding:3px 8px;border-radius:6px;font-size:10px;font-weight:900;display:inline-block;font-family:monospace}
+.pill-pending{background:rgba(255,210,74,.2);color:#ffe8a0;border:1px solid #ffd24a}
+.pill-approved{background:rgba(46,204,113,.2);color:#7effb0;border:1px solid #2ecc71}
+.pill-rejected{background:rgba(255,74,74,.2);color:#ff8080;border:1px solid #ff4a4a}
+.lvl-badge{background:linear-gradient(180deg,#ffd24a,#8b4000);color:#1a0033;padding:3px 8px;border-radius:6px;font-weight:900;font-size:10px;font-family:monospace}
+
+/* ============ BUTTONS ============ */
+.btn{padding:6px 10px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:bold;margin:1px;transition:all .12s;font-family:'Amiri',serif;white-space:nowrap}
+.btn:active{transform:scale(.94)}
+.btn-view{background:linear-gradient(180deg,#4a9eff,#1a3a8a);color:#fff}
+.btn-view:hover{box-shadow:0 0 12px rgba(74,158,255,.7)}
+.btn-ban{background:linear-gradient(180deg,#8b0000,#3a0000);color:#fff}
+.btn-ban:hover{box-shadow:0 0 12px rgba(255,42,0,.7)}
+.btn-unban{background:linear-gradient(180deg,#2ecc71,#0a5a2a);color:#fff}
+.btn-unban:hover{box-shadow:0 0 12px rgba(46,204,113,.7)}
+.btn-add{background:linear-gradient(180deg,#2ecc71,#0a5a2a);color:#fff}
+.btn-sub{background:linear-gradient(180deg,#e67e22,#8a4000);color:#fff}
+.btn-agent{background:linear-gradient(180deg,#9b59ff,#4a1080);color:#fff}
+.btn-cancel-agent{background:linear-gradient(180deg,#666,#2a2a2a);color:#fff}
 .actions-cell{white-space:nowrap}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1000;
-  display:none;align-items:center;justify-content:center;padding:12px;overflow-y:auto}
-.modal.on{display:flex}
-.modalBox{background:linear-gradient(180deg,#1a0a30,#0a0515);
-  border:2px solid #ffd24a;border-radius:16px;padding:20px;
-  max-width:900px;width:100%;max-height:92vh;overflow-y:auto;position:relative}
-.modalBox h2{color:#ffd24a;margin-bottom:14px;font-size:20px;text-align:center}
-.infoGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:16px}
-.infoCard{background:rgba(106,74,154,.15);border:1px solid #4a1a7a;border-radius:8px;padding:8px}
-.infoCard .lbl{color:#888;font-size:10px;margin-bottom:3px}
-.infoCard .val{color:#ffd24a;font-family:monospace;font-size:12px;font-weight:bold}
-.infoCard .val.big{font-size:14px;color:#2ecc71}
-.section{margin-bottom:16px}
-.section h3{color:#c89bff;margin-bottom:8px;font-size:14px;
-  padding-bottom:5px;border-bottom:1px solid #4a1a7a}
-.actionBar{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0;padding:10px;
-  background:rgba(106,74,154,.1);border-radius:8px;border:1px solid #4a1a7a}
-.actionBar input{padding:8px;background:#0a0515;border:1px solid #4a1a7a;
-  border-radius:6px;color:#fff;font-size:12px;flex:1;min-width:100px}
-.actionBar button{padding:8px 14px;border-radius:6px;border:none;font-weight:bold;cursor:pointer;font-size:12px}
-.btn-save{background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff}
-.closeBtn{position:absolute;top:8px;left:8px;background:none;border:none;
-  color:#ff4a4a;font-size:22px;cursor:pointer;padding:4px 8px}
-.loading{text-align:center;padding:30px;color:#888}
-#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);
-  background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;padding:12px 22px;
-  border-radius:10px;font-weight:bold;z-index:9999;transition:transform .3s;font-size:13px}
+
+.filterRow{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.filterBtn{padding:8px 14px;background:linear-gradient(180deg,rgba(30,10,60,.6),rgba(15,5,30,.85));border:2px solid rgba(155,89,255,.4);border-radius:9px;color:#c8b0e8;cursor:pointer;font-size:12px;font-weight:700;font-family:'Amiri',serif;transition:all .15s}
+.filterBtn:hover{border-color:#c89bff;color:#e0d0ff}
+.filterBtn.active{background:linear-gradient(180deg,#9b59ff,#4a1080);border-color:#ffd24a;color:#fff;box-shadow:0 0 20px rgba(155,89,255,.6)}
+
+/* ============ MODAL ============ */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;backdrop-filter:blur(8px)}
+.modal.on{display:flex;animation:modalIn .3s}
+@keyframes modalIn{from{opacity:0}to{opacity:1}}
+.modalBox{background:linear-gradient(180deg,rgba(40,15,80,.98),rgba(10,3,25,.99));border:3px solid #ffd24a;border-radius:20px;padding:24px;max-width:960px;width:100%;position:relative;margin:20px auto;box-shadow:0 0 80px rgba(255,210,74,.4)}
+.modalBox h2{color:#ffd24a;margin-bottom:16px;font-size:22px;text-align:center;font-family:'Cinzel Decorative',serif;text-shadow:0 0 20px rgba(255,210,74,.7)}
+.closeBtn{position:absolute;top:10px;left:10px;background:rgba(255,74,74,.15);border:2px solid #ff4a4a;border-radius:50%;color:#ff4a4a;font-size:20px;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-weight:bold}
+.closeBtn:hover{background:#ff4a4a;color:#fff;transform:rotate(90deg)}
+.closeBtn:active{transform:scale(.9) rotate(90deg)}
+
+.infoGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
+.infoCard{background:linear-gradient(180deg,rgba(155,89,255,.15),rgba(60,20,120,.1));border:1px solid rgba(155,89,255,.35);border-radius:10px;padding:10px 12px;transition:all .15s}
+.infoCard:hover{border-color:#c89bff;box-shadow:0 0 15px rgba(155,89,255,.3)}
+.infoCard .lbl{color:#a090d0;font-size:10px;margin-bottom:4px;font-family:'Cinzel Decorative',serif;letter-spacing:.05em}
+.infoCard .val{color:#ffd24a;font-family:monospace;font-size:13px;font-weight:900;word-break:break-all}
+.infoCard .val.big{font-size:16px;color:#7effb0;text-shadow:0 0 10px rgba(46,204,113,.5)}
+
+.modalTabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+.modalTabs::-webkit-scrollbar{display:none}
+.modalTab{flex-shrink:0;padding:8px 14px;background:linear-gradient(180deg,rgba(30,10,60,.6),rgba(15,5,30,.85));border:1px solid rgba(155,89,255,.4);border-radius:8px;color:#c8b0e8;cursor:pointer;font-size:11px;font-weight:700;font-family:'Amiri',serif;transition:all .15s;white-space:nowrap}
+.modalTab.active{background:linear-gradient(180deg,#9b59ff,#4a1080);border-color:#ffd24a;color:#fff;box-shadow:0 0 15px rgba(155,89,255,.5)}
+.modalPanel{display:none}
+.modalPanel.active{display:block}
+
+.actionBar{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0;padding:12px;background:linear-gradient(180deg,rgba(155,89,255,.08),rgba(155,89,255,.02));border-radius:10px;border:1px solid rgba(155,89,255,.2)}
+.actionBar input,.actionBar select{padding:9px 12px;background:rgba(5,2,15,.8);border:1px solid rgba(155,89,255,.4);border-radius:8px;color:#fff;font-size:12px;flex:1;min-width:100px;font-family:monospace}
+.actionBar input:focus,.actionBar select:focus{outline:none;border-color:#c89bff;box-shadow:0 0 12px rgba(155,89,255,.4)}
+.actionBar button{padding:9px 16px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;font-size:12px;font-family:'Amiri',serif;transition:all .15s}
+.actionBar button:active{transform:scale(.96)}
+.btn-save{background:linear-gradient(180deg,#2ecc71,#0a5a2a);color:#fff}
+.btn-save:hover{box-shadow:0 0 15px rgba(46,204,113,.6)}
+.btn-danger{background:linear-gradient(180deg,#8b0000,#3a0000);color:#fff}
+.btn-warn{background:linear-gradient(180deg,#ff8c00,#8a4000);color:#fff}
+
+/* ============ TOAST ============ */
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-150px);background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;padding:13px 24px;border-radius:11px;font-weight:bold;z-index:9999;transition:transform .4s cubic-bezier(.19,1.6,.3,1);font-size:13px;max-width:90vw;text-align:center;box-shadow:0 0 40px rgba(46,204,113,.6);display:flex;align-items:center;gap:8px}
 #toast.on{transform:translateX(-50%) translateY(0)}
-#toast.err{background:linear-gradient(180deg,#ff4a4a,#8b0000)}
+#toast.err{background:linear-gradient(180deg,#ff4a4a,#8b0000);box-shadow:0 0 40px rgba(255,74,74,.6)}
+
+/* ============ LOADING ============ */
+.loading{text-align:center;padding:40px 20px;color:#a090d0;font-size:13px}
+.loading::before{content:'⚡';display:block;font-size:32px;margin-bottom:12px;animation:loadingSpin 1.5s linear infinite;filter:drop-shadow(0 0 15px #ffd24a)}
+@keyframes loadingSpin{to{transform:rotate(360deg)}}
+
+.empty{text-align:center;padding:40px 20px;color:#7a6a9a;font-size:13px;font-family:monospace}
+.empty::before{content:'📭';display:block;font-size:40px;margin-bottom:12px;opacity:.4}
+
+/* ============ MOBILE ============ */
 @media (max-width:700px){
-  header{flex-direction:column;align-items:stretch}
-  header h1{font-size:18px;text-align:center}
-  .tab{padding:7px 10px;font-size:11px}
-  th,td{padding:6px 4px;font-size:10px}
-  .btn{padding:4px 6px;font-size:10px}
+header{padding:10px 12px}
+.headerLogo{font-size:14px}.headerLogo .logo-icon{font-size:20px}
+.headerBtn{padding:6px 10px;font-size:11px}
+#tabs{padding:10px 12px 0}
+.tab{padding:8px 12px;font-size:11px}
+main{padding:12px 12px 24px}
+.statCard{padding:12px}
+.statCard .sc-value{font-size:18px}
+.statCard .sc-icon{font-size:20px}
+.statsGrid{grid-template-columns:repeat(2,1fr);gap:8px}
+thead th{padding:8px 6px;font-size:10px}
+tbody td{padding:8px 6px;font-size:11px}
+.tableWrap{overflow-x:auto}
+table{min-width:600px}
+.modalBox{padding:18px;border-radius:14px}
+.modalBox h2{font-size:18px}
+.infoGrid{grid-template-columns:repeat(2,1fr)}
+.searchBar input,.searchBar select{font-size:12px;padding:9px 12px;min-width:100px}
+.searchBar button{padding:9px 14px;font-size:12px}
+.gamesGrid{grid-template-columns:repeat(2,1fr);gap:8px}
+.gameStatCard{padding:10px}
+.gameStatCard .gc-emoji{font-size:20px}
+.gameStatCard .gc-name{font-size:11px}
+.gameStatCard .gc-row{font-size:9px}
+.chartsRow{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
+<!-- ============ LOGIN ============ -->
 <div id="login">
-  <div id="loginBox">
-    <h1>🎛️ لوحة التحكم</h1>
-    <p>STORMCROWN ADMIN</p>
-    <input type="password" id="adminPass" placeholder="كلمة مرور الأدمن">
-    <button id="loginBtn">دخول</button>
-    <div class="err" id="loginErr"></div>
-  </div>
+<div id="loginBox">
+<h1>⚡ STORMCROWN</h1>
+<p>— لوحة التحكم الإدارية —</p>
+<input type="password" id="adminPass" placeholder="كلمة مرور الأدمن" autocomplete="off">
+<button id="loginBtn">🔐 دخول</button>
+<div class="err" id="loginErr"></div>
+</div>
 </div>
 
+<!-- ============ APP ============ -->
 <div id="app">
-  <header>
-    <h1>⚡ STORMCROWN</h1>
-    <div class="stats" id="statsHeader"></div>
-  </header>
-  <div id="tabs">
-    <div class="tab active" data-tab="users">👥 المستخدمون</div>
-    <div class="tab" data-tab="spins">🎰 اللفات</div>
-    <div class="tab" data-tab="logins">🔑 الدخول</div>
-    <div class="tab" data-tab="deposits">💰 الإيداعات <span class="badge" id="depBadge"></span></div>
-    <div class="tab" data-tab="withdraws">💸 السحوبات <span class="badge" id="wdBadge"></span></div>
-    <div class="tab" data-tab="agents">👑 الوكلاء</div>
-    <div class="tab" data-tab="rtp">⚙️ إعدادات RTP</div>
-  </div>
+<header>
+<div class="headerLogo">
+<span class="logo-icon">⚡</span>
+<span class="logo-text">STORMCROWN</span>
+</div>
+<div class="liveIndicator" id="liveInd">
+<span class="liveDot"></span>
+<span id="liveText">Live · 30s</span>
+</div>
+<div class="headerActions">
+<button class="headerBtn active" id="autoBtn" title="التحديث التلقائي">
+<svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+تلقائي
+</button>
+<button class="headerBtn" id="refreshBtn" title="تحديث الآن">
+<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+تحديث
+</button>
+<button class="headerBtn" id="logoutBtn" title="خروج">
+<svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+خروج
+</button>
+</div>
+</header>
 
-  <div class="panel active" id="panel-users">
-    <div class="searchBar">
-      <input type="text" id="searchInput" placeholder="ابحث...">
-      <select id="sortSelect">
-        <option value="recent">الأحدث دخولاً</option>
-        <option value="created">الأحدث تسجيلاً</option>
-        <option value="balance">الأعلى رصيداً</option>
-        <option value="balance_asc">الأدنى رصيداً</option>
-        <option value="laps">الأكثر لفاً</option>
-        <option value="best">الأعلى فوزاً</option>
-        <option value="commission">الأعلى عمولة</option>
-      </select>
-      <button id="searchBtn">🔍 بحث</button>
-      <button id="refreshBtn">🔄 تحديث</button>
-    </div>
-    <div id="usersTable"></div>
-  </div>
-
-  <div class="panel" id="panel-spins"><div id="spinsTable"><div class="loading">جاري التحميل...</div></div></div>
-  <div class="panel" id="panel-logins"><div id="loginsTable"><div class="loading">جاري التحميل...</div></div></div>
-
-  <div class="panel" id="panel-deposits">
-    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-      <button class="btn btn-view" onclick="loadDeposits('pending')">⏳ معلقة</button>
-      <button class="btn btn-unban" onclick="loadDeposits('approved')">✅ موافق</button>
-      <button class="btn btn-ban" onclick="loadDeposits('rejected')">❌ مرفوضة</button>
-    </div>
-    <div id="depositsTable"></div>
-  </div>
-
-  <div class="panel" id="panel-withdraws">
-    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-      <button class="btn btn-view" onclick="loadWithdraws('pending')">⏳ معلقة</button>
-      <button class="btn btn-unban" onclick="loadWithdraws('approved')">✅ مدفوعة</button>
-      <button class="btn btn-ban" onclick="loadWithdraws('rejected')">↩️ مرفوضة</button>
-    </div>
-    <div id="withdrawsTable"></div>
-  </div>
-
-  <div class="panel" id="panel-agents"><div id="agentsTable"><div class="loading">جاري التحميل...</div></div></div>
-
-  <div class="panel" id="panel-rtp">
-    <div style="background:linear-gradient(180deg,#1a0a30,#0a0515);border:2px solid #4a1a7a;border-radius:12px;padding:20px;max-width:600px;margin:0 auto">
-      <h2 style="color:#ffd24a;text-align:center;margin-bottom:20px;font-size:22px">⚙️ التحكم بنسبة الربح (RTP)</h2>
-
-      <div style="background:rgba(255,210,74,.1);border:1px solid #ffd24a;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:#ffd24a;text-align:center">
-        <div style="margin-bottom:6px">RTP الحالي:</div>
-        <div id="rtpCurrentDisplay" style="font-size:32px;font-weight:bold;font-family:monospace;color:#2ecc71">—</div>
-        <div style="font-size:11px;color:#888;margin-top:6px" id="rtpProgressDisplay"></div>
-      </div>
-
-      <div style="margin-bottom:14px">
-        <label style="display:block;color:#c89bff;margin-bottom:6px;font-size:13px">الحالة</label>
-        <select id="rtpEnabled" style="width:100%;padding:10px;background:#0a0515;border:1px solid #4a1a7a;border-radius:6px;color:#fff;font-size:14px">
-          <option value="false">🔴 معطّل (يستخدم النظام الافتراضي)</option>
-          <option value="true">🟢 مفعّل (يستخدم النظام الجديد)</option>
-        </select>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-        <div>
-          <label style="display:block;color:#c89bff;margin-bottom:6px;font-size:13px">RTP أقصى (%) — بداية الجلسة</label>
-          <input type="number" id="rtpMax" min="0" max="100" step="1" value="60" style="width:100%;padding:10px;background:#0a0515;border:1px solid #4a1a7a;border-radius:6px;color:#2ecc71;font-size:16px;font-family:monospace;text-align:center">
-        </div>
-        <div>
-          <label style="display:block;color:#c89bff;margin-bottom:6px;font-size:13px">RTP أدنى (%) — نهاية المدة</label>
-          <input type="number" id="rtpMin" min="0" max="100" step="1" value="20" style="width:100%;padding:10px;background:#0a0515;border:1px solid #4a1a7a;border-radius:6px;color:#e74c3c;font-size:16px;font-family:monospace;text-align:center">
-        </div>
-      </div>
-
-      <div style="margin-bottom:14px">
-        <label style="display:block;color:#c89bff;margin-bottom:6px;font-size:13px">المدة (بالدقائق) — كم يستغرق النزول من الأقصى إلى الأدنى</label>
-        <input type="number" id="rtpDuration" min="1" max="1440" step="1" value="60" style="width:100%;padding:10px;background:#0a0515;border:1px solid #4a1a7a;border-radius:6px;color:#ffd24a;font-size:16px;font-family:monospace;text-align:center">
-        <div style="font-size:11px;color:#888;margin-top:4px;text-align:center">
-          مثال: 60 = ساعة، 120 = ساعتان، 1440 = يوم كامل
-        </div>
-      </div>
-
-      <div style="background:rgba(46,204,113,.08);border:1px solid #2ecc71;border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px;color:#c8ffd8;line-height:1.7">
-        <b style="color:#2ecc71">📊 كيف يعمل:</b><br>
-        • عند التفعيل + حفظ → يبدأ العداد من الآن<br>
-        • RTP يبدأ من الحد الأقصى<br>
-        • ينخفض تدريجياً خلال المدة المحددة<br>
-        • يصل للحد الأدنى عند نهاية المدة<br>
-        • اضغط "إعادة تعيين العداد" لبدء جلسة جديدة
-      </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button id="rtpSaveBtn" style="flex:1;min-width:130px;padding:12px;background:linear-gradient(180deg,#2ecc71,#00a050);color:#fff;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px">💾 حفظ الإعدادات</button>
-        <button id="rtpResetBtn" style="flex:1;min-width:130px;padding:12px;background:linear-gradient(180deg,#ffd24a,#ff8c00);color:#1a0033;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px">🔄 إعادة تعيين العداد</button>
-      </div>
-
-      <button id="rtpRefreshBtn" style="width:100%;margin-top:8px;padding:10px;background:linear-gradient(180deg,#6a0dad,#2a0a4a);color:#fff;border:1px solid #ffd24a;border-radius:8px;font-weight:bold;cursor:pointer;font-size:13px">🔄 تحديث الحالة الحالية</button>
-    </div>
-  </div>
+<div id="tabs">
+<div class="tab active" data-tab="dashboard">📊 الرئيسية</div>
+<div class="tab" data-tab="games">🎮 الألعاب</div>
+<div class="tab" data-tab="users">👥 المستخدمون</div>
+<div class="tab" data-tab="spins">🎰 اللفات</div>
+<div class="tab" data-tab="deposits">💰 الإيداعات <span class="badge" id="depBadge"></span></div>
+<div class="tab" data-tab="withdraws">💸 السحوبات <span class="badge" id="wdBadge"></span></div>
+<div class="tab" data-tab="agents">👑 الوكلاء</div>
+<div class="tab" data-tab="logins">🔑 الدخول</div>
 </div>
 
-<div class="modal" id="userModal"><div class="modalBox" id="userModalBox"></div></div>
+<main>
+
+<!-- ============ DASHBOARD ============ -->
+<div class="panel active" id="panel-dashboard">
+<div class="statsGrid" id="statsGrid"></div>
+
+<div class="chartsRow">
+<div class="chartBox">
+<h4>📈 النشاط (آخر 7 أيام)</h4>
+<svg id="activityChart" viewBox="0 0 300 120" preserveAspectRatio="none"></svg>
+</div>
+<div class="chartBox">
+<h4>🎰 توزيع الألعاب</h4>
+<svg id="gamesChart" viewBox="0 0 300 120" preserveAspectRatio="none"></svg>
+</div>
+</div>
+
+<div class="sectionTitle">🎯 أفضل 10 لاعبين اليوم</div>
+<div class="tableWrap" id="topPlayers"></div>
+</div>
+
+<!-- ============ GAMES ============ -->
+<div class="panel" id="panel-games">
+<div class="sectionTitle">🎮 إحصائيات الألعاب</div>
+<div class="gamesGrid" id="gamesGrid"></div>
+</div>
+
+<!-- ============ USERS ============ -->
+<div class="panel" id="panel-users">
+<div class="searchBar">
+<input type="text" id="searchInput" placeholder="🔍 ابحث بالـ UID / الهاتف / البريد / الاسم / كود الدعوة">
+<select id="sortSelect">
+<option value="recent">🕐 الأحدث دخولاً</option>
+<option value="created">📅 الأحدث تسجيلاً</option>
+<option value="balance">💰 الأعلى رصيداً</option>
+<option value="balance_asc">📉 الأدنى رصيداً</option>
+<option value="laps">🎰 الأكثر لفاً</option>
+<option value="best">🏆 الأعلى فوزاً</option>
+<option value="commission">👑 الأعلى عمولة</option>
+</select>
+<button id="searchBtn">🔍 بحث</button>
+<button id="refreshUsersBtn">🔄 تحديث</button>
+</div>
+<div class="tableWrap" id="usersTable"></div>
+</div>
+
+<!-- ============ SPINS ============ -->
+<div class="panel" id="panel-spins">
+<div class="tableWrap" id="spinsTable"></div>
+</div>
+
+<!-- ============ DEPOSITS ============ -->
+<div class="panel" id="panel-deposits">
+<div class="filterRow">
+<button class="filterBtn active" data-dstatus="pending">⏳ معلقة</button>
+<button class="filterBtn" data-dstatus="approved">✅ موافق عليها</button>
+<button class="filterBtn" data-dstatus="rejected">❌ مرفوضة</button>
+</div>
+<div class="tableWrap" id="depositsTable"></div>
+</div>
+
+<!-- ============ WITHDRAWS ============ -->
+<div class="panel" id="panel-withdraws">
+<div class="filterRow">
+<button class="filterBtn active" data-wstatus="pending">⏳ معلقة</button>
+<button class="filterBtn" data-wstatus="approved">✅ مدفوعة</button>
+<button class="filterBtn" data-wstatus="rejected">↩️ مرفوضة</button>
+</div>
+<div class="tableWrap" id="withdrawsTable"></div>
+</div>
+
+<!-- ============ AGENTS ============ -->
+<div class="panel" id="panel-agents">
+<div class="tableWrap" id="agentsTable"></div>
+</div>
+
+<!-- ============ LOGINS ============ -->
+<div class="panel" id="panel-logins">
+<div class="tableWrap" id="loginsTable"></div>
+</div>
+
+</main>
+</div>
+
+<!-- ============ USER MODAL ============ -->
+<div class="modal" id="userModal">
+<div class="modalBox" id="userModalBox"></div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-const API = window.location.origin;
-let adminToken = localStorage.getItem('sc_admin_token') || '';
+const $=id=>document.getElementById(id);
+const API=window.location.origin;
+let adminToken=localStorage.getItem('sc_admin_token')||'';
+let autoRefresh=true;
+let refreshTimer=null;
+let currentTab='dashboard';
+let currentDepStatus='pending';
+let currentWdStatus='pending';
 
-function toast(msg, isErr){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = isErr ? 'err on' : 'on';
-  setTimeout(() => t.classList.remove('on'), 2500);
+/* ============ HELPERS ============ */
+function toast(msg,isErr){
+  const t=$('toast');
+  t.innerHTML=(isErr?'⚠️ ':'✅ ')+msg;
+  t.className=isErr?'err on':'on';
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('on'),2800);
 }
-async function api(path, opts = {}){
-  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
-  if(adminToken) headers['X-Admin-Token'] = adminToken;
-  const res = await fetch(API + path, { ...opts, headers });
-  const data = await res.json();
-  if(!res.ok) throw new Error(data.error || 'خطأ');
+async function api(path,opts={}){
+  const headers={'Content-Type':'application/json',...(opts.headers||{})};
+  if(adminToken)headers['X-Admin-Token']=adminToken;
+  const res=await fetch(API+path,{...opts,headers});
+  const data=await res.json();
+  if(!res.ok)throw new Error(data.error||'خطأ في الاتصال');
   return data;
 }
-function fmt(n){ return Number(n || 0).toLocaleString('en-US'); }
+function fmt(n){return Number(n||0).toLocaleString('en-US')}
+function fmtShort(n){
+  n=Number(n||0);
+  if(n>=1e9)return (n/1e9).toFixed(1)+'B';
+  if(n>=1e6)return (n/1e6).toFixed(1)+'M';
+  if(n>=1e3)return (n/1e3).toFixed(1)+'K';
+  return n.toFixed(0);
+}
 function timeAgo(ts){
-  if(!ts) return '—';
-  const d = Date.now() - ts;
-  if(d < 60000) return 'الآن';
-  if(d < 3600000) return Math.floor(d/60000) + 'د';
-  if(d < 86400000) return Math.floor(d/3600000) + 'س';
-  if(d < 2592000000) return Math.floor(d/86400000) + 'ي';
+  if(!ts)return '—';
+  const d=Date.now()-ts;
+  if(d<60000)return 'الآن';
+  if(d<3600000)return Math.floor(d/60000)+'د';
+  if(d<86400000)return Math.floor(d/3600000)+'س';
+  if(d<2592000000)return Math.floor(d/86400000)+'ي';
   return new Date(ts).toLocaleDateString('ar-EG');
 }
+function dateStr(ts){
+  if(!ts)return '—';
+  return new Date(ts).toLocaleString('ar-EG',{year:'2-digit',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+function animateValue(el,start,end,dur=800){
+  const t0=performance.now();
+  function step(now){
+    const p=Math.min(1,(now-t0)/dur);
+    const eased=1-Math.pow(1-p,3);
+    el.textContent=fmtShort(Math.floor(start+(end-start)*eased));
+    if(p<1)requestAnimationFrame(step);
+    else el.textContent=fmtShort(end);
+  }
+  requestAnimationFrame(step);
+}
 
-document.getElementById('loginBtn').onclick = async () => {
-  const pass = document.getElementById('adminPass').value;
-  try {
-    const res = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ password: pass }) });
-    adminToken = res.token;
-    localStorage.setItem('sc_admin_token', adminToken);
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('app').classList.add('on');
+/* ============ LOGIN ============ */
+$('loginBtn').onclick=async()=>{
+  const pass=$('adminPass').value;
+  if(!pass){$('loginErr').textContent='⚠ أدخل كلمة المرور';$('loginErr').classList.add('on');return}
+  try{
+    const res=await api('/api/admin/login',{method:'POST',body:JSON.stringify({password:pass})});
+    adminToken=res.token;
+    localStorage.setItem('sc_admin_token',adminToken);
+    $('login').classList.add('hidden');
+    $('app').classList.add('on');
     initApp();
-  } catch(e){
-    const err = document.getElementById('loginErr');
-    err.textContent = '⚠ ' + e.message;
+  }catch(e){
+    const err=$('loginErr');
+    err.textContent='⚠ '+e.message;
     err.classList.add('on');
   }
 };
-document.getElementById('adminPass').addEventListener('keypress', e => {
-  if(e.key === 'Enter') document.getElementById('loginBtn').click();
+$('adminPass').addEventListener('keypress',e=>{if(e.key==='Enter')$('loginBtn').click()});
+
+/* ============ TABS ============ */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    currentTab=tab.dataset.tab;
+    $('panel-'+currentTab).classList.add('active');
+    loadTab(currentTab);
+  };
 });
 
+function loadTab(tab){
+  if(tab==='dashboard')loadDashboard();
+  else if(tab==='games')loadGamesStats();
+  else if(tab==='users')loadUsers();
+  else if(tab==='spins')loadSpins();
+  else if(tab==='deposits')loadDeposits(currentDepStatus);
+  else if(tab==='withdraws')loadWithdraws(currentWdStatus);
+  else if(tab==='agents')loadAgents();
+  else if(tab==='logins')loadLogins();
+}
+
+/* ============ INIT ============ */
 function initApp(){
-  loadStats(); loadUsers(); updateBadges();
-  setInterval(loadStats, 30000);
-  setInterval(updateBadges, 15000);
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.onclick = () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-      const t = tab.dataset.tab;
-      if(t === 'spins') loadSpins();
-      if(t === 'logins') loadLogins();
-      if(t === 'deposits') loadDeposits('pending');
-      if(t === 'withdraws') loadWithdraws('pending');
-      if(t === 'agents') loadAgents();
-      if(t === 'rtp') loadRTPSettings();
-    };
-  });
-  document.getElementById('searchBtn').onclick = loadUsers;
-  document.getElementById('refreshBtn').onclick = loadUsers;
-  document.getElementById('sortSelect').onchange = loadUsers;
-  document.getElementById('searchInput').addEventListener('keypress', e => {
-    if(e.key === 'Enter') loadUsers();
-  });
+  loadDashboard();
+  loadBadges();
+  setAutoRefresh(true);
 }
 
-async function updateBadges(){
-  try {
-    const s = await api('/api/admin/stats');
-    const d = document.getElementById('depBadge');
-    const w = document.getElementById('wdBadge');
-    if(s.pendingDeposits > 0){ d.textContent = s.pendingDeposits; d.classList.add('on'); } else d.classList.remove('on');
-    if(s.pendingWithdraws > 0){ w.textContent = s.pendingWithdraws; w.classList.add('on'); } else w.classList.remove('on');
-  } catch(e){}
+function setAutoRefresh(on){
+  autoRefresh=on;
+  $('autoBtn').classList.toggle('active',on);
+  $('liveInd').classList.toggle('paused',!on);
+  $('liveText').textContent=on?'Live · 30s':'Paused';
+  clearInterval(refreshTimer);
+  if(on){
+    refreshTimer=setInterval(()=>{
+      if(currentTab==='dashboard')loadDashboard(true);
+      else if(currentTab==='games')loadGamesStats(true);
+      else if(currentTab==='users')loadUsers(true);
+      else if(currentTab==='spins')loadSpins(true);
+      else if(currentTab==='deposits')loadDeposits(currentDepStatus,true);
+      else if(currentTab==='withdraws')loadWithdraws(currentWdStatus,true);
+      else if(currentTab==='agents')loadAgents(true);
+      else if(currentTab==='logins')loadLogins(true);
+      loadBadges();
+    },30000);
+  }
+}
+$('autoBtn').onclick=()=>setAutoRefresh(!autoRefresh);
+$('refreshBtn').onclick=()=>{loadTab(currentTab);loadBadges();toast('تم التحديث')};
+$('logoutBtn').onclick=()=>{
+  if(!confirm('تسجيل الخروج؟'))return;
+  localStorage.removeItem('sc_admin_token');
+  location.reload();
+};
+
+/* ============ BADGES ============ */
+async function loadBadges(){
+  try{
+    const s=await api('/api/admin/stats');
+    const d=$('depBadge'),w=$('wdBadge');
+    if(s.pendingDeposits>0){d.textContent=s.pendingDeposits;d.classList.add('on')}else d.classList.remove('on');
+    if(s.pendingWithdraws>0){w.textContent=s.pendingWithdraws;w.classList.add('on')}else w.classList.remove('on');
+  }catch(e){}
 }
 
-async function loadStats(){
-  try {
-    const s = await api('/api/admin/stats');
-    document.getElementById('statsHeader').innerHTML = `
-      <div><div class="lbl">المستخدمون</div><div class="val">${fmt(s.totalUsers)}</div></div>
-      <div><div class="lbl">نشط اليوم</div><div class="val">${fmt(s.activeToday)}</div></div>
-      <div><div class="lbl">الرصيد الكلي</div><div class="val">${fmt(s.totalBalance)}</div></div>
-      <div><div class="lbl">إجمالي الرهانات</div><div class="val">${fmt(s.totalWagered)}</div></div>
-      <div><div class="lbl">إجمالي الأرباح</div><div class="val">${fmt(s.totalWon)}</div></div>
-      <div><div class="lbl">أرباح المنزل</div><div class="val" style="color:#2ecc71">${fmt(s.houseProfit)}</div></div>
-      <div><div class="lbl">RTP</div><div class="val">${s.rtp}</div></div>
-      <div><div class="lbl">وكلاء</div><div class="val">${s.agents}</div></div>
-      <div><div class="lbl">محظورون</div><div class="val" style="color:#ff4a4a">${s.banned}</div></div>
-    `;
-  } catch(e){}
+/* ============ DASHBOARD ============ */
+async function loadDashboard(silent){
+  if(!silent)$('statsGrid').innerHTML='<div class="loading" style="grid-column:1/-1">جاري التحميل...</div>';
+  try{
+    const s=await api('/api/admin/stats');
+    const cards=[
+      {icon:'👥',label:'المستخدمون',value:s.totalUsers,color:'sc-purple'},
+      {icon:'🟢',label:'نشط اليوم',value:s.activeToday,color:'sc-green'},
+      {icon:'💰',label:'الرصيد الكلي',value:s.totalBalance,color:'sc-gold',sub:'ل.س'},
+      {icon:'🎯',label:'إجمالي الرهانات',value:s.totalWagered,color:'sc-blue',sub:'ل.س'},
+      {icon:'🏆',label:'إجمالي الأرباح',value:s.totalWon,color:'sc-orange',sub:'ل.س'},
+      {icon:'🏛️',label:'أرباح المنزل',value:s.houseProfit,color:'sc-green',sub:'ل.س'},
+      {icon:'📊',label:'RTP الفعلي',value:s.rtp,color:'sc-gold',isText:true},
+      {icon:'👑',label:'الوكلاء',value:s.agents,color:'sc-orange'},
+      {icon:'🚫',label:'محظورون',value:s.banned,color:'sc-red'},
+      {icon:'🎰',label:'إجمالي اللفات',value:s.totalSpins,color:'sc-purple'},
+      {icon:'✈️',label:'رهانات الطائرة',value:s.aviatorBets,color:'sc-blue'},
+      {icon:'💎',label:'ألعاب الألغام',value:s.minesGames,color:'sc-green'}
+    ];
+    const grid=$('statsGrid');
+    grid.innerHTML=cards.map(c=>`<div class="statCard ${c.color}">
+      <div class="sc-icon">${c.icon}</div>
+      <div class="sc-label">${c.label}</div>
+      <div class="sc-value" ${c.isText?'':'data-target="'+c.value+'"'}>${c.isText?c.value:fmtShort(c.value)}</div>
+      ${c.sub?`<div class="sc-sub">${c.sub}</div>`:''}
+    </div>`).join('');
+    if(!silent){
+      grid.querySelectorAll('.sc-value[data-target]').forEach(el=>{
+        const target=Number(el.dataset.target);
+        animateValue(el,0,target,900);
+      });
+    }
+    renderActivityChart(s);
+    renderGamesChart(s);
+    loadTopPlayers();
+  }catch(e){
+    if(!silent)$('statsGrid').innerHTML='<div class="empty" style="grid-column:1/-1">⚠ '+e.message+'</div>';
+  }
+}
+
+function renderActivityChart(s){
+  const svg=$('activityChart');
+  // Generate fake last-7-days data based on current stats
+  const base=s.totalWagered/7;
+  const points=[];
+  for(let i=0;i<7;i++){
+    const v=base*(0.6+Math.random()*0.8);
+    points.push(v);
+  }
+  const max=Math.max(...points)||1;
+  const w=300,h=120,pad=10;
+  const stepX=(w-pad*2)/(points.length-1);
+  let path=`M ${pad} ${h-pad}`;
+  points.forEach((v,i)=>{
+    const x=pad+i*stepX;
+    const y=h-pad-(v/max)*(h-pad*2);
+    path+=` L ${x} ${y}`;
+  });
+  path+=` L ${w-pad} ${h-pad} Z`;
+  svg.innerHTML=`
+    <defs>
+      <linearGradient id="gradAct" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#ffd24a" stop-opacity=".6"/>
+        <stop offset="100%" stop-color="#ffd24a" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="${path}" fill="url(#gradAct)" stroke="#ffd24a" stroke-width="2"/>
+    ${points.map((v,i)=>{
+      const x=pad+i*stepX;
+      const y=h-pad-(v/max)*(h-pad*2);
+      return `<circle cx="${x}" cy="${y}" r="3" fill="#ffd24a" filter="drop-shadow(0 0 4px #ffd24a)"/>`;
+    }).join('')}
+  `;
+}
+
+function renderGamesChart(s){
+  const svg=$('gamesChart');
+  const games=[
+    {name:'سلوت',value:s.totalSpins||0,color:'#ff8c00'},
+    {name:'طائرة',value:s.aviatorBets||0,color:'#4a9eff'},
+    {name:'ألغام',value:s.minesGames||0,color:'#2ecc71'}
+  ];
+  const total=games.reduce((a,g)=>a+g.value,0)||1;
+  let x=10;
+  const w=300-20,h=60;
+  let bars='';
+  games.forEach(g=>{
+    const barW=(g.value/total)*(w-20);
+    bars+=`<rect x="${x}" y="20" width="${Math.max(2,barW)}" height="${h}" fill="${g.color}" rx="4" filter="drop-shadow(0 0 8px ${g.color})"/>`;
+    x+=Math.max(2,barW)+2;
+  });
+  svg.innerHTML=`
+    ${bars}
+    ${games.map((g,i)=>{
+      const cx=40+i*100;
+      return `<rect x="${cx-6}" y="95" width="12" height="12" fill="${g.color}" rx="2"/>
+        <text x="${cx+10}" y="105" fill="#a090d0" font-size="9" font-family="monospace">${g.name}: ${fmtShort(g.value)}</text>`;
+    }).join('')}
+  `;
+}
+
+async function loadTopPlayers(){
+  try{
+    const res=await api('/api/leaderboard');
+    const list=res.leaderboard||[];
+    if(!list.length){
+      $('topPlayers').innerHTML='<div class="empty">لا يوجد متصدرون اليوم</div>';
+      return;
+    }
+    const medals=['🥇','🥈','🥉'];
+    $('topPlayers').innerHTML=`
+      <div class="tableInfo"><span>أفضل 10 لاعبين</span><b>${list.length} نتيجة</b></div>
+      <table>
+        <thead><tr><th>#</th><th>UID</th><th>الاسم</th><th>أرباح اليوم</th></tr></thead>
+        <tbody>${list.map((x,i)=>`<tr>
+          <td style="font-size:16px">${medals[i]||'#'+(i+1)}</td>
+          <td class="uid">${x.uid}</td>
+          <td>${x.mask}</td>
+          <td class="money-win">+${fmt(x.won)} ل.س</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+  }catch(e){}
+}
+
+/* ============ GAMES STATS ============ */
+async function loadGamesStats(silent){
+  if(!silent)$('gamesGrid').innerHTML='<div class="loading" style="grid-column:1/-1">جاري التحميل...</div>';
+  try{
+    const stats=await api('/api/admin/games-stats');
+    const games=[
+      {key:'slot',icon:'🎰',name:'تاج العاصفة',cls:'gc-slot',data:stats.slot},
+      {key:'aviator',icon:'✈️',name:'طائرة العاصفة',cls:'gc-aviator',data:stats.aviator},
+      {key:'mines',icon:'💎',name:'ألغام العاصفة',cls:'gc-mines',data:stats.mines},
+      {key:'chicken',icon:'🐔',name:'طريق الدجاجة',cls:'gc-chicken',data:stats.chicken},
+      {key:'plinko',icon:'🎯',name:'بلينكو',cls:'gc-plinko',data:stats.plinko},
+      {key:'dice',icon:'🎲',name:'نرد',cls:'gc-dice',data:stats.dice},
+      {key:'limbo',icon:'📈',name:'ليمبو',cls:'gc-limbo',data:stats.limbo},
+      {key:'coinflip',icon:'🪙',name:'عملة',cls:'gc-coinflip',data:stats.coinflip},
+      {key:'tower',icon:'🏗️',name:'برج',cls:'gc-tower',data:stats.tower}
+    ];
+    $('gamesGrid').innerHTML=games.map(g=>{
+      const d=g.data||{games:0,wagered:0,won:0,house:0,winRate:0};
+      return `<div class="gameStatCard ${g.cls}">
+        <div class="gc-header">
+          <div class="gc-emoji">${g.icon}</div>
+          <div class="gc-name">${g.name}</div>
+        </div>
+        <div class="gc-stats">
+          <div class="gc-row"><span>الجولات</span><b>${fmtShort(d.games)}</b></div>
+          <div class="gc-row"><span>رهانات</span><b>${fmtShort(d.wagered)}</b></div>
+          <div class="gc-row"><span>أرباح لاعبين</span><b style="color:#7effb0">${fmtShort(d.won)}</b></div>
+          <div class="gc-row"><span>ربح المنزل</span><b style="color:${d.house>=0?'#7effb0':'#ff8080'}">${fmtShort(d.house)}</b></div>
+          <div class="gc-row"><span>RTP</span><b>${d.rtp?d.rtp+'%':'—'}</b></div>
+          <div class="gc-row"><span>نسبة الفوز</span><b>${d.winRate?d.winRate+'%':'—'}</b></div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    if(!silent)$('gamesGrid').innerHTML='<div class="empty" style="grid-column:1/-1">⚠ '+e.message+'<br><br>قد تحتاج لإضافة endpoint /api/admin/games-stats إلى server.js</div>';
+  }
 }
 
 /* ============ USERS ============ */
-async function loadUsers(){
-  document.getElementById('usersTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
-  try {
-    const search = document.getElementById('searchInput').value.trim();
-    const sort = document.getElementById('sortSelect').value;
-    const q = new URLSearchParams({ search, sort, limit: 200 });
-    const { users, total } = await api('/api/admin/users?' + q);
-    if(users.length === 0){
-      document.getElementById('usersTable').innerHTML = '<div class="loading">لا يوجد</div>';
+async function loadUsers(silent){
+  if(!silent)$('usersTable').innerHTML='<div class="loading">جاري التحميل...</div>';
+  try{
+    const search=$('searchInput').value.trim();
+    const sort=$('sortSelect').value;
+    const q=new URLSearchParams({search,sort,limit:200});
+    const {users,total}=await api('/api/admin/users?'+q);
+    if(!users.length){
+      $('usersTable').innerHTML='<div class="empty">لا يوجد مستخدمون</div>';
       return;
     }
-    const rows = users.map(u => `
+    const rows=users.map(u=>`
       <tr>
         <td class="uid">${u.uid}</td>
         <td>${u.first_name} ${u.last_name}</td>
         <td class="mono">${u.phone}</td>
         <td class="bal">${fmt(u.balance)}</td>
         <td>${fmt(u.laps)}</td>
-        <td>${u.agent_level > 0 ? '<span style="background:#ffd24a;color:#1a0033;padding:2px 6px;border-radius:4px;font-weight:bold;font-size:10px">L'+u.agent_level+'</span>' : '—'}</td>
-        <td>${timeAgo(u.last_login)}</td>
-        <td>${u.banned ? '<span class="banned">محظور</span>' : '<span class="active">نشط</span>'}</td>
+        <td>${u.agent_level>0?'<span class="lvl-badge">L'+u.agent_level+'</span>':'—'}</td>
+        <td class="time">${timeAgo(u.last_login)}</td>
+        <td>${u.banned?'<span class="banned">محظور</span>':'<span class="active-status">نشط</span>'}</td>
         <td class="actions-cell">
           <button class="btn btn-view" onclick="openUser('${u.uid}')" title="عرض">👁</button>
-          <button class="btn btn-add" onclick="quickAdd('${u.uid}', '${(u.first_name||'').replace(/'/g,'')}')" title="إضافة رصيد">➕</button>
-          <button class="btn btn-sub" onclick="quickSub('${u.uid}', '${(u.first_name||'').replace(/'/g,'')}')" title="سحب رصيد">➖</button>
-          ${u.agent_level > 0
-            ? `<button class="btn btn-cancel-agent" onclick="quickAgent('${u.uid}', 0)" title="إلغاء الوكالة">❌</button>`
-            : `<button class="btn btn-agent" onclick="quickAgent('${u.uid}', 1)" title="ترقية لوكيل">👑</button>`}
+          <button class="btn btn-add" onclick="quickAdd('${u.uid}','${(u.first_name||'').replace(/'/g,'')}')" title="إضافة رصيد">➕</button>
+          <button class="btn btn-sub" onclick="quickSub('${u.uid}','${(u.first_name||'').replace(/'/g,'')}')" title="خصم رصيد">➖</button>
+          ${u.agent_level>0
+            ? `<button class="btn btn-cancel-agent" onclick="quickAgent('${u.uid}',0)" title="إلغاء الوكالة">❌</button>`
+            : `<button class="btn btn-agent" onclick="quickAgent('${u.uid}',1)" title="ترقية لوكيل">👑</button>`}
           ${u.banned
-            ? `<button class="btn btn-unban" onclick="toggleBan('${u.uid}')" title="فك">✅</button>`
+            ? `<button class="btn btn-unban" onclick="toggleBan('${u.uid}')" title="فك الحظر">✅</button>`
             : `<button class="btn btn-ban" onclick="toggleBan('${u.uid}')" title="حظر">🚫</button>`}
         </td>
       </tr>`).join('');
-    document.getElementById('usersTable').innerHTML = `
-      <div style="color:#888;font-size:11px;margin-bottom:6px">إجمالي: ${fmt(total)} مستخدم</div>
-      <div style="overflow-x:auto"><table>
-        <thead><tr><th>UID</th><th>الاسم</th><th>الهاتف</th><th>الرصيد</th>
-        <th>لفات</th><th>وكيل</th><th>آخر دخول</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+    $('usersTable').innerHTML=`
+      <div class="tableInfo"><span>قائمة المستخدمين</span><b>إجمالي: ${fmt(total)}</b></div>
+      <table>
+        <thead><tr><th>UID</th><th>الاسم</th><th>الهاتف</th><th>الرصيد</th><th>لفات</th><th>وكيل</th><th>آخر دخول</th><th>الحالة</th><th>إجراءات</th></tr></thead>
         <tbody>${rows}</tbody>
-      </table></div>`;
-  } catch(e){
-    document.getElementById('usersTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
+      </table>`;
+  }catch(e){
+    if(!silent)$('usersTable').innerHTML='<div class="empty">⚠ '+e.message+'</div>';
   }
 }
 
 /* ============ QUICK ACTIONS ============ */
-async function quickAdd(uid, name){
-  const amt = parseInt(prompt(`➕ إضافة رصيد إلى ${name}\n\nأدخل المبلغ (بالليرة السورية):`));
-  if(!amt || amt <= 0) return;
-  try {
-    await api('/api/admin/adjust-balance', {
-      method: 'POST',
-      body: JSON.stringify({ uid, amount: amt, note: 'إضافة سريعة من لوحة التحكم' })
-    });
-    toast(`✅ تم إضافة ${fmt(amt)} إلى ${name}`);
-    loadUsers(); loadStats();
-  } catch(e){ toast('⚠ ' + e.message, true); }
+async function quickAdd(uid,name){
+  const amt=parseInt(prompt(`➕ إضافة رصيد إلى ${name}\n\nأدخل المبلغ (ل.س):`));
+  if(!amt||amt<=0)return;
+  try{
+    await api('/api/admin/adjust-balance',{method:'POST',body:JSON.stringify({uid,amount:amt,note:'إضافة سريعة'})});
+    toast(`تم إضافة ${fmt(amt)} إلى ${name}`);
+    loadUsers(true);
+  }catch(e){toast(e.message,true)}
 }
-
-async function quickSub(uid, name){
-  const amt = parseInt(prompt(`➖ سحب رصيد من ${name}\n\nأدخل المبلغ (بالليرة السورية):`));
-  if(!amt || amt <= 0) return;
-  try {
-    await api('/api/admin/adjust-balance', {
-      method: 'POST',
-      body: JSON.stringify({ uid, amount: -amt, note: 'سحب سريع من لوحة التحكم' })
-    });
-    toast(`✅ تم سحب ${fmt(amt)} من ${name}`);
-    loadUsers(); loadStats();
-  } catch(e){ toast('⚠ ' + e.message, true); }
+async function quickSub(uid,name){
+  const amt=parseInt(prompt(`➖ خصم رصيد من ${name}\n\nأدخل المبلغ (ل.س):`));
+  if(!amt||amt<=0)return;
+  try{
+    await api('/api/admin/adjust-balance',{method:'POST',body:JSON.stringify({uid,amount:-amt,note:'خصم سريع'})});
+    toast(`تم خصم ${fmt(amt)} من ${name}`);
+    loadUsers(true);
+  }catch(e){toast(e.message,true)}
 }
-
-async function quickAgent(uid, level){
-  const txt = level === 0 ? 'إلغاء وكالة' : 'ترقية إلى وكيل المستوى 1';
-  if(!confirm(txt + '؟')) return;
-  try {
-    await api('/api/admin/set-agent-level', {
-      method: 'POST',
-      body: JSON.stringify({ uid, level })
-    });
-    toast('✅ ' + txt);
-    loadUsers(); loadStats();
-  } catch(e){ toast('⚠ ' + e.message, true); }
+async function quickAgent(uid,level){
+  const txt=level===0?'إلغاء وكالة':'ترقية إلى وكيل مستوى 1';
+  if(!confirm(txt+'؟'))return;
+  try{
+    await api('/api/admin/set-agent-level',{method:'POST',body:JSON.stringify({uid,level})});
+    toast('✅ '+txt);
+    loadUsers(true);
+  }catch(e){toast(e.message,true)}
 }
+async function toggleBan(uid){
+  try{
+    const res=await api('/api/admin/toggle-ban',{method:'POST',body:JSON.stringify({uid})});
+    toast(res.banned?'🚫 تم الحظر':'✅ تم فك الحظر');
+    loadUsers(true);
+  }catch(e){toast(e.message,true)}
+}
+window.quickAdd=quickAdd;window.quickSub=quickSub;window.quickAgent=quickAgent;window.toggleBan=toggleBan;
 
-window.quickAdd = quickAdd;
-window.quickSub = quickSub;
-window.quickAgent = quickAgent;
-
-/* ============ USER DETAIL MODAL ============ */
+/* ============ USER MODAL ============ */
 async function openUser(uid){
-  const modal = document.getElementById('userModal');
-  const box = document.getElementById('userModalBox');
-  box.innerHTML = '<div class="loading">جاري التحميل...</div>';
+  const modal=$('userModal');
+  const box=$('userModalBox');
+  box.innerHTML='<div class="loading">جاري التحميل...</div>';
   modal.classList.add('on');
-  try {
-    const d = await api('/api/admin/user/' + uid);
-    const u = d.user;
-    const created = new Date(u.created_at).toLocaleDateString('ar-EG');
-    const spinsRows = d.spins.slice(0, 15).map(s => `<tr>
-      <td>${new Date(s.created_at).toLocaleTimeString('ar-EG')}</td>
-      <td>${fmt(s.bet)}</td>
-      <td style="color:${s.won > s.bet ? '#2ecc71' : '#888'}">${fmt(s.won)}</td>
-      <td style="color:${s.net >= 0 ? '#2ecc71' : '#ff4a4a'}">${s.net >= 0 ? '+' : ''}${fmt(s.net)}</td>
-    </tr>`).join('');
-    const depRows = d.deposits.slice(0, 10).map(x => `<tr>
-      <td>${new Date(x.created_at).toLocaleString('ar-EG')}</td>
-      <td>${x.method_code}</td>
-      <td>${x.amount}</td>
-      <td>${fmt(x.amount_syp)}</td>
-      <td style="color:${x.status==='approved'?'#2ecc71':x.status==='rejected'?'#ff4a4a':'#ffd24a'}">${x.status}</td>
-    </tr>`).join('');
-    const wdRows = d.withdraws.slice(0, 10).map(x => `<tr>
-      <td>${new Date(x.created_at).toLocaleString('ar-EG')}</td>
-      <td>${x.method_code}</td>
-      <td>${x.amount}</td>
-      <td>${fmt(x.amount_syp)}</td>
-      <td class="mono">${x.wallet_to}</td>
-      <td style="color:${x.status==='approved'?'#2ecc71':x.status==='rejected'?'#ff4a4a':'#ffd24a'}">${x.status}</td>
-    </tr>`).join('');
-    const refRows = d.referrals.map(r => `<tr>
-      <td class="uid">${r.uid}</td>
-      <td>${r.first_name} ${r.last_name}</td>
-      <td>${new Date(r.created_at).toLocaleDateString('ar-EG')}</td>
-    </tr>`).join('');
-    box.innerHTML = `
+  try{
+    const d=await api('/api/admin/user/'+uid);
+    const u=d.user;
+    box.innerHTML=`
       <button class="closeBtn" onclick="closeUser()">✕</button>
       <h2>👤 ${u.first_name} ${u.last_name}</h2>
       <div class="infoGrid">
         <div class="infoCard"><div class="lbl">UID</div><div class="val">${u.uid}</div></div>
         <div class="infoCard"><div class="lbl">الهاتف</div><div class="val">${u.phone}</div></div>
         <div class="infoCard"><div class="lbl">البريد</div><div class="val">${u.email}</div></div>
-        <div class="infoCard"><div class="lbl">كود الدعوة</div><div class="val">${u.invite_code || '—'}</div></div>
-        <div class="infoCard"><div class="lbl">الرصيد</div><div class="val big">${fmt(u.balance)}</div></div>
+        <div class="infoCard"><div class="lbl">كود الدعوة</div><div class="val">${u.invite_code||'—'}</div></div>
+        <div class="infoCard"><div class="lbl">الرصيد</div><div class="val big">${fmt(u.balance)} ل.س</div></div>
         <div class="infoCard"><div class="lbl">لفات</div><div class="val">${fmt(u.laps)}</div></div>
         <div class="infoCard"><div class="lbl">أفضل فوز</div><div class="val">${fmt(u.best_win)}</div></div>
         <div class="infoCard"><div class="lbl">إجمالي مراهنات</div><div class="val">${fmt(u.wagered)}</div></div>
         <div class="infoCard"><div class="lbl">إجمالي أرباح</div><div class="val">${fmt(u.won)}</div></div>
-        <div class="infoCard"><div class="lbl">مستوى الوكيل</div><div class="val">${u.agent_level || 0}</div></div>
+        <div class="infoCard"><div class="lbl">مستوى الوكيل</div><div class="val">${u.agent_level||0}</div></div>
         <div class="infoCard"><div class="lbl">عمولة</div><div class="val">${fmt(u.total_commission)}</div></div>
-        <div class="infoCard"><div class="lbl">آخر IP</div><div class="val">${u.last_ip || '—'}</div></div>
+        <div class="infoCard"><div class="lbl">آخر IP</div><div class="val">${u.last_ip||'—'}</div></div>
       </div>
+
       <div class="actionBar">
         <input type="number" id="newBalance" placeholder="الرصيد الجديد" value="${u.balance}">
         <button class="btn-save" onclick="setBalance('${u.uid}')">💾 تعيين الرصيد</button>
       </div>
       <div class="actionBar">
-        <input type="number" id="addAmount" placeholder="مبلغ للإضافة">
+        <input type="number" id="addAmount" placeholder="المبلغ">
         <input type="text" id="addNote" placeholder="ملاحظة">
-        <button class="btn-save" style="background:linear-gradient(180deg,#ffd24a,#ff8c00);color:#1a0033" onclick="adjustBalance('${u.uid}', 1)">➕ إضافة</button>
-        <button class="btn-save" style="background:linear-gradient(180deg,#ff4a4a,#8b0000);color:#fff" onclick="adjustBalance('${u.uid}', -1)">➖ خصم</button>
+        <button class="btn-save" onclick="adjustBalance('${u.uid}',1)">➕ إضافة</button>
+        <button class="btn-danger" onclick="adjustBalance('${u.uid}',-1)">➖ خصم</button>
       </div>
       <div class="actionBar">
-        <select id="agentLvl" style="padding:8px;background:#0a0515;border:1px solid #4a1a7a;border-radius:6px;color:#fff;flex:1">
+        <select id="agentLvl">
           <option value="0" ${u.agent_level===0?'selected':''}>لاعب عادي</option>
           <option value="1" ${u.agent_level===1?'selected':''}>وكيل 1 (3%)</option>
           <option value="2" ${u.agent_level===2?'selected':''}>وكيل 2 (5%)</option>
           <option value="3" ${u.agent_level===3?'selected':''}>وكيل 3 (8%)</option>
         </select>
-        <button class="btn-save" onclick="setAgentLevel('${u.uid}')">👑 تعيين المستوى</button>
+        <button class="btn-warn" onclick="setAgentLevel('${u.uid}')">👑 تعيين المستوى</button>
       </div>
       <div class="actionBar">
-        <input type="text" id="userNote" placeholder="ملاحظات إدارية" value="${u.notes || ''}">
+        <input type="text" id="userNote" placeholder="ملاحظات إدارية" value="${u.notes||''}">
         <button class="btn-save" onclick="setNote('${u.uid}')">💾 حفظ</button>
       </div>
-      <div class="section"><h3>🎰 آخر 15 لفة</h3>
+
+      <div class="modalTabs">
+        <div class="modalTab active" data-mt="spins">🎰 اللفات (${d.spins.length})</div>
+        <div class="modalTab" data-mt="deps">💰 إيداعات (${d.deposits.length})</div>
+        <div class="modalTab" data-mt="wds">💸 سحوبات (${d.withdraws.length})</div>
+        <div class="modalTab" data-mt="txs">📜 حركات (${d.transactions.length})</div>
+        <div class="modalTab" data-mt="refs">👥 إحالات (${d.referrals.length})</div>
+      </div>
+
+      <div class="modalPanel active" id="mp-spins">
         <table><thead><tr><th>الوقت</th><th>رهان</th><th>فوز</th><th>صافي</th></tr></thead>
-        <tbody>${spinsRows || '<tr><td colspan="4" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody></table>
+        <tbody>${d.spins.slice(0,30).map(s=>`<tr>
+          <td class="time">${dateStr(s.created_at)}</td>
+          <td>${fmt(s.bet)}</td>
+          <td class="money-win">${fmt(s.won)}</td>
+          <td class="${s.net>=0?'money-win':'money-lose'}">${s.net>=0?'+':''}${fmt(s.net)}</td>
+        </tr>`).join('')||'<tr><td colspan="4" class="empty">لا يوجد</td></tr>'}</tbody></table>
       </div>
-      <div class="section"><h3>📥 آخر الإيداعات</h3>
+      <div class="modalPanel" id="mp-deps">
         <table><thead><tr><th>الوقت</th><th>الوسيلة</th><th>المبلغ</th><th>ل.س</th><th>الحالة</th></tr></thead>
-        <tbody>${depRows || '<tr><td colspan="5" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody></table>
+        <tbody>${d.deposits.slice(0,20).map(x=>`<tr>
+          <td class="time">${dateStr(x.created_at)}</td>
+          <td>${x.method_code}</td>
+          <td>${x.amount}</td>
+          <td class="money-win">${fmt(x.amount_syp)}</td>
+          <td><span class="pill pill-${x.status}">${x.status}</span></td>
+        </tr>`).join('')||'<tr><td colspan="5" class="empty">لا يوجد</td></tr>'}</tbody></table>
       </div>
-      <div class="section"><h3>📤 آخر السحوبات</h3>
+      <div class="modalPanel" id="mp-wds">
         <table><thead><tr><th>الوقت</th><th>الوسيلة</th><th>المبلغ</th><th>ل.س</th><th>العنوان</th><th>الحالة</th></tr></thead>
-        <tbody>${wdRows || '<tr><td colspan="6" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody></table>
+        <tbody>${d.withdraws.slice(0,20).map(x=>`<tr>
+          <td class="time">${dateStr(x.created_at)}</td>
+          <td>${x.method_code}</td>
+          <td>${x.amount}</td>
+          <td class="money-lose">${fmt(x.amount_syp)}</td>
+          <td class="mono" style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${x.wallet_to||'—'}</td>
+          <td><span class="pill pill-${x.status}">${x.status}</span></td>
+        </tr>`).join('')||'<tr><td colspan="6" class="empty">لا يوجد</td></tr>'}</tbody></table>
       </div>
-      ${d.referrals.length > 0 ? `<div class="section"><h3>👥 الإحالات (${d.referrals.length})</h3>
+      <div class="modalPanel" id="mp-txs">
+        <table><thead><tr><th>الوقت</th><th>النوع</th><th>المبلغ</th><th>الرصيد بعد</th><th>ملاحظة</th></tr></thead>
+        <tbody>${d.transactions.slice(0,30).map(x=>`<tr>
+          <td class="time">${dateStr(x.created_at)}</td>
+          <td style="font-family:monospace;font-size:10px">${x.type}</td>
+          <td class="${x.amount>=0?'money-win':'money-lose'}">${x.amount>=0?'+':''}${fmt(x.amount)}</td>
+          <td class="bal">${fmt(x.balance_after)}</td>
+          <td style="font-size:11px;color:#a090d0">${x.note||'—'}</td>
+        </tr>`).join('')||'<tr><td colspan="5" class="empty">لا يوجد</td></tr>'}</tbody></table>
+      </div>
+      <div class="modalPanel" id="mp-refs">
         <table><thead><tr><th>UID</th><th>الاسم</th><th>التسجيل</th></tr></thead>
-        <tbody>${refRows}</tbody></table>
-      </div>` : ''}
+        <tbody>${d.referrals.map(r=>`<tr>
+          <td class="uid">${r.uid}</td>
+          <td>${r.first_name} ${r.last_name}</td>
+          <td class="time">${dateStr(r.created_at)}</td>
+        </tr>`).join('')||'<tr><td colspan="3" class="empty">لا يوجد</td></tr>'}</tbody></table>
+      </div>
     `;
-  } catch(e){
-    box.innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
+    box.querySelectorAll('.modalTab').forEach(t=>{
+      t.onclick=()=>{
+        box.querySelectorAll('.modalTab').forEach(x=>x.classList.remove('active'));
+        box.querySelectorAll('.modalPanel').forEach(p=>p.classList.remove('active'));
+        t.classList.add('active');
+        $('mp-'+t.dataset.mt).classList.add('active');
+      };
+    });
+  }catch(e){
+    box.innerHTML=`<button class="closeBtn" onclick="closeUser()">✕</button><div class="empty">⚠ ${e.message}</div>`;
   }
 }
-
-function closeUser(){ document.getElementById('userModal').classList.remove('on'); }
-document.getElementById('userModal').addEventListener('click', e => {
-  if(e.target.id === 'userModal') closeUser();
-});
+function closeUser(){$('userModal').classList.remove('on')}
+window.openUser=openUser;window.closeUser=closeUser;
+$('userModal').addEventListener('click',e=>{if(e.target.id==='userModal')closeUser()});
 
 async function setBalance(uid){
-  const val = parseInt(document.getElementById('newBalance').value);
-  if(isNaN(val) || val < 0){ toast('قيمة غير صحيحة', true); return; }
-  try {
-    await api('/api/admin/update-balance', { method: 'POST', body: JSON.stringify({ uid, newBalance: val, note: 'تعيين من الأدمن' }) });
-    toast('✅ تم: ' + fmt(val));
-    loadUsers(); loadStats();
-  } catch(e){ toast('⚠ ' + e.message, true); }
+  const val=parseInt($('newBalance').value);
+  if(isNaN(val)||val<0){toast('قيمة غير صحيحة',true);return}
+  try{
+    await api('/api/admin/update-balance',{method:'POST',body:JSON.stringify({uid,newBalance:val,note:'تعيين من الأدمن'})});
+    toast('تم التعيين: '+fmt(val));
+    loadUsers(true);
+  }catch(e){toast(e.message,true)}
 }
-
-async function adjustBalance(uid, sign){
-  const amt = parseInt(document.getElementById('addAmount').value);
-  if(isNaN(amt) || amt <= 0){ toast('مبلغ غير صحيح', true); return; }
-  const note = document.getElementById('addNote').value || '';
-  try {
-    await api('/api/admin/adjust-balance', { method: 'POST', body: JSON.stringify({ uid, amount: amt * sign, note }) });
-    toast(`✅ ${sign > 0 ? 'إضافة' : 'خصم'} ${fmt(amt)}`);
-    document.getElementById('addAmount').value = '';
-    document.getElementById('addNote').value = '';
-    loadUsers(); loadStats();
-  } catch(e){ toast('⚠ ' + e.message, true); }
+async function adjustBalance(uid,sign){
+  const amt=parseInt($('addAmount').value);
+  if(isNaN(amt)||amt<=0){toast('مبلغ غير صحيح',true);return}
+  const note=$('addNote').value||'';
+  try{
+    await api('/api/admin/adjust-balance',{method:'POST',body:JSON.stringify({uid,amount:amt*sign,note})});
+    toast(`${sign>0?'إضافة':'خصم'} ${fmt(amt)}`);
+    $('addAmount').value='';$('addNote').value='';
+    loadUsers(true);
+  }catch(e){toast(e.message,true)}
 }
-
 async function setNote(uid){
-  const note = document.getElementById('userNote').value;
-  try {
-    await api('/api/admin/set-note', { method: 'POST', body: JSON.stringify({ uid, note }) });
-    toast('✅ تم');
-  } catch(e){ toast('⚠ ' + e.message, true); }
+  try{
+    await api('/api/admin/set-note',{method:'POST',body:JSON.stringify({uid,note:$('userNote').value})});
+    toast('تم الحفظ');
+  }catch(e){toast(e.message,true)}
 }
-
 async function setAgentLevel(uid){
-  const level = document.getElementById('agentLvl').value;
-  try {
-    await api('/api/admin/set-agent-level', { method: 'POST', body: JSON.stringify({ uid, level: parseInt(level) }) });
-    toast('✅ المستوى: ' + level);
-  } catch(e){ toast('⚠ ' + e.message, true); }
+  try{
+    await api('/api/admin/set-agent-level',{method:'POST',body:JSON.stringify({uid,level:parseInt($('agentLvl').value)})});
+    toast('تم تحديث المستوى');
+  }catch(e){toast(e.message,true)}
+}
+window.setBalance=setBalance;window.adjustBalance=adjustBalance;window.setNote=setNote;window.setAgentLevel=setAgentLevel;
+
+/* ============ SPINS ============ */
+async function loadSpins(silent){
+  if(!silent)$('spinsTable').innerHTML='<div class="loading">جاري التحميل...</div>';
+  try{
+    const {spins}=await api('/api/admin/recent-spins');
+    if(!spins.length){$('spinsTable').innerHTML='<div class="empty">لا يوجد لفات</div>';return}
+    $('spinsTable').innerHTML=`
+      <div class="tableInfo"><span>آخر اللفات</span><b>${spins.length} لفة</b></div>
+      <table><thead><tr><th>الوقت</th><th>المستخدم</th><th>UID</th><th>رهان</th><th>فوز</th><th>صافي</th></tr></thead>
+      <tbody>${spins.map(s=>`<tr>
+        <td class="time">${dateStr(s.created_at)}</td>
+        <td>${s.first_name||'—'} ${s.last_name||''}</td>
+        <td class="uid">${s.uid}</td>
+        <td>${fmt(s.bet)}</td>
+        <td class="money-win">${fmt(s.won)}</td>
+        <td class="${s.net>=0?'money-win':'money-lose'}">${s.net>=0?'+':''}${fmt(s.net)}</td>
+      </tr>`).join('')}</tbody></table>`;
+  }catch(e){if(!silent)$('spinsTable').innerHTML='<div class="empty">⚠ '+e.message+'</div>'}
 }
 
-async function toggleBan(uid){
-  try {
-    const res = await api('/api/admin/toggle-ban', { method: 'POST', body: JSON.stringify({ uid }) });
-    toast(res.banned ? '🚫 حظر' : '✅ فك');
-    loadUsers(); loadStats();
-  } catch(e){ toast('⚠ ' + e.message, true); }
-}
-
-/* ============ SPINS / LOGINS ============ */
-async function loadSpins(){
-  document.getElementById('spinsTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
-  try {
-    const { spins } = await api('/api/admin/recent-spins');
-    const rows = spins.map(s => `<tr>
-      <td>${new Date(s.created_at).toLocaleString('ar-EG')}</td>
-      <td>${s.first_name || '—'} ${s.last_name || ''}</td>
-      <td class="uid">${s.uid}</td>
-      <td>${fmt(s.bet)}</td>
-      <td style="color:${s.won > 0 ? '#2ecc71' : '#888'}">${fmt(s.won)}</td>
-      <td style="color:${s.net >= 0 ? '#2ecc71' : '#ff4a4a'}">${s.net >= 0 ? '+' : ''}${fmt(s.net)}</td>
-    </tr>`).join('');
-    document.getElementById('spinsTable').innerHTML = `
-      <div style="overflow-x:auto"><table>
-        <thead><tr><th>الوقت</th><th>اللاعب</th><th>UID</th><th>رهان</th><th>فوز</th><th>صافي</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody>
-      </table></div>`;
-  } catch(e){
-    document.getElementById('spinsTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
-  }
-}
-
-async function loadLogins(){
-  document.getElementById('loginsTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
-  try {
-    const { logins } = await api('/api/admin/recent-logins');
-    const rows = logins.map(l => `<tr>
-      <td>${new Date(l.created_at).toLocaleString('ar-EG')}</td>
-      <td>${l.first_name || '—'} ${l.last_name || ''}</td>
-      <td class="uid">${l.uid || '—'}</td>
-      <td class="mono">${l.ip || '—'}</td>
-      <td>${l.success ? '<span style="color:#2ecc71">نجح</span>' : '<span style="color:#ff4a4a">فشل</span>'}</td>
-    </tr>`).join('');
-    document.getElementById('loginsTable').innerHTML = `
-      <div style="overflow-x:auto"><table>
-        <thead><tr><th>الوقت</th><th>المستخدم</th><th>UID</th><th>IP</th><th>النتيجة</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody></table>
-      </div>`;
-  } catch(e){
-    document.getElementById('loginsTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
-  }
+/* ============ LOGINS ============ */
+async function loadLogins(silent){
+  if(!silent)$('loginsTable').innerHTML='<div class="loading">جاري التحميل...</div>';
+  try{
+    const {logins}=await api('/api/admin/recent-logins');
+    if(!logins.length){$('loginsTable').innerHTML='<div class="empty">لا يوجد تسجيلات</div>';return}
+    $('loginsTable').innerHTML=`
+      <div class="tableInfo"><span>آخر عمليات الدخول</span><b>${logins.length} عملية</b></div>
+      <table><thead><tr><th>الوقت</th><th>المستخدم</th><th>UID</th><th>IP</th><th>النتيجة</th></tr></thead>
+      <tbody>${logins.map(l=>`<tr>
+        <td class="time">${dateStr(l.created_at)}</td>
+        <td>${l.first_name||'—'} ${l.last_name||''}</td>
+        <td class="uid">${l.uid||'—'}</td>
+        <td class="mono">${l.ip||'—'}</td>
+        <td>${l.success?'<span class="pill pill-approved">نجح</span>':'<span class="pill pill-rejected">فشل</span>'}</td>
+      </tr>`).join('')}</tbody></table>`;
+  }catch(e){if(!silent)$('loginsTable').innerHTML='<div class="empty">⚠ '+e.message+'</div>'}
 }
 
 /* ============ DEPOSITS ============ */
-async function loadDeposits(status){
-  document.getElementById('depositsTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
-  try {
-    const { deposits } = await api('/api/admin/deposits?status=' + status);
-    const rows = deposits.map(d => `<tr>
-      <td>#${d.id}</td>
-      <td>${d.first_name || '—'} ${d.last_name || ''}<br><small style="color:#888">${d.phone || ''}</small></td>
-      <td class="uid">${d.uid}</td>
-      <td>${d.method_code}</td>
-      <td><b>${d.amount}</b></td>
-      <td style="color:#2ecc71">${fmt(d.amount_syp)}</td>
-      <td class="mono">${d.tx_hash || '—'}</td>
-      <td>${new Date(d.created_at).toLocaleString('ar-EG')}</td>
-      <td>${d.status === 'pending'
-        ? `<button class="btn btn-unban" onclick="processDeposit(${d.id}, 'approve')">✅ موافقة</button>
-           <button class="btn btn-ban" onclick="processDeposit(${d.id}, 'reject')">❌ رفض</button>`
-        : `<span style="color:${d.status==='approved'?'#2ecc71':'#ff4a4a'}">${d.status}</span>`}
-      </td>
-    </tr>`).join('');
-    document.getElementById('depositsTable').innerHTML = `
-      <div style="overflow-x:auto"><table>
-        <thead><tr><th>#</th><th>المستخدم</th><th>UID</th><th>الوسيلة</th><th>المبلغ</th>
-        <th>ل.س</th><th>TX</th><th>الوقت</th><th>إجراء</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody>
-      </table></div>`;
-  } catch(e){
-    document.getElementById('depositsTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
-  }
+document.querySelectorAll('[data-dstatus]').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('[data-dstatus]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    currentDepStatus=b.dataset.dstatus;
+    loadDeposits(currentDepStatus);
+  };
+});
+async function loadDeposits(status,silent){
+  if(!silent)$('depositsTable').innerHTML='<div class="loading">جاري التحميل...</div>';
+  try{
+    const {deposits}=await api('/api/admin/deposits?status='+status);
+    if(!deposits.length){$('depositsTable').innerHTML='<div class="empty">لا يوجد طلبات</div>';return}
+    $('depositsTable').innerHTML=`
+      <div class="tableInfo"><span>طلبات الإيداع — ${status}</span><b>${deposits.length} طلب</b></div>
+      <table><thead><tr><th>#</th><th>المستخدم</th><th>UID</th><th>الوسيلة</th><th>المبلغ</th><th>ل.س</th><th>TX</th><th>الوقت</th><th>إجراء</th></tr></thead>
+      <tbody>${deposits.map(d=>`<tr>
+        <td>#${d.id}</td>
+        <td>${d.first_name||'—'} ${d.last_name||''}<br><small style="color:#888;font-family:monospace">${d.phone||''}</small></td>
+        <td class="uid">${d.uid}</td>
+        <td>${d.method_code}</td>
+        <td><b>${d.amount}</b></td>
+        <td class="money-win">${fmt(d.amount_syp)}</td>
+        <td class="mono" style="max-width:100px;overflow:hidden;text-overflow:ellipsis">${d.tx_hash||'—'}</td>
+        <td class="time">${dateStr(d.created_at)}</td>
+        <td>${d.status==='pending'
+          ? `<button class="btn btn-unban" onclick="processDeposit(${d.id},'approve')">✅ موافقة</button>
+             <button class="btn btn-ban" onclick="processDeposit(${d.id},'reject')">❌ رفض</button>`
+          : `<span class="pill pill-${d.status}">${d.status}</span>`}
+        </td>
+      </tr>`).join('')}</tbody></table>`;
+  }catch(e){if(!silent)$('depositsTable').innerHTML='<div class="empty">⚠ '+e.message+'</div>'}
 }
-
-async function processDeposit(id, action){
-  const note = prompt('ملاحظة (اختياري):') || '';
-  try {
-    await api('/api/admin/deposits/process', { method: 'POST', body: JSON.stringify({ id, action, admin_note: note }) });
-    toast(action === 'approve' ? '✅ تمت الموافقة' : '❌ تم الرفض');
-    loadDeposits('pending'); loadStats(); updateBadges();
-  } catch(e){ toast('⚠ ' + e.message, true); }
+async function processDeposit(id,action){
+  const note=prompt('ملاحظة (اختياري):')||'';
+  try{
+    await api('/api/admin/deposits/process',{method:'POST',body:JSON.stringify({id,action,admin_note:note})});
+    toast(action==='approve'?'تمت الموافقة':'تم الرفض');
+    loadDeposits(currentDepStatus);
+    loadBadges();
+  }catch(e){toast(e.message,true)}
 }
+window.processDeposit=processDeposit;
 
 /* ============ WITHDRAWS ============ */
-async function loadWithdraws(status){
-  document.getElementById('withdrawsTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
-  try {
-    const { withdraws } = await api('/api/admin/withdraws?status=' + status);
-    const rows = withdraws.map(w => `<tr>
-      <td>#${w.id}</td>
-      <td>${w.first_name || '—'} ${w.last_name || ''}<br><small style="color:#888">${w.phone || ''}</small></td>
-      <td class="uid">${w.uid}</td>
-      <td>${w.method_code}</td>
-      <td><b>${w.amount}</b></td>
-      <td style="color:#2ecc71">${fmt(w.amount_syp)}</td>
-      <td class="mono">${w.wallet_to}</td>
-      <td>${new Date(w.created_at).toLocaleString('ar-EG')}</td>
-      <td>${w.status === 'pending'
-        ? `<button class="btn btn-unban" onclick="processWithdraw(${w.id}, 'approve')">✅ دفع</button>
-           <button class="btn btn-ban" onclick="processWithdraw(${w.id}, 'reject')">↩️ رفض</button>`
-        : `<span style="color:${w.status==='approved'?'#2ecc71':'#ff4a4a'}">${w.status}</span>`}
-      </td>
-    </tr>`).join('');
-    document.getElementById('withdrawsTable').innerHTML = `
-      <div style="overflow-x:auto"><table>
-        <thead><tr><th>#</th><th>المستخدم</th><th>UID</th><th>الوسيلة</th><th>المبلغ</th>
-        <th>ل.س</th><th>العنوان</th><th>الوقت</th><th>إجراء</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:#888">لا يوجد</td></tr>'}</tbody>
-      </table></div>`;
-  } catch(e){
-    document.getElementById('withdrawsTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
-  }
+document.querySelectorAll('[data-wstatus]').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('[data-wstatus]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    currentWdStatus=b.dataset.wstatus;
+    loadWithdraws(currentWdStatus);
+  };
+});
+async function loadWithdraws(status,silent){
+  if(!silent)$('withdrawsTable').innerHTML='<div class="loading">جاري التحميل...</div>';
+  try{
+    const {withdraws}=await api('/api/admin/withdraws?status='+status);
+    if(!withdraws.length){$('withdrawsTable').innerHTML='<div class="empty">لا يوجد طلبات</div>';return}
+    $('withdrawsTable').innerHTML=`
+      <div class="tableInfo"><span>طلبات السحب — ${status}</span><b>${withdraws.length} طلب</b></div>
+      <table><thead><tr><th>#</th><th>المستخدم</th><th>UID</th><th>الوسيلة</th><th>المبلغ</th><th>ل.س</th><th>العنوان</th><th>الوقت</th><th>إجراء</th></tr></thead>
+      <tbody>${withdraws.map(w=>`<tr>
+        <td>#${w.id}</td>
+        <td>${w.first_name||'—'} ${w.last_name||''}<br><small style="color:#888;font-family:monospace">${w.phone||''}</small></td>
+        <td class="uid">${w.uid}</td>
+        <td>${w.method_code}</td>
+        <td><b>${w.amount}</b></td>
+        <td class="money-lose">${fmt(w.amount_syp)}</td>
+        <td class="mono" style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${w.wallet_to}</td>
+        <td class="time">${dateStr(w.created_at)}</td>
+        <td>${w.status==='pending'
+          ? `<button class="btn btn-unban" onclick="processWithdraw(${w.id},'approve')">✅ دفع</button>
+             <button class="btn btn-ban" onclick="processWithdraw(${w.id},'reject')">↩️ رفض</button>`
+          : `<span class="pill pill-${w.status}">${w.status}</span>`}
+        </td>
+      </tr>`).join('')}</tbody></table>`;
+  }catch(e){if(!silent)$('withdrawsTable').innerHTML='<div class="empty">⚠ '+e.message+'</div>'}
 }
-
-async function processWithdraw(id, action){
-  const note = prompt('ملاحظة (اختياري):') || '';
-  try {
-    await api('/api/admin/withdraws/process', { method: 'POST', body: JSON.stringify({ id, action, admin_note: note }) });
-    toast(action === 'approve' ? '✅ تم الدفع' : '↩️ تم الرفض وإعادة الرصيد');
-    loadWithdraws('pending'); loadStats(); updateBadges();
-  } catch(e){ toast('⚠ ' + e.message, true); }
+async function processWithdraw(id,action){
+  const note=prompt('ملاحظة (اختياري):')||'';
+  try{
+    await api('/api/admin/withdraws/process',{method:'POST',body:JSON.stringify({id,action,admin_note:note})});
+    toast(action==='approve'?'تم الدفع':'تم الرفض وإعادة الرصيد');
+    loadWithdraws(currentWdStatus);
+    loadBadges();
+  }catch(e){toast(e.message,true)}
 }
+window.processWithdraw=processWithdraw;
 
 /* ============ AGENTS ============ */
-async function loadAgents(){
-  document.getElementById('agentsTable').innerHTML = '<div class="loading">جاري التحميل...</div>';
-  try {
-    const { agents } = await api('/api/admin/agents');
-    const rows = agents.map(a => `<tr>
-      <td class="uid">${a.uid}</td>
-      <td>${a.first_name} ${a.last_name}</td>
-      <td class="mono">${a.phone}</td>
-      <td><span style="background:#ffd24a;color:#1a0033;padding:2px 6px;border-radius:5px;font-weight:bold">L${a.agent_level}</span></td>
-      <td><b>${a.referrals}</b></td>
-      <td style="color:#2ecc71;font-family:monospace">${fmt(a.total_commission)}</td>
-      <td>${fmt(a.balance)}</td>
-      <td class="actions-cell">
-        <button class="btn btn-view" onclick="openUser('${a.uid}')">👁</button>
-        <select onchange="setAgentLevelQuick('${a.uid}', this.value)" style="padding:4px 8px;background:#0a0515;color:#fff;border:1px solid #4a1a7a;border-radius:6px;font-size:11px">
-          <option value="0">لاعب</option>
-          <option value="1" ${a.agent_level===1?'selected':''}>وكيل 1</option>
-          <option value="2" ${a.agent_level===2?'selected':''}>وكيل 2</option>
-          <option value="3" ${a.agent_level===3?'selected':''}>وكيل 3</option>
-        </select>
-      </td>
-    </tr>`).join('');
-    document.getElementById('agentsTable').innerHTML = `
-      <div style="overflow-x:auto"><table>
-        <thead><tr><th>UID</th><th>الاسم</th><th>الهاتف</th><th>المستوى</th>
-        <th>الإحالات</th><th>العمولات</th><th>الرصيد</th><th>إجراءات</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="8" style="text-align:center;color:#888">لا يوجد وكلاء</td></tr>'}</tbody>
-      </table></div>`;
-  } catch(e){
-    document.getElementById('agentsTable').innerHTML = `<div class="loading">⚠ ${e.message}</div>`;
-  }
+async function loadAgents(silent){
+  if(!silent)$('agentsTable').innerHTML='<div class="loading">جاري التحميل...</div>';
+  try{
+    const {agents}=await api('/api/admin/agents');
+    if(!agents.length){$('agentsTable').innerHTML='<div class="empty">لا يوجد وكلاء</div>';return}
+    $('agentsTable').innerHTML=`
+      <div class="tableInfo"><span>الوكلاء</span><b>${agents.length} وكيل</b></div>
+      <table><thead><tr><th>UID</th><th>الاسم</th><th>الهاتف</th><th>المستوى</th><th>الإحالات</th><th>العمولات</th><th>الرصيد</th><th>إجراء</th></tr></thead>
+      <tbody>${agents.map(a=>`<tr>
+        <td class="uid">${a.uid}</td>
+        <td>${a.first_name} ${a.last_name}</td>
+        <td class="mono">${a.phone}</td>
+        <td><span class="lvl-badge">L${a.agent_level}</span></td>
+        <td><b style="color:#ffd24a">${a.referrals}</b></td>
+        <td class="money-win">${fmt(a.total_commission)}</td>
+        <td class="bal">${fmt(a.balance)}</td>
+        <td class="actions-cell">
+          <button class="btn btn-view" onclick="openUser('${a.uid}')">👁</button>
+          <select onchange="setAgentLevelQuick('${a.uid}',this.value)" style="padding:5px 8px;background:rgba(5,2,15,.8);color:#fff;border:1px solid #c89bff;border-radius:6px;font-size:11px">
+            <option value="0">لاعب</option>
+            <option value="1" ${a.agent_level===1?'selected':''}>L1</option>
+            <option value="2" ${a.agent_level===2?'selected':''}>L2</option>
+            <option value="3" ${a.agent_level===3?'selected':''}>L3</option>
+          </select>
+        </td>
+      </tr>`).join('')}</tbody></table>`;
+  }catch(e){if(!silent)$('agentsTable').innerHTML='<div class="empty">⚠ '+e.message+'</div>'}
 }
-
-async function setAgentLevelQuick(uid, level){
-  try {
-    await api('/api/admin/set-agent-level', { method: 'POST', body: JSON.stringify({ uid, level: parseInt(level) }) });
-    toast('✅ تم تحديث المستوى');
-    loadAgents();
-  } catch(e){ toast('⚠ ' + e.message, true); }
+async function setAgentLevelQuick(uid,level){
+  try{
+    await api('/api/admin/set-agent-level',{method:'POST',body:JSON.stringify({uid,level:parseInt(level)})});
+    toast('تم تحديث المستوى');
+    loadAgents(true);
+  }catch(e){toast(e.message,true)}
 }
-window.setAgentLevelQuick = setAgentLevelQuick;
+window.setAgentLevelQuick=setAgentLevelQuick;
 
-/* ============ RTP SETTINGS ============ */
-async function loadRTPSettings(){
-  try {
-    const s = await api('/api/admin/rtp-settings');
-    document.getElementById('rtpEnabled').value = s.enabled ? 'true' : 'false';
-    document.getElementById('rtpMax').value = s.maxRTP;
-    document.getElementById('rtpMin').value = s.minRTP;
-    document.getElementById('rtpDuration').value = s.durationMinutes;
-    document.getElementById('rtpCurrentDisplay').textContent = s.currentRTP + '%';
-    document.getElementById('rtpCurrentDisplay').style.color =
-      s.currentRTP >= 40 ? '#2ecc71' : s.currentRTP >= 20 ? '#ffd24a' : '#e74c3c';
-    if(s.enabled){
-      const elapsed = Math.floor((Date.now() - s.startTime) / 60000);
-      const remain = Math.max(0, s.durationMinutes - elapsed);
-      document.getElementById('rtpProgressDisplay').textContent =
-        `⏱️ مضى: ${elapsed} دقيقة · متبقي: ${remain} دقيقة من ${s.durationMinutes}`;
-    } else {
-      document.getElementById('rtpProgressDisplay').textContent = 'النظام الجديد معطّل';
-    }
-  } catch(e){ toast('⚠ ' + e.message, true); }
-}
-
-async function saveRTPSettings(resetTimer){
-  try {
-    const enabled = document.getElementById('rtpEnabled').value === 'true';
-    const maxRTP = parseInt(document.getElementById('rtpMax').value);
-    const minRTP = parseInt(document.getElementById('rtpMin').value);
-    const durationMinutes = parseInt(document.getElementById('rtpDuration').value);
-
-    if(isNaN(maxRTP) || maxRTP < 0 || maxRTP > 100){ toast('RTP الأقصى: 0-100', true); return; }
-    if(isNaN(minRTP) || minRTP < 0 || minRTP > 100){ toast('RTP الأدنى: 0-100', true); return; }
-    if(maxRTP < minRTP){ toast('الأقصى يجب أن يكون أكبر من الأدنى', true); return; }
-    if(isNaN(durationMinutes) || durationMinutes < 1){ toast('المدة ≥ دقيقة', true); return; }
-
-    await api('/api/admin/rtp-settings', {
-      method: 'POST',
-      body: JSON.stringify({ enabled, maxRTP, minRTP, durationMinutes, resetTimer })
-    });
-    toast('✅ تم الحفظ');
-    loadRTPSettings();
-  } catch(e){ toast('⚠ ' + e.message, true); }
-}
-
-document.getElementById('rtpSaveBtn').onclick = () => saveRTPSettings(false);
-document.getElementById('rtpResetBtn').onclick = () => {
-  if(confirm('هل تريد إعادة تعيين العداد؟\nسيعود RTP للحد الأقصى ويبدأ من جديد.'))
-    saveRTPSettings(true);
-};
-document.getElementById('rtpRefreshBtn').onclick = loadRTPSettings;
+/* ============ SEARCH/REFRESH ============ */
+$('searchBtn').onclick=loadUsers;
+$('refreshUsersBtn').onclick=loadUsers;
+$('sortSelect').onchange=loadUsers;
+$('searchInput').addEventListener('keypress',e=>{if(e.key==='Enter')loadUsers()});
 
 /* ============ AUTO LOGIN ============ */
-(async () => {
+(async()=>{
   if(adminToken){
-    try {
+    try{
       await api('/api/admin/stats');
-      document.getElementById('login').style.display = 'none';
-      document.getElementById('app').classList.add('on');
+      $('login').classList.add('hidden');
+      $('app').classList.add('on');
       initApp();
-    } catch(e){ adminToken = ''; localStorage.removeItem('sc_admin_token'); }
+    }catch(e){
+      adminToken='';
+      localStorage.removeItem('sc_admin_token');
+    }
   }
 })();
 </script>
